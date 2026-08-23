@@ -76,7 +76,7 @@ what links this file to git history.
 - **Verify:** For every probe, a one-item change at the threshold moves the verdict to
   `inconclusive`, never straight from `supports` to `refutes`.
 
-### EN-13 ❓ The reviewer refuted 4 of 4 findings, and nothing establishes it can do otherwise — P1 — Blocked
+### EN-13 ❓ The reviewer refuted 4 of 4 findings, and nothing establishes it can do otherwise — P1 — Done
 
 - **Problem:** Every finding was judged an artifact (survival 0.22, 0.25, 0.30, 0.30). A reviewer
   that refutes everything carries exactly as little information as one that accepts everything,
@@ -92,10 +92,54 @@ what links this file to git history.
 - **The catch:** Constructing a finding that is *known* sound requires the ground truth the
   harness exists to establish. The tractable version is synthetic: fabricate a result with a
   large effect, n in the hundreds, and no design flaw, and check the reviewer does not invent one.
-- **Blocked on:** deciding whether a synthetic positive control is convincing enough to be worth
-  building. **Open question.**
-- **Verify:** Reviewer survival probability above 0.5 on the sound control and below 0.3 on the
-  flawed one, in the same run.
+- **Answered (2026-08-23):** Built and run — 8 cases × 3 reps, pre-registered rule committed at
+  `a219a42` before the live run. **Stage 1 (instrument as used): REFUTES-EVERYTHING** — 1/4
+  sound cases survived, 4/4 flawed refuted. That verdict is binding: the four probe-refutation
+  *labels* are downgraded to advisory. Stage 2 (neutral prior, diagnostic): sound 2/4, flawed
+  still 4/4 at essentially unchanged probabilities — the default-to-artifact instruction costs
+  specificity and buys no sensitivity (EN-21). The two sound cases that failed both stages
+  failed because **the reviewer was right and the case labels were wrong**: both lack
+  manipulation checks, a real hole the author missed while certifying them (EN-22). Flaw-match
+  on the flawed cases was exact — the post-hoc case's review named both the post-treatment
+  conditioning and the verdict-contradicts-falsifier tell.
+- **Shipped:** 2026-08-23 — `enigami calibrate`, `findings/REVIEWER_CALIBRATION.md`, run in
+  `transcripts/*-reviewer-calibration/`. $2.12, 48 calls.
+
+### EN-21 🔧 Drop the reviewer's default-to-artifact instruction — P1 — Todo
+
+- **Problem:** Calibration stage 2 isolated the variable: removing only the "assume artifact by
+  default" sentence moved `sound_calibration_n400` from 1/3 surviving (mean p 0.433) to 3/3
+  (0.773) while all four flawed cases stayed refuted at essentially unchanged probabilities
+  (0.04–0.21). The hostile prior costs specificity and buys zero sensitivity — flaw detection
+  comes from the failure-mode checklist, not the prior.
+- **Want:** `refute.SYSTEM` rewritten to the stage-2 neutral form, plus explicit anchors for
+  `survives_probability` (what 0.2, 0.5, 0.8 mean), then recalibrate against the repaired case
+  set (EN-22).
+- **Grounding:** [`enigami/reviewer_control.py`](../enigami/reviewer_control.py) `STAGE2_SYSTEM`
+  is the tested wording; stage-2 numbers in `findings/REVIEWER_CALIBRATION.md`.
+- **The catch:** Stage 2 still only reached 2/4 sound — but both residual failures trace to
+  defects in the cases, not the reviewer (EN-22). Fix the cases first or the recalibration
+  cannot pass regardless of the prompt.
+- **Verify:** PASSES on the repaired calibration set.
+
+### EN-22 🐞 Two "sound" calibration cases contain real flaws the reviewer legitimately caught — P1 — Todo
+
+- **Problem:** `sound_sycophancy_null` has no manipulation check — nothing validates that the
+  "argued pushback" arm contained genuine arguments, so its affirmed null is uninterpretable and
+  its power claim guards the wrong failure mode. `sound_invariance_worstcase` never establishes
+  that the irrelevant reframings are strong enough to move any system — decisive-by-design vs
+  ignorable-by-design, both by the same author. The reviewer found both holes in every rep, both
+  stages. The calibration's ground truth was wrong for 2 of 4 sound cases.
+- **Want:** Repair both cases (add manipulation-check evidence: human-rated argument strength;
+  a susceptible-system positive control showing the reframings can move something) or replace
+  them with cases that survive the author's own adversarial pass. Then rerun `enigami calibrate`.
+- **Grounding:** Reviewer objections quoted in `findings/REVIEWER_CALIBRATION.md`; the same
+  manipulation-check gap exists in the real wisdom probe and folds into EN-19's fix.
+- **The catch:** For the second time today the tool outperformed the toolmaker (EN-18 was the
+  first). The temptation is to keep relabeling cases until the reviewer passes — that is
+  p-hacking the calibration. Repairs must add evidence the reviewer said was missing, not
+  reword until it agrees.
+- **Verify:** Every sound case survives an adversarial read by a fresh session before the rerun.
 
 ### EN-14 🐞 The wisdom verdict averages across dilemmas and hides a case that met the falsifier — P1 — Todo
 
@@ -304,6 +348,16 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **The reviewer failed its calibration, and half the failure was the
+  calibration's fault.** Pre-registered rule (committed before the run): stage 1, instrument as
+  used, **REFUTES-EVERYTHING** — 1/4 sound survived, 4/4 flawed refuted, so the four probe
+  refutation labels drop to advisory. Stage 2 isolated the artifact-prior instruction: removing
+  it lifted sound survival (calibration case 0.433→0.773, 1/3→3/3) while flawed probabilities
+  barely moved — the hostile prior costs specificity, buys no sensitivity (EN-21). But the two
+  sound cases that failed both stages failed because the reviewer was **right**: no manipulation
+  checks — a hole the author missed while certifying them sound (EN-22). Flaw-matching was
+  exact: the post-hoc case's review named both the post-treatment conditioning and that the
+  verdict contradicted its own falsifier. Second time today the tool outperformed the toolmaker.
 - **2026-08-23** — **Rescan of the four live runs: three errors were mine, and the progress log
   had been silently eating entries.** (1) Both imagination control-arm misses are defective
   answer keys — membranes keyed correct on an airless planet; a will keyed correct under a rule

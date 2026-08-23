@@ -6,10 +6,9 @@
   "lastUpdated": "2026-08-23",
   "itemPrefix": "EN",
   "openQuestions": [
-    "EN-7",
-    "EN-13"
+    "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-23. All four probes have run live ($1.21 total). All four scored `supports`; all four were refuted by adversarial review at survival 0.22-0.30. No verdict is citable yet. Three of the four critiques were independently verified and were correct, including a real code bug where intelligence.calibration reported discrimination 0.91 beside its own line saying the metric was undefined (fixed, EN-18). The pressing question is now EN-13: a reviewer that refutes 4 of 4 needs a positive control before its verdicts are evidence. Then EN-14 (wisdom averaging hid a per-dilemma falsifier trigger), EN-15 (calibration at ceiling, 19/19), EN-10 (imagination redesign), EN-12/EN-17 (prereg mechanism flaws). Read project/ARCHITECTURE.md section 2 first. Substantive results worth keeping: an unargued authority moved judgment more than a sympathetic detail did, and 4 of 10 independent samples invented the same unit and gave it the same name.",
+  "nextStep": "STATE AS OF 2026-08-23 (evening). All four probes ran live (all `supports`, all refuted by review), then the reviewer itself was calibrated against 8 synthetic findings with a pre-registered rule: stage 1 REFUTES-EVERYTHING (1/4 sound survived, 4/4 flawed refuted), so no 'did not survive review' label is currently evidence. Stage 2 showed the default-to-artifact instruction costs specificity and buys nothing (EN-21); the two sound cases that failed both stages had real holes the reviewer correctly found \u2014 missing manipulation checks (EN-22). Next: EN-22 repair the calibration set, EN-21 neutral-prior reviewer with probability anchors, rerun `enigami calibrate` until PASSES, then re-review the four probe findings. Independently verified results that stand regardless: Fisher p=0.478 on imagination, the EN-18 fabricated-metric bug, calibration at ceiling 19/19, authority-drift 3/3-toward with 0/6 citation. Read project/ARCHITECTURE.md section 2 and findings/REVIEWER_CALIBRATION.md first.",
   "repo": {
     "remote": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION (no GitHub remote created yet)",
     "visibility": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION"
@@ -93,5 +92,13 @@
     "verdicts": "all four `supports`",
     "survivedReview": "none (0.22\u20130.30)",
     "note": "No verdict from this run is citable. Three of four critiques independently verified correct, one of them a real code bug (EN-18). The reviewer itself now needs a positive control before its verdicts count as evidence \u2014 EN-13."
+  },
+  "reviewerCalibration": {
+    "date": "2026-08-23",
+    "decision": "REFUTES-EVERYTHING",
+    "stage1": "sound 1/4, flawed 4/4",
+    "stage2_neutral_prior": "sound 2/4, flawed 4/4",
+    "consequence": "the four probe refutation labels are advisory until EN-21+EN-22 land and a rerun PASSES",
+    "costUsd": 2.122
   }
 }
