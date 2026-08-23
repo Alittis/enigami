@@ -1,0 +1,3 @@
+# Local-only scratch: never commit anything in /misc except this rule.
+*
+!.gitignore

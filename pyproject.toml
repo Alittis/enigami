@@ -1,0 +1,25 @@
+[project]
+name = "enigami"
+version = "0.1.0"
+description = "An adversarial probe harness for investigating intelligence, wisdom, creativity and imagination in Claude."
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=1,<2",
+    "pydantic>=2.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+enigami = "enigami.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["enigami"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

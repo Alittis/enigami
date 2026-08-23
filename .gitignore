@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Secrets — never commit. Written by deploy/scripts/setup-anthropic-env.sh
+.env
+.env.*
+!.env.example
+
+# Raw probe runs: large, regenerable, and may contain long model outputs.
+# Findings (findings/) are committed; transcripts are not.
+transcripts/*
+!transcripts/.gitkeep
+
+.DS_Store
