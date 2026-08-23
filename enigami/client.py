@@ -212,6 +212,11 @@ class Subject:
         reply = self.ask(prompt, schema=schema, **kwargs)
         if reply.refused:
             raise ProbeError(f"Refused ({reply.refusal_category}) — cannot score this call.")
+        if not reply.text.strip():
+            raise ProbeError(
+                f"Empty response text (stop_reason={reply.stop_reason}) — usually thinking "
+                "consumed the whole max_tokens budget before any output was emitted."
+            )
         try:
             return schema.model_validate_json(reply.text), reply
         except Exception as e:

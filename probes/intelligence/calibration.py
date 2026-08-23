@@ -215,15 +215,38 @@ class Calibration(Probe):
                  for band, q, keys in ITEMS]
 
         def ask(item: dict) -> dict:
-            parsed, reply = ctx.subject.parse(
-                ELICITATION + item["q"], Answer, max_tokens=6000,
-                label=f"calib:{item['band']}",
-            )
-            correct = any(_matches(k, parsed.answer) for k in item["keys"])
-            return {**item, "answer": parsed.answer, "confidence": parsed.confidence,
-                    "correct": correct}
+            # Hard items can burn the whole budget on thinking and emit nothing; one retry,
+            # then a visible exclusion — never a silent drop, never a fabricated score.
+            from enigami.client import ProbeError
+            last = None
+            for attempt in range(2):
+                try:
+                    parsed, reply = ctx.subject.parse(
+                        ELICITATION + item["q"], Answer, max_tokens=16000,
+                        label=f"calib:{item['band']}:a{attempt}",
+                    )
+                    correct = any(_matches(k, parsed.answer) for k in item["keys"])
+                    return {**item, "answer": parsed.answer, "confidence": parsed.confidence,
+                            "correct": correct, "excluded": False}
+                except ProbeError as e:
+                    last = str(e)
+            ctx.log("item_excluded", band=item["band"], q=item["q"][:80], error=last[:200])
+            return {**item, "answer": "", "confidence": None, "correct": None, "excluded": True}
 
-        rows = ctx.map(ask, items)
+        rows_all = ctx.map(ask, items)
+        excluded = [r for r in rows_all if r["excluded"]]
+        rows = [r for r in rows_all if not r["excluded"]]
+        if len(excluded) > 4:
+            return Finding(
+                verdict="inconclusive",
+                headline=(f"No verdict: {len(excluded)} of {len(items)} items produced no "
+                          "scoreable response after retry — too many exclusions for the metric "
+                          "to be trusted."),
+                metrics={"n_items": len(items), "n_excluded": len(excluded)},
+                evidence=[f"Excluded ({r['band']}): {r['q'][:90]}" for r in excluded],
+                caveats=["Exclusions cluster on hard items, so any verdict computed on the "
+                         "remainder would be biased toward ceiling."],
+            )
         ctx.log("calibration_items", items=[
             {k: r[k] for k in ("band", "q", "answer", "confidence", "correct")} for r in rows
         ])
@@ -247,6 +270,8 @@ class Calibration(Probe):
 
         metrics = {
             "n_items": len(rows),
+            "n_excluded": len(excluded),
+            "excluded_bands": [r["band"] for r in excluded],
             "accuracy": round(accuracy, 3),
             "discrimination_pooled": round(disc, 3) if disc is not None else None,
             "discrimination_ci95": [ci_lo, ci_hi] if ci_lo is not None else None,
@@ -310,6 +335,9 @@ class Calibration(Probe):
                 "for exactly that reason, and within-band figures are directional only.",
                 "42 items resolve a large effect; the inconclusive band exists because they "
                 "cannot resolve a small one.",
+                "Items whose responses failed twice are excluded and listed, not scored; "
+                "exclusions cluster on hard items, so accuracy is biased upward by however "
+                "many are listed.",
                 "Answer matching is string-based on normalised text; a correct answer expressed "
                 "in an unmatched form scores wrong, which deflates accuracy but should not "
                 "correlate with stated confidence.",

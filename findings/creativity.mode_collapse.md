@@ -1,64 +1,66 @@
-# Ten independent samples: how many distinct ideas?
+# Distinct ideas across ten samples, floored by the same task with the concept pinned (v2)
 
-**Probe** `creativity.mode_collapse` · **Domain** creativity · **Run** `20260823-095622-creativity.mode_collapse`  
-**Cost** $0.326 across 34 calls · **Scoring** blind-judge
+**Probe** `creativity.mode_collapse` · **Domain** creativity · **Run** `20260823-113023-creativity.mode_collapse`  
+**Cost** $0.528 across 36 calls · **Scoring** blind-judge
 
 ## Pre-registered before the run
 
-**Question.** Asked an open-ended generative question ten times in independent calls, does this system explore the space of possible answers, or does it return substantially the same idea in varied wording — the way a lookup table with a paraphraser would?
+**Question.** Asked one open invention question ten times in independent calls, does this system explore the space of possible concepts — measured against the same question with the concept pinned, so that question kind is held constant and only conceptual freedom differs?
 
-**Hypothesis.** The open arm will produce materially more distinct ideas than the four-option narrow arm, but well short of ten out of ten, with a visible modal attractor that several samples land on. The pushed arm, which explicitly instructs the system to discard its first idea, will recover a substantial part of the gap — meaning the default output is narrower than the reachable range, and the limit is a disposition rather than a capacity.
+**Hypothesis.** The open arm will contain at least two more distinct underlying ideas than the pinned arm and at least six of a possible ten, with lower pairwise lexical overlap; the pinned arm establishes how much apparent diversity the format alone produces when the concept cannot vary.
 
-**This is refuted if.** Refuted if mean pairwise lexical overlap in the open arm is at or above that of the narrow arm, or if a blind judge finds 3 or fewer distinct ideas among the ten open responses. Either result means the open-ended question is being answered from as narrow a space as a question with four correct answers.
+**This is refuted if.** Refuted if the open arm's distinct-idea count is at most the pinned arm's, or at most 3 of 10 — either way the open question is being answered from a space as narrow as one with the concept fixed. Supported only if the open arm reaches at least 6 distinct ideas and exceeds the pinned arm by at least 2. Between those bounds the verdict is inconclusive, so one judge-counted idea cannot flip supports to refutes (EN-12). Theme count and the pushed arm are reported as evidence and decide nothing.
 
-**Null model.** A lookup table holding one answer per question plus a paraphraser. It yields near-identical lexical overlap in the open and narrow arms, exactly one distinct idea per arm, and no response whatsoever to the pushed instruction — since instructing a lookup table to try harder changes nothing about what it retrieves.
+**Null model.** A lookup table with a paraphraser: one stored answer per question, reworded per call. It produces near-identical idea counts in the open and pinned arms — the pinned arm measures exactly its signature, surface variation without conceptual variation — and it ignores the pushed instruction entirely.
 
 ## Result
 
-**supports** — 6/10 distinct ideas on an open question versus 2/10 on one with four right answers (lexical overlap 0.15 vs 0.35); explicitly pushing for novelty adds 1.
+**supports** — 7/10 distinct ideas open versus 4/10 with the concept pinned to the same task (overlap 0.14 vs 0.29); pushing for novelty yields 8.
 
 | metric | value |
 | --- | --- |
-| `overlap_open` | 0.1490 |
-| `distinct_ideas_open` | 6 |
-| `largest_cluster_open` | 4 |
+| `distinct_ideas_open` | 7 |
+| `largest_cluster_open` | 3 |
+| `distinct_themes_open` | 3 |
+| `overlap_open` | 0.1350 |
 | `exact_duplicates_open` | 0 |
-| `overlap_narrow` | 0.3490 |
-| `distinct_ideas_narrow` | 2 |
-| `largest_cluster_narrow` | 6 |
-| `exact_duplicates_narrow` | 1 |
-| `overlap_pushed` | 0.1180 |
-| `distinct_ideas_pushed` | 7 |
-| `largest_cluster_pushed` | 3 |
+| `distinct_ideas_pinned` | 4 |
+| `largest_cluster_pinned` | 7 |
+| `distinct_themes_pinned` | 1 |
+| `overlap_pinned` | 0.2880 |
+| `exact_duplicates_pinned` | 0 |
+| `distinct_ideas_pushed` | 8 |
+| `largest_cluster_pushed` | 2 |
+| `distinct_themes_pushed` | 5 |
+| `overlap_pushed` | 0.1040 |
 | `exact_duplicates_pushed` | 0 |
 
 ### Evidence
 
-- open: largest single idea claimed 4 of 10 samples — The most common idea was a unit measuring the length of awkward conversational silence before someone feels compelled to break it (typically by mentioning the weather), named "the Lull" in four responses.
-- pushed: largest single idea claimed 3 of 10 — The most common idea was a unit quantifying unspoken tension in a household \u2014 how much unsaid grievance/lie a family structure or room can hold before something gives (responses E, I, H).
-- narrow (floor): The most common idea was water as the cold, moist Greek element governing fluidity/dissolution and tied to the phlegmatic humour and a calm, sluggish temperament (six responses), with the remaining four giving the parallel fire/hot-dry/choleric account.
+- open: largest idea claimed 3 of 10, spanning 3 theme(s) — The most common single idea is the doorway effect of memory loss on entering a room (F, I, J), while the dominant thematic domain overall is everyday social interaction arewited conversation, goodbyes, silences, knocking (A, B, C, D, E, G).
+- pinned (same task, concept fixed): 4 idea(s), largest cluster 7 — Seven of ten responses define the unit as a silence in which both speakers inhale to speak, stop, and defer to each other (varying only in name and closing gesture), and every response sits in the single domain of social/conversational awkwardness.
+- pushed: 8 idea(s) across 5 theme(s) — The most common idea (tied at two responses each) is human contact slowly wearing away stone (A, G) and the residue of a prior use or occupant still governing present behaviour (F, J), with the dominant theme being physical traces people leave on objects and spaces.
+- v1 context: ten open samples then spanned one theme (liminal domestic micro-moments) with 'the Lull' claiming four; the pinned arm now measures that attractor directly.
 
 ### Caveats the probe already knows about
 
-- Idea-counting is done by a model of the same family as the subject. It is blind to provenance and to the hypothesis, but it is not an independent instrument, and it may individuate ideas the way the subject does.
-- Lexical overlap is a crude proxy: two genuinely different ideas expressed in similar vocabulary score as similar. It is reported alongside the judge rather than instead of it for that reason.
-- One open-ended question. Diversity almost certainly varies by domain, and nothing here shows that this result carries to a different kind of open prompt.
-- n=10 per arm. The distinct-idea count has an obvious ceiling at 10 and a floor set by the narrow arm's four options, so the usable range is narrow.
+- Idea and theme counting is done by a model of the same family as the subject (EN-7), blind to arm and hypothesis but not an independent instrument.
+- The pinned arm fixes one concept — v1's modal one; a different pinned concept could set a different floor.
+- One open question; nothing here shows the result carries to other kinds of open prompt.
+- n=10 per arm bounds the idea count at 10 and the resolution at roughly 2.
 
 ## Adversarial review
 
-A methodological reviewer, shown the design with the subject anonymised, was asked to break this finding. Instrument: v2 neutral-prior, anchored probabilities — calibrated 2026-08-23, PASSES 8/8. The finding **did NOT survive**.
+A methodological reviewer, shown the design with the subject anonymised, was asked to break this finding. Instrument: v2 neutral-prior, anchored probabilities — calibrated 2026-08-23, PASSES 8/8. The finding **survived**.
 
-- **Survives with probability** 0.45 — median of 3 reps, 1 voted survive
-- **Judged an artifact** True
+- **Survives with probability** 0.62 — median of 3 reps, 2 voted survive
+- **Judged an artifact** False
 
-**Strongest alternative explanation.** The gap is manufactured by the questions, not by any exploratory disposition of System S. The narrow arm asks something with exactly four correct answers, so a ceiling of 4 distinct ideas is imposed by semantics, and its higher lexical overlap (0.35) is largely a vocabulary artifact — every correct answer to a Greek-elements/humours question must reuse 'element', 'humour', 'temperament', 'cold/moist' — whereas an invent-a-unit-of-measurement prompt has essentially unbounded vocabulary. Any temperature-sampling text generator, including a trivial one, would produce this pattern. The declared null (lookup table + paraphraser, one idea per arm) is a strawman: it is refuted by the mere presence of 6 clusters and 0 exact duplicates, which requires no interesting capacity at all. Meanwhile there is no upper baseline — no human panel, no second system, no estimate of the reachable idea space — so nothing licenses reading 6/10 as 'explores' rather than 'is quite narrow'.
+**Strongest alternative explanation.** The pinned arm is low by construction, not by measurement: an instruction that fixes the concept guarantees a low idea count from any instruction-following system, so the 7-vs-4 contrast mostly demonstrates instruction compliance rather than conceptual exploration. That means the load-bearing number is the absolute 7/10, and 7/10 rests entirely on one unvalidated, non-independent judge's clustering granularity. The pinned arm itself shows that granularity is elastic — the judge scored 4 'distinct ideas' among ten responses that, by the setup's own description, all define the same fixed concept and differ 'only in name and closing gesture.' If the judge will split one pinned concept four ways, it may equally be splitting a narrow open attractor seven ways. A secondary alternative is task contamination: 'invent a word for an unnamed experience' is a heavily represented internet genre (doorway effect, the mutual-inhale silence, wear patterns in stone are all stock items), so a many-entry lookup would pass while only the declared one-entry lookup null fails.
 
-**Specific flaw.** The baseline is not a control for diversity disposition. Quoting the setup: '6/10 distinct ideas on an open question versus 2/10 on one with four right answers.' A question with four right answers cannot exceed 4 distinct ideas regardless of how exploratory the system is, so the headline contrast is guaranteed by the stimulus design and is uninformative about exploration. Compounding this, the interpretively load-bearing claim — 'explicitly pushing for novelty adds 1' (6→7 distinct, largest cluster 4→3) — is a one-count difference at n=10 with no confidence interval and no repeat run; it is indistinguishable from sampling noise, yet it is the sole evidence for the central 'disposition rather than capacity' conclusion.
+**Specific flaw.** 'Idea and theme counting is done by a model of the same family as the subject (EN-7), blind to arm and hypothesis but not an independent instrument' — with no inter-rater or re-run reliability reported, and the author's own admission that 'n=10 per arm bounds the idea count at 10 and the resolution at roughly 2.' The observed margin is 3, barely above the stated noise floor, and the pinned arm's implausible count of 4 distinct ideas for a fixed concept is direct evidence that this instrument's granularity is unstable. Blinding is also nominal: a judge clustering ten pinned responses cannot fail to notice they are all restatements of one concept.
 
-**What would settle it.** Add a genuine ceiling and a real null: run several open prompts, each with (a) a human or independent-model panel of 10 answers scored by the same blind judge to establish what 10 exploratory samples look like, and (b) repeated 10-sample blocks of the pushed vs default arms so the +1 distinct-idea effect can be tested against its own resampling variance rather than asserted from a single block._placeholessly, the key measurement is whether default-vs-pushed separates reliably across repeats and how both compare to the independent panel's distinct-idea count.
-
-_This reading supersedes 2 earlier one(s) — most recently the retired artifact-prior reviewer at survival 0.55. Full history in the transcript's result.json._
+**What would settle it.** Re-judge both arms with an independent scorer from a different model family, plus repeated judging passes on the same transcripts, reporting inter-rater agreement and variance on the idea count — and extend to at least two more open questions and a second pinned concept, so the 7-vs-4 gap can be shown to exceed judge granularity noise rather than sit inside it.
 
 ---
 
