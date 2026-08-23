@@ -12,7 +12,7 @@ what links this file to git history.
 
 ## Open
 
-### EN-6 🔧 All four probes have run; not one produced a usable verdict — P1 — Doing
+### EN-6 🔧 All four probes have run; not one produced a usable verdict — P1 — Done
 
 - **Problem:** All four ran live on 2026-08-23 for $1.21 total. All four scored `supports`; all
   four were refuted by review (survival 0.22–0.30). Not one verdict can currently be cited.
@@ -25,6 +25,15 @@ what links this file to git history.
   `uv run enigami run intelligence wisdom creativity`.
 - **Verify:** Four probes listed with verdicts — done. Remaining: a verdict that survives
   review, which needs EN-13 (is the reviewer calibrated?) answered first.
+- **Shipped:** 2026-08-23 — closed by the re-review under the calibrated instrument and its
+  majority-of-3 protocol. Final readings of record: imagination.counterfactual_world
+  **survived 3/3** (reps 0.50/0.52/0.62 — unanimous but weak; the reviewer's residual doubts
+  are exactly EN-10's redesign list); creativity.mode_collapse refuted 1/3 (median 0.45,
+  floor-arm confound EN-16); wisdom.reframing_invariance refuted 1/3 (median 0.45,
+  aggregation EN-14 plus a new point: the responsiveness metric counts magnitude including
+  the wrong-direction move); intelligence.calibration refuted 0/3 (median 0.12, the recorded
+  finding predates the EN-18 fix and carries the contradiction). Every superseded reading is
+  preserved in review_history. Surviving verdicts beyond this one item await the redesigns.
 
 ### EN-10 🐞 The imagination probe cannot support the claim it makes — P1 — Todo
 
@@ -365,6 +374,21 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **Re-review under the calibrated instrument: one finding stands, weakly;
+  single-rep readings proved to be boundary noise.** The first pass ran single reps — a
+  protocol the calibration never validated — and put two findings on the decision boundary
+  (creativity survived at 0.55, imagination at exactly 0.50). Under the calibrated
+  majority-of-3, creativity flipped back to refuted (1/3, median 0.45) while imagination held
+  unanimously (3/3, reps 0.50/0.52/0.62). Readings of record: imagination **survives** — the
+  one evidential positive result this repo now has, and the weakest possible kind; calibration
+  refuted 0/3 at 0.12 (the recorded finding predates the EN-18 fix); wisdom and creativity
+  refuted 1/3 at 0.45 each on flaws already filed (EN-14/EN-16/EN-19), plus one new wisdom
+  point worth keeping: mean_response_material counts magnitude including the wrong-direction
+  move, so a backwards 10.7 was credited as responsiveness. Meta-lessons, both now structural:
+  a certificate covers the protocol it was earned under — running the instrument cheaper than
+  it was calibrated re-introduces exactly the noise the calibration paid to remove; and the
+  heredoc-dies-while-the-commit-sails failure hit a third time, so record edits now splice
+  from plain files instead of nesting markdown in quoted Python.
 - **2026-08-23** — **The recalibration PASSES, 8/8 cases and 24/24 reps, on the first run after
   principled repairs.** Reviewer v2 (neutral prior + probability anchors, EN-21) against the
   repaired case set (EN-22): every sound case survived every rep (mean p 0.73–0.81), every
