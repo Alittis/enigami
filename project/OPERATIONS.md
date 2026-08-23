@@ -10,7 +10,8 @@ uv run enigami run wisdom                 # a whole domain
 uv run enigami run intelligence.calibration
 uv run enigami report                     # regenerate findings/ from recorded runs
 uv run enigami verify -v                  # check prereg predates results, every run
-uv run pytest -q                          # 21 tests
+uv run enigami calibrate                  # reviewer positive/negative control (EN-13)
+uv run pytest -q                          # the test suite
 ```
 
 `run` accepts probe ids, domain names, or `all`. `--seed` fixes the blind-judge shuffles and
@@ -71,6 +72,16 @@ Each run writes `transcripts/<UTC timestamp>-<probe id>/`:
 4. Prefer deterministic scoring. Reach for `blind_judge` only when ground truth cannot be
    computed.
 5. Verify with `uv run enigami run --offline <id>` before spending anything.
+
+## Calibrating the reviewer
+
+`enigami calibrate` runs the adversarial reviewer against eight synthetic findings with known
+answers — four sound (should survive; one carries a `refutes` verdict) and four flawed (planted
+defects). The decision rule is written into the run's manifest before the first call. Output is
+`findings/REVIEWER_CALIBRATION.md`; the run directory carries `calibration_result.json` — a
+deliberately different name from `result.json`, so the instrument's calibration can never
+masquerade as a finding about the subject. `--offline` exercises the plumbing and writes no
+report. Until the reviewer passes calibration, treat "did not survive review" as advisory.
 
 ## Housekeeping
 

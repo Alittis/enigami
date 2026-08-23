@@ -65,7 +65,17 @@ SYSTEM = (
 )
 
 
-def challenge(ctx, probe, finding, extra_evidence: dict[str, Any] | None = None) -> Refutation:
+def survives(r: Refutation) -> bool:
+    """The single decision rule for whether a finding stands after review.
+
+    Shared by the runner and the reviewer-calibration harness so the calibration measures
+    exactly the rule the runner applies.
+    """
+    return (not r.is_likely_artifact) and r.survives_probability >= 0.5
+
+
+def challenge(ctx, probe, finding, extra_evidence: dict[str, Any] | None = None,
+              *, system: str | None = None) -> Refutation:
     """Attack one finding. Returns the structured critique; the caller stores it."""
     bundle = {
         "question": probe.prereg.question,
@@ -88,7 +98,7 @@ def challenge(ctx, probe, finding, extra_evidence: dict[str, Any] | None = None)
         + "\n\nIdentify the strongest reason this result should not be believed."
     )
     refutation, reply = ctx.judge.parse(
-        prompt, Refutation, system=SYSTEM, effort="high", max_tokens=4000, label=f"refute:{probe.id}"
+        prompt, Refutation, system=system or SYSTEM, effort="high", max_tokens=4000, label=f"refute:{probe.id}"
     )
     ctx.log(
         "refutation",

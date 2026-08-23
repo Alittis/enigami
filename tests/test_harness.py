@@ -230,3 +230,47 @@ def test_short_answer_keys_match_words_not_substrings():
     assert not m._matches("w", "I would say Ta")
     assert m._matches("1648", "It was signed in 1648.")
     assert not m._matches("wb", "the web unit")
+
+
+# --- the reviewer calibration harness (EN-13) --------------------------------
+
+def test_control_cases_are_wellformed():
+    from enigami import reviewer_control as rc
+    keys = [c.key for c in rc.CASES]
+    assert len(keys) == len(set(keys)) == 8
+    assert sum(c.expected == "sound" for c in rc.CASES) == 4
+    for c in rc.CASES:
+        assert c.expected in ("sound", "flawed")
+        if c.expected == "flawed":
+            assert len(c.planted_flaw) >= 40, c.key
+        else:
+            assert c.planted_flaw == "", c.key
+    # one sound case must carry a refutes verdict, to catch direction-judging
+    assert any(c.expected == "sound" and c.finding.verdict == "refutes" for c in rc.CASES)
+
+
+def test_survives_is_the_single_decision_rule():
+    from enigami.refute import Refutation, survives
+    base = dict(strongest_alternative_explanation="x", specific_flaw="y", what_would_settle_it="z")
+    assert survives(Refutation(is_likely_artifact=False, survives_probability=0.5, **base))
+    assert not survives(Refutation(is_likely_artifact=True, survives_probability=0.9, **base))
+    assert not survives(Refutation(is_likely_artifact=False, survives_probability=0.49, **base))
+
+
+def test_offline_calibration_writes_no_report_and_no_result_json():
+    from pathlib import Path
+
+    from enigami import config, reviewer_control as rc
+
+    report_path = config.FINDINGS / "REVIEWER_CALIBRATION.md"
+    existed_before = report_path.exists()
+    res = rc.run_calibration(reps=1, offline=True)
+    assert res["offline"] is True
+    assert res["calls"] == 8
+    assert res["decision"] == "MIXED"  # stub survives everything: 4/4 sound, 0/4 flawed
+    assert res["stage2"] is None  # never triggered offline
+    run_dir = Path(res["run_dir"])
+    assert (run_dir / "calibration_result.json").exists()
+    # never result.json: latest_results() must not pick calibration up as a finding
+    assert not (run_dir / "result.json").exists()
+    assert report_path.exists() == existed_before

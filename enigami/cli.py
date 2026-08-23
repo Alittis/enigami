@@ -106,6 +106,31 @@ def cmd_verify(args) -> int:
     return 1 if bad else 0
 
 
+def cmd_calibrate(args) -> int:
+    from . import reviewer_control as rc
+
+    if not args.offline and not config.have_credentials():
+        print("No Anthropic credentials found. Run ./deploy/scripts/setup-anthropic-env.sh", file=sys.stderr)
+        return 1
+    n = len(rc.CASES) * args.reps
+    mode = "OFFLINE (plumbing only, no report)" if args.offline else f"live against {config.JUDGE_MODEL}"
+    print(f"Calibrating the reviewer {mode} — {len(rc.CASES)} cases x {args.reps} reps = {n} review calls.\n")
+    result = rc.run_calibration(reps=args.reps, offline=args.offline)
+    for stage_name in ("stage1", "stage2"):
+        stage = result.get(stage_name)
+        if not stage:
+            continue
+        print(f"  [{stage_name}]")
+        for key, row in stage["per_case"].items():
+            mark = {True: "ok  ", False: "MISS", None: "?   "}[row["verdict_correct"]]
+            print(f"    {mark} {row['expected']:6} {key:32} survived {row['survived_reps']}/{row['reps_ok']}  mean_p {row['mean_p']}")
+        print(f"    sound passing {stage['sound_pass']}/4 · flawed refuted {stage['flawed_refuted']}/4 -> {stage['decision']}")
+    print(f"\nDecision: {result['decision']}  (${result['cost_usd']:.3f}, {result['calls']} calls)")
+    if not args.offline:
+        print("Report: findings/REVIEWER_CALIBRATION.md")
+    return 0
+
+
 def cmd_doctor(args) -> int:
     print(f"repo            {config.REPO_ROOT}")
     try:
@@ -157,6 +182,11 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("verify", help="check that each run's pre-registration predates its results")
     p.add_argument("-v", "--verbose", action="store_true")
     p.set_defaults(fn=cmd_verify)
+
+    p = sub.add_parser("calibrate", help="run the reviewer's positive/negative control (EN-13)")
+    p.add_argument("--reps", type=int, default=3)
+    p.add_argument("--offline", action="store_true")
+    p.set_defaults(fn=cmd_calibrate)
 
     p = sub.add_parser("doctor", help="check environment, credentials and probe loading")
     p.add_argument("--ping", action="store_true", help="make one cheap live API call")

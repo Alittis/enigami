@@ -26,6 +26,7 @@ Five mechanisms push against it. Four are enforced in code.
 | A null model per probe | `Prereg.null_model`, required | An impressive output with nothing to compare it against |
 | Blind scoring | `enigami/scoring.py` — `blind_judge` takes texts and a rubric, and is structurally incapable of receiving condition labels | A judge that knows which arm it is grading |
 | Anonymised refutation | `enigami/refute.py` — subject identity is scrubbed, the reviewer's default is "artifact" | A reviewer who knows it is grading its own family |
+| Reviewer calibration | `enigami/reviewer_control.py` — 8 synthetic findings with known answers, decision rule fsynced before the first call | A refuter that refutes (or passes) everything, whose verdicts would carry no information |
 
 Deterministic scoring is preferred wherever ground truth can be computed rather than judged.
 Three of the four shipped probes score deterministically; only `creativity.mode_collapse`

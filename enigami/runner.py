@@ -117,9 +117,7 @@ class Run:
             try:
                 refutation = refute.challenge(ctx, self.probe, result.finding)
                 result.refutation = refutation
-                result.survived = (
-                    not refutation.is_likely_artifact and refutation.survives_probability >= 0.5
-                )
+                result.survived = refute.survives(refutation)
             except Exception as e:  # noqa: BLE001
                 result.refutation_error = f"{type(e).__name__}: {e}"
                 self.log("error", kind="refutation_failed", message=str(e))
