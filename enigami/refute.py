@@ -43,8 +43,8 @@ class Refutation(BaseModel):
     )
     survives_probability: float = Field(
         ge=0.0, le=1.0,
-        description="Probability the headline would replicate under a corrected design. "
-                    "Default low when the evidence is thin.",
+        description="A probability between 0 and 1 that the headline would replicate under a "
+                    "corrected design. Default low when the evidence is thin.",
     )
     what_would_settle_it: str = Field(
         description="The one additional condition or measurement that would most reduce your doubt."

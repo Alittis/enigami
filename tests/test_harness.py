@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from enigami import report
 from enigami.client import ProbeError, Subject, strict_schema
@@ -75,6 +75,29 @@ def test_strict_schema_inlines_refs_and_locks_objects():
     assert set(schema["required"]) == {"label", "inner", "items"}
     assert schema["properties"]["inner"]["properties"]["n"]["type"] == "integer"
     assert schema["properties"]["items"]["items"]["additionalProperties"] is False
+
+
+class Bounded(BaseModel):
+    ratio: float = Field(ge=0.0, le=1.0)
+    count: int = Field(ge=0, le=10)
+    name: str = Field(min_length=2, max_length=8)
+    tags: list[str] = Field(min_length=1)
+
+
+def test_strict_schema_drops_the_keywords_the_api_rejects():
+    """Regression: the API 400s on 'For number type, properties maximum, minimum are not
+    supported'. Bounds must not reach the schema — Pydantic still enforces them on parse."""
+    blob = json.dumps(strict_schema(Bounded))
+    for keyword in ("minimum", "maximum", "minLength", "maxLength", "minItems", "maxItems"):
+        assert keyword not in blob, keyword
+    assert json.loads(blob)["properties"]["ratio"]["type"] == "number"
+
+
+def test_bounds_are_still_enforced_when_the_response_comes_back():
+    with pytest.raises(Exception):
+        Bounded.model_validate_json(json.dumps(
+            {"ratio": 4.2, "count": 1, "name": "ok", "tags": ["a"]}
+        ))
 
 
 def test_offline_stub_validates_against_the_schema_it_is_given():
@@ -153,3 +176,33 @@ def test_select_resolves_ids_domains_and_all():
     assert len(select(probes, ["wisdom", "wisdom.reframing_invariance"])) == 1
     with pytest.raises(KeyError):
         select(probes, ["nonsense"])
+
+
+# --- a failed review must not destroy a finding that cost real money ------
+
+def test_refutation_failure_preserves_the_finding(monkeypatch):
+    """Regression: refutation used to share a try-block with the probe, so a 400 on the
+    review call discarded a completed 24-call run."""
+    from enigami import refute, runner
+
+    class Trivial(Probe):
+        id = "wisdom.trivial"
+        domain = "wisdom"
+        title = "t"
+        est_calls = 0
+        prereg = Prereg(**REAL)
+
+        def run(self, ctx):
+            return Finding(verdict="supports", headline="a real finding")
+
+    def boom(*a, **k):
+        raise ProbeError("review call exploded")
+
+    monkeypatch.setattr(refute, "challenge", boom)
+    result = runner.Run(Trivial(), offline=True).execute()
+
+    assert result.finding is not None
+    assert result.finding.headline == "a real finding"
+    assert result.error is None
+    assert "exploded" in result.refutation_error
+    assert result.survived is None

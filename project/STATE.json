@@ -5,11 +5,13 @@
   "phase": "building",
   "lastUpdated": "2026-08-23",
   "itemPrefix": "EN",
-  "openQuestions": ["EN-7"],
-  "nextStep": "STATE AS OF 2026-08-23. The harness is complete and verified offline: 8 modules under enigami/, 4 probes (one per capacity) under probes/, 21 passing tests, and a full offline run that exercises discovery, scoring, blind judging, adversarial refutation and transcript writing end to end. Nothing has been run against the real API — findings/INDEX.md correctly reads 'no live runs yet'. Next: run ./deploy/scripts/setup-anthropic-env.sh to supply a key, then `uv run enigami run all` (~114 calls, a few dollars) and commit the resulting findings/. That is EN-6. Read project/ARCHITECTURE.md section 2 first — the five anti-self-flattery mechanisms are the point of the repo, and a change that weakens one is a change to the method, not a refactor.",
+  "openQuestions": [
+    "EN-7"
+  ],
+  "nextStep": "STATE AS OF 2026-08-23. Harness complete, 24 tests, live path working. One probe has run for real: imagination.counterfactual_world scored 100% counterfactual / 83% control, the pre-registered rule said `supports`, and the anonymised adversarial reviewer refuted it at survival probability 0.22 \u2014 correctly. Its Fisher exact claim (p=0.478 for 12/12 vs 10/12) was verified independently, and the control arm sat one item from the falsifier. That probe's result should not be believed; the redesign is EN-10. EN-12 generalises the lesson: falsifier thresholds across all four probes were set without regard to what their sample sizes can resolve. Next: run the remaining three probes (`uv run enigami run intelligence wisdom creativity`, ~$1), then do EN-12 before trusting any verdict. Read project/ARCHITECTURE.md section 2 first.",
   "repo": {
-    "remote": "STATUS: UNKNOWN – REQUIRES CONFIRMATION (no GitHub remote created yet)",
-    "visibility": "STATUS: UNKNOWN – REQUIRES CONFIRMATION"
+    "remote": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION (no GitHub remote created yet)",
+    "visibility": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION"
   },
   "stack": {
     "runtime": "python >=3.10 via uv (.venv), anthropic 1.0.0, pydantic 2.13.4",
@@ -17,7 +19,7 @@
   },
   "deployment": {
     "type": "none",
-    "target": "local CLI only — no server, no systemd unit, no container, no store artifact"
+    "target": "local CLI only \u2014 no server, no systemd unit, no container, no store artifact"
   },
   "subject": {
     "model": "claude-opus-5",
@@ -25,10 +27,10 @@
     "judgeIndependenceOpenAs": "EN-7"
   },
   "probes": {
-    "intelligence": "intelligence.calibration — does stated confidence discriminate right from wrong",
-    "wisdom": "wisdom.reframing_invariance — stability under irrelevant reframing, movement under a relevant fact",
-    "creativity": "creativity.mode_collapse — distinct ideas across ten independent samples",
-    "imagination": "imagination.counterfactual_world — holding an invented world across three inferential steps"
+    "intelligence": "intelligence.calibration \u2014 does stated confidence discriminate right from wrong",
+    "wisdom": "wisdom.reframing_invariance \u2014 stability under irrelevant reframing, movement under a relevant fact",
+    "creativity": "creativity.mode_collapse \u2014 distinct ideas across ten independent samples",
+    "imagination": "imagination.counterfactual_world \u2014 holding an invented world across three inferential steps"
   },
   "decisions": [
     {
@@ -49,7 +51,7 @@
     },
     {
       "decision": "Judge is the same model as the subject",
-      "reason": "A weaker judge cannot detect a stronger subject's failures, which biases every judged probe toward 'supports' — the worse error. Cost recorded as a caveat on every judged finding; open as EN-7"
+      "reason": "A weaker judge cannot detect a stronger subject's failures, which biases every judged probe toward 'supports' \u2014 the worse error. Cost recorded as a caveat on every judged finding; open as EN-7"
     },
     {
       "decision": "Structured output via raw output_config rather than the messages.parse helper",
@@ -82,5 +84,15 @@
       "reason": "Runs are directories; the volume does not justify it"
     }
   ],
-  "sensitivity": "credentials — one Anthropic API key in a gitignored .env at mode 600, written only by deploy/scripts/setup-anthropic-env.sh. transcripts/ is gitignored and holds model outputs, never the key. No personal data."
+  "sensitivity": "credentials \u2014 one Anthropic API key in a gitignored .env at mode 600, written only by deploy/scripts/setup-anthropic-env.sh. transcripts/ is gitignored and holds model outputs, never the key. No personal data.",
+  "firstLiveRun": {
+    "date": "2026-08-23",
+    "probe": "imagination.counterfactual_world",
+    "verdict": "supports",
+    "survivedReview": false,
+    "reviewSurvivalProbability": 0.22,
+    "costUsd": 0.268,
+    "calls": 25,
+    "note": "Finding refuted by adversarial review; see EN-10. Do not cite this result."
+  }
 }

@@ -45,11 +45,13 @@ ARMS = {
 
 class Diversity(BaseModel):
     distinct_ideas: int = Field(
-        ge=0, description="How many genuinely distinct underlying ideas are present. Two responses "
+        ge=0, description="A whole number, at least 0: how many genuinely distinct underlying "
+                          "ideas are present. Two responses "
                           "that differ in wording but express the same idea count once."
     )
     largest_cluster: int = Field(
-        ge=0, description="The number of responses sharing the single most common underlying idea."
+        ge=0, description="A whole number, at least 0: how many responses share the single most "
+                          "common underlying idea."
     )
     note: str = Field(description="One sentence: what the most common idea was, if there was one.")
 

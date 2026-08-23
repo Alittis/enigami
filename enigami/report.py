@@ -94,6 +94,16 @@ def write_finding(result: dict) -> Path | None:
             "",
         ]
 
+    elif result.get("refutation_error"):
+        lines += [
+            "## Adversarial review",
+            "",
+            f"**Review did not run** — `{result['refutation_error']}`. The finding above stands "
+            "unreviewed, which is weaker than a finding that survived review and weaker than one "
+            "that failed it. Rerun `enigami run` for this probe to obtain a review.",
+            "",
+        ]
+
     ok, note = verify_ordering(Path(config.TRANSCRIPTS / result["run_id"]))
     lines += ["---", "", f"_Pre-registration integrity: {note}._", ""]
     if not ok:
@@ -122,7 +132,9 @@ def write_index(results: list[dict]) -> Path:
         if r.get("error"):
             lines.append(f"| [`{r['probe']}`]({r['probe']}.md) | {r['domain']} | run failed | — | `{r['error'][:60]}` |")
             continue
-        survived = {True: "yes", False: "**no**", None: "—"}[r.get("survived_refutation")]
+        survived = {True: "yes", False: "**no**", None: "review failed" if r.get("refutation_error") else "—"}[
+            r.get("survived_refutation")
+        ]
         headline = f["headline"].replace("|", "\\|")
         lines.append(
             f"| [`{r['probe']}`]({r['probe']}.md) | {r['domain']} | "

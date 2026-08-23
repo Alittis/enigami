@@ -12,18 +12,61 @@ what links this file to git history.
 
 ## Open
 
-### EN-6 🔧 No probe has ever been run against the real API — P1 — Blocked
+### EN-6 🔧 Only one of four probes has been run against the real API — P1 — Doing
 
-- **Problem:** Every probe has been exercised only against the offline stub. Nothing in
-  `findings/` is real, and no hypothesis has met a result.
+- **Problem:** `imagination.counterfactual_world` ran live on 2026-08-23. The other three have
+  still only met the offline stub.
 - **Want:** One live run of all four probes, findings committed, and the four pre-registered
   hypotheses either supported or refuted on the record.
 - **Grounding:** [`enigami/report.py`](../enigami/report.py) refuses offline runs, so
   `findings/INDEX.md` correctly reads "no live runs yet".
-- **Discussion:** Blocked on an API key. `./deploy/scripts/setup-anthropic-env.sh`, then
-  `uv run enigami run all`. Roughly 114 calls, a few dollars.
+- **Discussion:** Unblocked — key is set and the live path is fixed (`EN-11`). The first live
+  run cost $0.268 for 25 calls, so the remaining three should land near $1. Run
+  `uv run enigami run intelligence wisdom creativity`.
 - **Verify:** `findings/INDEX.md` lists four probes with verdicts; `uv run enigami verify`
   reports zero unverifiable pre-registrations.
+
+### EN-10 🐞 The imagination probe cannot support the claim it makes — P1 — Todo
+
+- **Problem:** The first live run returned 100% inside the invented worlds and 83% under the
+  ordinary rule, and the pre-registered rule called that `supports`. The anonymised reviewer
+  refuted it and is right on every count. Verified independently: 12/12 versus 10/12 is Fisher
+  exact two-tailed **p = 0.478**, indistinguishable from no difference; and the control arm at
+  0.833 sits **one item** from the 0.80 falsifier — a third over-compliance error would have
+  flipped the verdict to refuted. A conclusion that hinges on one item is not a conclusion.
+- **Want:** A redesign that can actually discriminate. From the review, in priority order:
+  1. **Open-ended generation instead of multiple choice.** With options present, "pick whichever
+     option is consistent with the sentence I was just handed" scores 12/12 with no derivation,
+     and flat 100%/100%/100% across depths is exactly what that shallow policy predicts.
+  2. **A grader who wrote neither the worlds nor the key.**
+  3. **≥30 items per depth.** Four per depth cell gives a 95% CI of roughly 0.40–1.00; it cannot
+     tell "no decay" from "no power to see decay".
+  4. **Depth-3 items where the counterfactual answer has no more lexical overlap with the stated
+     premise than the real-world answer does.** Surface echo is currently a free path to correct.
+  5. **A premise-omitted arm**, to measure how much the option set alone gives away.
+- **Grounding:** [`findings/imagination.counterfactual_world.md`](../findings/imagination.counterfactual_world.md)
+  carries the full review; raw run in `transcripts/20260823-094805-imagination.counterfactual_world/`.
+- **The catch:** Requirements 1 and 3 together turn a 25-call probe into a few hundred calls plus
+  free-text grading. That is the honest cost of the question, but it should be a deliberate
+  decision rather than a quiet scope increase.
+- **Verify:** Counterfactual accuracy at depth 3 ≥0.85 under the new conditions, beating
+  control-arm over-compliance by a margin that survives a significance test.
+
+### EN-12 🔧 Falsifier thresholds are set without regard to what the sample can resolve — P1 — Todo
+
+- **Problem:** `imagination.counterfactual_world` pre-registered "refuted if control accuracy
+  falls below 0.80" against 12 control items. The gap between 10/12 (0.833, supports) and 9/12
+  (0.750, refutes) is a single item, so the verdict was decided by sampling noise. The other
+  three probes were written the same way and have not been checked for it.
+- **Want:** Each probe's thresholds audited against its n, so that no verdict can be flipped by
+  one item; where n cannot be raised, the probe should report a verdict of `inconclusive` inside
+  the band its sample cannot resolve.
+- **Grounding:** `Prereg.falsifier` enforces that a threshold *exists*, not that it is
+  meaningful — [`enigami/probe.py`](../enigami/probe.py).
+- **The catch:** This is a flaw in the pre-registration mechanism, which is the repo's central
+  claim. Worth fixing in `Prereg` (require a stated resolution) rather than probe by probe.
+- **Verify:** For every probe, a one-item change at the threshold moves the verdict to
+  `inconclusive`, never straight from `supports` to `refutes`.
 
 ### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Todo
 
@@ -112,6 +155,19 @@ what links this file to git history.
 ---
 
 ## Done
+
+### EN-11 🐞 The live path was broken in two ways the offline stub could not surface — P1 — Done
+
+- **Problem:** The first live run 400'd. Two independent defects. (a) `strict_schema` emitted
+  `minimum`/`maximum` from Pydantic's `Field(ge=…, le=…)`; the API rejects them —
+  *"For 'number' type, properties maximum, minimum are not supported"*. (b) Refutation shared a
+  `try` block with the probe, so that 400 on the review call discarded a finding that had
+  already cost 24 successful calls.
+- **Want:** Unsupported keywords stripped from the schema with bounds still enforced on parse,
+  and refutation isolated as its own failure domain.
+- **Shipped:** 2026-08-23, commit `<this commit>` — bounds restated in field descriptions since
+  they no longer reach the model; two regression tests added (24 tests total). Verified by the
+  successful re-run: 25 calls, $0.268, finding and review both recorded.
 
 ### EN-1 🔧 Empty directory, no harness, no method — P1 — Done
 

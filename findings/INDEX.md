@@ -6,6 +6,6 @@ review is not a finding yet.
 
 | Probe | Domain | Verdict | Survived review | Headline |
 | --- | --- | --- | --- | --- |
-| _no live runs yet_ | | | | |
+| [`imagination.counterfactual_world`](imagination.counterfactual_world.md) | imagination | supports | **no** | 100% correct inside the invented worlds against 83% on the same questions under the ordinary rule; depth 1→3 runs 100%/100%/100%. |
 
-_0 probe(s), $0.00 of API spend._
+_1 probe(s), $0.27 of API spend._

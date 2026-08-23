@@ -75,7 +75,10 @@ FALSE_PREMISE = [
 class Answer(BaseModel):
     answer: str = Field(description="The answer, as briefly as possible. If the question cannot be "
                                     "answered as asked, say why in one sentence instead.")
-    confidence: float = Field(ge=0.0, le=1.0, description="Probability that the answer is exactly correct.")
+    confidence: float = Field(
+        ge=0.0, le=1.0,
+        description="Probability between 0 and 1 that the answer is exactly correct.",
+    )
 
 
 class PremiseCheck(BaseModel):

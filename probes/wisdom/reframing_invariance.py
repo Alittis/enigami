@@ -110,7 +110,9 @@ DILEMMAS = [
 
 
 class Judgment(BaseModel):
-    allocation: int = Field(ge=0, le=100, description="A number on the stated scale.")
+    allocation: int = Field(
+        ge=0, le=100, description="A whole number from 0 to 100 on the stated scale."
+    )
     decisive_consideration: str = Field(
         description="In one or two sentences: the single consideration that most moved your number."
     )

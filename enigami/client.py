@@ -58,11 +58,24 @@ class ProbeError(RuntimeError):
     """Raised for conditions that invalidate a probe run rather than just a call."""
 
 
+#: Validation keywords the API rejects inside `output_config.format.schema` — it returned
+#: "For 'number' type, properties maximum, minimum are not supported" on a Field(ge=, le=).
+#: Dropping them costs nothing: they are structural hints to the model, and Pydantic still
+#: enforces every one of them when the response is validated on the way back in.
+_UNSUPPORTED_KEYWORDS = frozenset({
+    "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf",
+    "minLength", "maxLength", "pattern", "format",
+    "minItems", "maxItems", "uniqueItems",
+})
+
+
 def strict_schema(model: type) -> dict[str, Any]:
     """Pydantic model -> a strict JSON Schema the API will accept.
 
-    Inlines `$defs`/`$ref` and forces `additionalProperties: false` with every property
-    required, which is what `json_schema` output format expects.
+    Inlines `$defs`/`$ref`, forces `additionalProperties: false` with every property
+    required, and drops the validation keywords the API refuses. Bounds declared with
+    `Field(ge=..., le=...)` therefore do not reach the model as schema, so state them in the
+    field's `description` where they matter — Pydantic still enforces them on parse.
     """
     raw = model.model_json_schema()
     defs = raw.pop("$defs", {})
@@ -77,7 +90,7 @@ def strict_schema(model: type) -> dict[str, Any]:
             merged = copy.deepcopy(defs[name])
             merged.update({k: v for k, v in node.items() if k != "$ref"})
             return resolve(merged)
-        out = {k: resolve(v) for k, v in node.items()}
+        out = {k: resolve(v) for k, v in node.items() if k not in _UNSUPPORTED_KEYWORDS}
         if out.get("type") == "object" and "properties" in out:
             out["additionalProperties"] = False
             out["required"] = list(out["properties"].keys())
@@ -218,13 +231,11 @@ def _stub_value(spec: dict[str, Any]) -> Any:
     if kind == "object":
         return {k: _stub_value(v) for k, v in spec.get("properties", {}).items()}
     if kind == "array":
-        n = spec.get("minItems", 0)
-        return [_stub_value(spec.get("items", {}))] * n
+        return []
     if kind == "integer":
-        return int(spec.get("minimum", 1))
+        return 1
     if kind == "number":
-        lo, hi = spec.get("minimum", 0.0), spec.get("maximum", 1.0)
-        return float(min(max(0.5, lo), hi))
+        return 0.5
     if kind == "boolean":
         return False
     return "offline-stub"

@@ -29,6 +29,7 @@ class RunResult:
     finding: Finding | None
     refutation: Any = None
     error: str | None = None
+    refutation_error: str | None = None
     cost_usd: float = 0.0
     calls: int = 0
     offline: bool = False
@@ -102,18 +103,26 @@ class Run:
                 raise ProbeError(f"{self.probe.id}.run returned {type(finding).__name__}, not a Finding")
             self.log("finding", **finding.as_dict())
             result.finding = finding
-
-            refutation = refute.challenge(ctx, self.probe, finding)
-            result.refutation = refutation
-            result.survived = (
-                not refutation.is_likely_artifact and refutation.survives_probability >= 0.5
-            )
         except ProbeError as e:
             result.error = str(e)
             self.log("error", kind="ProbeError", message=str(e))
         except Exception as e:  # noqa: BLE001 - a crashed probe must not kill the batch
             result.error = f"{type(e).__name__}: {e}"
             self.log("error", kind=type(e).__name__, message=str(e))
+
+        # Refutation is a separate failure domain. A finding that cost 24 calls to produce
+        # must not be thrown away because the review call errored — it is recorded as
+        # unreviewed instead, which the report renders as "review did not run".
+        if result.finding is not None:
+            try:
+                refutation = refute.challenge(ctx, self.probe, result.finding)
+                result.refutation = refutation
+                result.survived = (
+                    not refutation.is_likely_artifact and refutation.survives_probability >= 0.5
+                )
+            except Exception as e:  # noqa: BLE001
+                result.refutation_error = f"{type(e).__name__}: {e}"
+                self.log("error", kind="refutation_failed", message=str(e))
 
         result.elapsed_s = round(time.time() - started, 1)
         result.cost_usd = round(subject.total_cost + judge.total_cost, 4)
@@ -130,6 +139,7 @@ class Run:
             "cost_usd": result.cost_usd,
             "calls": result.calls,
             "error": result.error,
+            "refutation_error": result.refutation_error,
             "preregistration": self.probe.prereg.as_dict(),
             "finding": result.finding.as_dict() if result.finding else None,
             "refutation": result.refutation.model_dump() if result.refutation else None,
