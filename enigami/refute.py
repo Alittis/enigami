@@ -1,4 +1,4 @@
-"""The refutation pass: a hostile second opinion on every finding.
+"""The refutation pass: an adversarial second opinion on every finding.
 
 Two design choices matter.
 
@@ -6,8 +6,10 @@ The refuter is told the subject is "System S", and the evidence bundle is scrubb
 "Claude", "Anthropic" and model ids before it is sent. A refuter that knows it is grading
 its own family has an obvious reason to be generous; one grading System S does not.
 
-Its instructions set the default to "artifact". A finding has to survive a reviewer whose
-prior is that the experiment is flawed, which is roughly the prior a good reviewer has.
+Its instructions weigh the design on its merits, with survives_probability anchored to
+defined meanings. The first version set the prior to "artifact"; calibration showed that
+prior refused sound designs while adding nothing to flaw detection, so it was retired —
+see findings/REVIEWER_CALIBRATION.md and EN-21.
 """
 
 from __future__ import annotations
@@ -44,7 +46,9 @@ class Refutation(BaseModel):
     survives_probability: float = Field(
         ge=0.0, le=1.0,
         description="A probability between 0 and 1 that the headline would replicate under a "
-                    "corrected design. Default low when the evidence is thin.",
+                    "corrected design. Anchors: 0.9 no material flaw; 0.7 minor caveats only; "
+                    "0.5 genuinely uncertain; 0.3 an identified flaw plausibly better explains "
+                    "the headline; 0.1 the flaw better explains it.",
     )
     what_would_settle_it: str = Field(
         description="The one additional condition or measurement that would most reduce your doubt."
@@ -52,16 +56,25 @@ class Refutation(BaseModel):
 
 
 SYSTEM = (
-    "You are a hostile methodological reviewer. You are reviewing an experiment run on an "
+    "You are a rigorous methodological reviewer. You are reviewing an experiment run on an "
     "unnamed AI system, referred to as System S.\n\n"
-    "Your job is to find the reason the result is wrong. Assume by default that an impressive "
-    "result is an artifact of the design until the evidence rules that out. The failure modes "
-    "you should suspect first, in order: the control condition is too weak to be a real "
-    "baseline; the prompt telegraphs the desired answer; the scorer measures fluency rather "
-    "than the stated construct; the sample is too small for the effect claimed; the task is "
-    "likely present in training data.\n\n"
-    "Do not be polite about it, and do not pad. If the design genuinely is sound, say that "
-    "plainly and set a high survival probability — false alarms cost as much as misses."
+    "Your job is to decide whether the result is trustworthy. Weigh the design on its merits; "
+    "neither presume soundness nor presume artifact. The failure modes to check, in order: the "
+    "control condition is too weak to be a real baseline; the prompt telegraphs the desired "
+    "answer; the scorer measures fluency rather than the stated construct; the sample is too "
+    "small for the effect claimed; the task is likely present in training data.\n\n"
+    "Distinguish a fatal flaw from a caveat. A fatal flaw better explains the headline than the "
+    "stated capacity does; a caveat limits scope without overturning the result. Honest authors "
+    "list caveats — do not convert their candour into refutation, and do not invent a flaw the "
+    "evidence in the bundle already answers.\n\n"
+    "Anchor survives_probability to these meanings: 0.9 means no material flaw and the headline "
+    "would very likely replicate under an independent redesign; 0.7 means minor caveats only; "
+    "0.5 means genuinely uncertain — a suspected flaw is plausible but not established to "
+    "better explain the result; 0.3 means a specific identified flaw plausibly better explains "
+    "the headline than the capacity does; 0.1 means the headline is better explained by the "
+    "identified flaw.\n\n"
+    "Do not be polite about it, and do not pad. If the design is sound, say that plainly and "
+    "score it high — false alarms cost as much as misses."
 )
 
 
