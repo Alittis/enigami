@@ -81,7 +81,7 @@ defects). The decision rule is written into the run's manifest before the first 
 `findings/REVIEWER_CALIBRATION.md`; the run directory carries `calibration_result.json` — a
 deliberately different name from `result.json`, so the instrument's calibration can never
 masquerade as a finding about the subject. `--offline` exercises the plumbing and writes no
-report. Until the reviewer passes calibration, treat "did not survive review" as advisory.
+report. The reviewer passed calibration on 2026-08-23 (8/8 cases): its readings are evidential from that date. Reviews produced by earlier reviewer versions remain advisory — check the run date against the calibration history in `project/STATE.json`.
 
 ## Housekeeping
 

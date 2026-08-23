@@ -595,8 +595,10 @@ def run_calibration(reps: int = 3, offline: bool = False, workers: int = 6) -> d
 
 
 IMPLICATIONS = {
-    "PASSES": ("The instrument discriminates. The four refutations of the v1 probes stand as "
-               "evidence about those probes, and 'did not survive review' is a result."),
+    "PASSES": ("The instrument discriminates: readings it produces from now on are evidential. "
+               "It does not retroactively validate readings from earlier reviewer versions — "
+               "any probe review that predates this calibration remains advisory until re-run "
+               "with the calibrated instrument."),
     "REFUTES-EVERYTHING": ("The instrument does not discriminate: it refuses sound designs too, "
                            "so the four refutations of the v1 probes carry no evidential weight "
                            "on their own. The probes' flaws remain real where independently "
