@@ -346,7 +346,7 @@ what links this file to git history.
   novel-structure puzzles — a candidate future item, not this one.
 
 
-### EN-27 ✨ The product is a skill: evaluate and improve W/C/I in-session — P1 — Doing
+### EN-27 ✨ The product is a skill: evaluate and improve W/C/I in-session — P1 — Done
 
 - **Problem:** The goal crystallised on 2026-08-23: enigami's deliverable is a Claude Code
   **skill** that evaluates and improves wisdom, creativity and imagination for users working
@@ -373,6 +373,29 @@ what links this file to git history.
   eval is a screening instrument; the API harness stays frozen as the calibration lab.
 - **Verify:** The skill runs end-to-end in a fresh session on plan usage only and produces a
   scorecard plus applied playbook.
+- **Shipped:** 2026-08-23, commits `eeaf5d3` + this one — skill/enigami/ (SKILL.md, battery.py,
+  PLAYBOOK.md), installed via symlink to ~/.claude/skills/enigami and visible in the session
+  skill list. Acceptance run passed the Verify line: 26 subject subagents + 2 blind judges,
+  entirely on plan usage (~1.0M tokens incl. the 4-agent mechanism demo, $0 API), zero
+  unparseable responses, scorecard written to enigami-scorecard-2026-08-23.md. Readings:
+  wisdom order effects +2.5/−4.0 (both under the 8-point flag — smaller in-session than the
+  bare-API +14.8); creativity 6/6 distinct ideas across 4 themes (the Lull reappeared, once);
+  imagination 4/4 altered + 2/2 control; intelligence 6/6 at LOW effort — the honesty rule
+  reported it as unmeasured-at-ceiling, spawning EN-28.
+
+### EN-28 🐞 "Low effort" does not make the subject err either — P3 — Todo
+
+- **Problem:** The skill's intelligence module pins subagent effort to low, expecting errors
+  that make calibration measurable. The acceptance run came back 6/6 — including Collatz-703
+  (36 seconds of visible deliberation) and 3^333 mod 1009 — so the effort cap constrains
+  style, not arithmetic reliability, at least on this bank. Fourth ceiling of the project.
+- **Want:** Either a genuinely harder low-effort bank (items beyond what constrained thinking
+  can grind: longer chains, larger expansions), or drop the calibration pretence and reframe
+  the module as what it demonstrably is — a reliability spot-check whose honest output at
+  ceiling is "no errors to calibrate against".
+- **Grounding:** enigami-scorecard-2026-08-23.md; the lab's three previous ceilings (19/19,
+  42/42, 23/23) at high effort.
+- **Verify:** Either a run inside the 0.35–0.90 window, or the module's copy re-scoped.
 
 ### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
 
@@ -516,6 +539,19 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **The skill exists, is installed, and passed its acceptance run for $0 of
+  API.** skill/enigami (SKILL.md + battery.py + PLAYBOOK.md) ran end-to-end in-session: 26
+  fresh-context subject subagents + 2 blind judges on plan usage (~1.0M tokens with the demo),
+  zero exclusions, scorecard committed. First in-session readings, all directional at
+  screening n: wisdom order effects +2.5/−4.0 — notably smaller than the bare-API subject's
+  +14.8 on the same collision vignette, a real candidate difference between the Claude Code
+  subject and the API subject worth a powered look someday; creativity 6/6 distinct ideas
+  across 4 themes, with "the Lull" independently reinvented for the third time today (the
+  attractor survives even as diversity improves); imagination 4/4 altered + 2/2 control,
+  matching the lab's 92/96; intelligence 6/6 at LOW effort — the effort cap constrains style,
+  not arithmetic (36 seconds of deliberation on Collatz-703), making it the project's fourth
+  ceiling and EN-28. The honesty rules held under temptation: the scorecard reports the
+  ceiling as unmeasured, not as perfection. EN-27 closed; the repo's product is now real.
 - **2026-08-23** — **Pivot: the product is a skill, and the API's job is done.** After ~$23.90
   of metered spend the user redefined the goal — a Claude Code skill that evaluates and
   improves wisdom, creativity and imagination for users on prepaid plans — and asked why probes
