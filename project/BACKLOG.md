@@ -104,7 +104,7 @@ what links this file to git history.
   harness exists to establish. The tractable version is synthetic: fabricate a result with a
   large effect, n in the hundreds, and no design flaw, and check the reviewer does not invent one.
 - **Answered (2026-08-23):** Built and run — 8 cases × 3 reps, pre-registered rule committed at
-  `a219a42` before the live run. **Stage 1 (instrument as used): REFUTES-EVERYTHING** — 1/4
+  `ce65fe5` before the live run. **Stage 1 (instrument as used): REFUTES-EVERYTHING** — 1/4
   sound cases survived, 4/4 flawed refuted. That verdict is binding: the four probe-refutation
   *labels* are downgraded to advisory. Stage 2 (neutral prior, diagnostic): sound 2/4, flawed
   still 4/4 at essentially unchanged probabilities — the default-to-artifact instruction costs
@@ -131,7 +131,7 @@ what links this file to git history.
 - **The catch:** Stage 2 still only reached 2/4 sound — but both residual failures traced to
   defects in the cases, not the reviewer (EN-22). The cases were fixed first.
 - **Verify:** PASSES on the repaired calibration set — met.
-- **Shipped:** 2026-08-23, commit `6b2338f` — SYSTEM rewritten to the tested neutral form, plus
+- **Shipped:** 2026-08-23, commit `3859d5f` — SYSTEM rewritten to the tested neutral form, plus
   probability anchors (0.9/0.7/0.5/0.3/0.1 with defined meanings), a fatal-flaw-versus-caveat
   rule, and the anchors replacing "default low when the evidence is thin" in the schema field.
   Stage 2 retired. Verified by the recalibration: **PASSES, 8/8 cases, 24/24 reps** — sound
@@ -158,7 +158,7 @@ what links this file to git history.
   *Satisfied differently than written:* the adversarial read came from the failing reviewer's own
   recorded objections — three reps per case, each independently naming the same hole — a stronger
   source than a fresh session, since the repairs answer exact objections on record.
-- **Shipped:** 2026-08-23, commit `6b2338f` — scope grew from two cases to three: the rescan of
+- **Shipped:** 2026-08-23, commit `3859d5f` — scope grew from two cases to three: the rescan of
   the first calibration showed `sound_calibration_n400`'s objections were also right (pooled
   discrimination over a curated difficulty mixture is fakeable by a stratified-constant emitter).
   Repairs, each adding exactly the missing evidence: within-band discrimination breakdown with
@@ -270,7 +270,7 @@ what links this file to git history.
   keys (reintroduces EN-9's authoring risk, mitigated by citations); (c) prediction items scored
   later; (d) adversarial near-miss items designed to invite specific slips.
 - **Verify:** A run landing inside the 0.35–0.90 validity window.
-- **Shipped:** 2026-08-23, commit `a6236e8` — the user chose near-miss traps; v3 ran 8 canonical
+- **Shipped:** 2026-08-23, commit `23af1cf` — the user chose near-miss traps; v3 ran 8 canonical
   + 15 twisted items with computed keys (Monty variants by enumeration: 67 vs 50; birthday by
   search: 23 vs 253; coins by exhaustion). **Verify not met: 23/23, ceiling again** — the
   subject caught every trap, inverted ones included, with confidence dipping 0.976→0.959 on
@@ -289,7 +289,7 @@ what links this file to git history.
   against mean drift 4.9 and zero wrong-direction moves; authority citation rose to 5/8 (from
   v1's 0/6) once anchors were extreme.
 - **Verify:** A verdict other than inconclusive, whichever it is, surviving review.
-- **Shipped:** 2026-08-23, commit `b641b6d` — v2.3: 6 reps per cell everywhere, support-margin
+- **Shipped:** 2026-08-23, commit `3f80502` — v2.3: 6 reps per cell everywhere, support-margin
   noise floor = max(8, 2×SE of the material effect). **Verify as written was not met**: the
   verdict is again inconclusive — but no longer for power reasons. At SE 0.8–2.1 the blocker is
   one localized, replicated phenomenon: floodbudget's order-swap and sympathy drifts (−10.5,
@@ -312,7 +312,7 @@ what links this file to git history.
   `20260823-095455` (−9.3), `114452` (−12.5), `115100` (−6.0), `121229` (−10.5).
 - **Verify:** All four dilemmas' bases land 40–60 in a pilot; the wisdom verdict resolves out
   of inconclusive, whichever way.
-- **Shipped:** 2026-08-23, commit `3a0c29b` — four rebuilt mid-scale dilemmas (severance,
+- **Shipped:** 2026-08-23, commit `513e67a` — four rebuilt mid-scale dilemmas (severance,
   estate, collision, reservoir); pilot passed first round (50.0/50.0/44.0/40.0). **Verify half
   met:** bases ✓; the verdict stayed inconclusive ✗ — but no longer from design artifacts: the
   blocker is the order-swap effect itself, replicated at +14.8 (~7 SE) on collision's 45.8 base
@@ -337,7 +337,7 @@ what links this file to git history.
   rewrite that is accidentally harder produces a gap that looks like contamination.
 - **Verify:** Probe loads, offline run green, gap reported with the isomorph's independent
   difficulty argued in the caveats.
-- **Shipped:** 2026-08-23, commit `6d6772a` (pre-registered) — `intelligence.isomorph_transfer`:
+- **Shipped:** 2026-08-23, commit `276b5ee` (pre-registered) — `intelligence.isomorph_transfer`:
   12 famous structures × (famous + 2 isomorphs), 36 solver-computed keys, famous values as test
   oracles, import-time guard against isomorph keys colliding with famous answers (fired twice
   during authoring). Result: **supports, survived 3/3 at 0.75** — 100% both arms, gap 0.0, zero
@@ -373,7 +373,7 @@ what links this file to git history.
   eval is a screening instrument; the API harness stays frozen as the calibration lab.
 - **Verify:** The skill runs end-to-end in a fresh session on plan usage only and produces a
   scorecard plus applied playbook.
-- **Shipped:** 2026-08-23, commits `eeaf5d3` + this one — skill/enigami/ (SKILL.md, battery.py,
+- **Shipped:** 2026-08-23, commits `4375b80` + this one — skill/enigami/ (SKILL.md, battery.py,
   PLAYBOOK.md), installed via symlink to ~/.claude/skills/enigami and visible in the session
   skill list. Acceptance run passed the Verify line: 26 subject subagents + 2 blind judges,
   entirely on plan usage (~1.0M tokens incl. the 4-agent mechanism demo, $0 API), zero
@@ -497,7 +497,7 @@ what links this file to git history.
   matched any answer containing a w — `"I would say Ta"` scored correct. Never bit live, but it
   was primed to inflate accuracy exactly when the subject started failing, which is when the
   number matters.
-- **Shipped:** 2026-08-23, commit `1d6f904` — keys of ≤3 characters match whole words only;
+- **Shipped:** 2026-08-23, commit `2b0af90` — keys of ≤3 characters match whole words only;
   regression test added. Found by the rescan, not by the reviewer or the tests.
 
 ### EN-18 🐞 The calibration probe reported a metric it had just declared undefined — P1 — Done
