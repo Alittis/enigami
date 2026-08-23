@@ -1,7 +1,7 @@
 # Free-text reasoning inside an invented rule, with a leakage arm (v2)
 
-**Probe** `imagination.counterfactual_world` · **Domain** imagination · **Run** `20260823-114706-imagination.counterfactual_world`  
-**Cost** $0.687 across 57 calls · **Scoring** blind-judge
+**Probe** `imagination.counterfactual_world` · **Domain** imagination · **Run** `20260823-115321-imagination.counterfactual_world`  
+**Cost** $0.980 across 98 calls · **Scoring** blind-judge
 
 ## Pre-registered before the run
 
@@ -15,7 +15,4 @@
 
 ## Result
 
-**The run failed.** `Response did not validate against FreeAnswer: 1 validation error for FreeAnswer
-  Invalid JSON: EOF while parsing a string at line 1 column 88 [type=json_invalid, input_value='{"answer": "Concentratio...ly aggregative: estates', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
-{"answer": "Concentration tends to rise, because the rule is purely aggregative: estates`
+**The run failed.** `Refused (bio) — cannot score this call.`

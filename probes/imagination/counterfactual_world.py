@@ -367,23 +367,31 @@ class CounterfactualWorld(Probe):
                 f"STATEMENT Y: {pair[1][1]}"
             )
             from enigami.client import ProbeError
-            try:
-                parsed, _ = ctx.judge.parse(
-                    prompt, Match, system=GRADER_SYSTEM, max_tokens=4000,
-                    label=f"grade:{row['arm']}:{row['world']}:{row['qi']}",
-                )
-            except ProbeError:
-                parsed, _ = ctx.judge.parse(
-                    prompt, Match, system=GRADER_SYSTEM, max_tokens=4000,
-                    label=f"grade:{row['arm']}:{row['world']}:{row['qi']}:retry",
-                )
-            picked = "neither" if parsed.asserts == "neither" else pair["XY".index(parsed.asserts)][0]
+            parsed = None
+            for attempt in range(2):
+                try:
+                    parsed, _ = ctx.judge.parse(
+                        prompt, Match, system=GRADER_SYSTEM, max_tokens=4000,
+                        label=f"grade:{row['arm']}:{row['world']}:{row['qi']}:a{attempt}",
+                    )
+                    break
+                except ProbeError as e:
+                    err = str(e)
+            if parsed is None:
+                ctx.log("grading_excluded", arm=row["arm"], world=row["world"], qi=row["qi"],
+                        error=err[:200])
+                picked = "ungraded"
+            else:
+                picked = "neither" if parsed.asserts == "neither" else pair["XY".index(parsed.asserts)][0]
             return {**{k: row[k] for k in ("world", "arm", "qi", "depth")},
                     "answer": row["answer"], "picked": picked}
 
         graded = ctx.map(grade, answered)
         ctx.log("graded", rows=[{k: r[k] for k in ("world", "arm", "qi", "depth", "picked")}
                                 for r in graded])
+
+        ungraded = sum(r["picked"] == "ungraded" for r in graded)
+        graded = [r for r in graded if r["picked"] != "ungraded"]
 
         def arm_rows(arm):
             return [r for r in graded if r["arm"] == arm]
@@ -416,6 +424,7 @@ class CounterfactualWorld(Probe):
         metrics = {
             "n_per_arm_effective": {"altered": n_alt, "control": n_ctl, "omitted": n_omit},
             "n_excluded": excluded,
+            "n_ungraded": ungraded,
             "altered_accuracy": round(alt_acc, 3),
             "control_accuracy": round(ctl_acc, 3),
             "omitted_cf_rate": round(omit_rate, 3),

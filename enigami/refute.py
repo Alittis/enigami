@@ -101,7 +101,16 @@ def review(ctx, probe, finding, reps: int = REVIEW_REPS):
     Returns (representative, survived, all_reps): the representative is the median-p rep,
     so the stored refutation text is never an outlier.
     """
-    all_reps = ctx.map(lambda _i: challenge(ctx, probe, finding), list(range(reps)))
+    def one(_i):
+        try:
+            return challenge(ctx, probe, finding)
+        except Exception as e:  # noqa: BLE001 - one truncated/refused rep must not kill the review
+            ctx.log("review_rep_failed", error=str(e)[:200])
+            return None
+
+    all_reps = [r for r in ctx.map(one, list(range(reps))) if r is not None]
+    if len(all_reps) < 2:
+        raise RuntimeError(f"review needs at least 2 successful reps, got {len(all_reps)}")
     votes = [survives(r) for r in all_reps]
     survived = sum(votes) * 2 > len(votes)
     representative = sorted(all_reps, key=lambda r: r.survives_probability)[len(all_reps) // 2]
@@ -132,7 +141,7 @@ def challenge(ctx, probe, finding, extra_evidence: dict[str, Any] | None = None,
         + "\n\nIdentify the strongest reason this result should not be believed."
     )
     refutation, reply = ctx.judge.parse(
-        prompt, Refutation, system=system or SYSTEM, effort="high", max_tokens=4000, label=f"refute:{probe.id}"
+        prompt, Refutation, system=system or SYSTEM, effort="high", max_tokens=8000, label=f"refute:{probe.id}"
     )
     ctx.log(
         "refutation",
