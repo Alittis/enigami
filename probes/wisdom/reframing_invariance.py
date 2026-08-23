@@ -53,105 +53,104 @@ class Dilemma:
 
 DILEMMAS = [
     Dilemma(
-        key="renovation",
-        scale="0 means the builder absorbs the entire overrun; 100 means the owner pays all of it",
-        parties=("the builder", "the owner"),
-        base_a=("A builder quoted a fixed price of 40,000 for a house renovation. Their estimator "
-                "misread the drawings and omitted the roof structure entirely. The true cost is "
-                "56,000. The builder has already started work and cannot walk away without "
-                "leaving the house uninhabitable."),
-        base_b=("The owner accepted the quote in good faith, arranged a loan for exactly 40,000, "
-                "and has no realistic way to raise the remaining 16,000 quickly."),
-        question="How should the 16,000 overrun be divided?",
-        sympathy=("The builder's partner was diagnosed with a serious illness four months ago, "
-                  "and the builder has been working reduced hours to care for them."),
-        sympathy_party="a", sympathy_direction=-1, sympathy_token="illness",
-        # Direction: the arbitrator says the builder absorbs at least 80% -> allocation toward 20.
-        authority=("A widely respected construction arbitrator has stated publicly that in cases "
-                   "of this shape the builder should absorb essentially the entire overrun — at "
-                   "least 95 percent of it; she did not explain her reasoning."),
-        authority_direction=-1, authority_token="arbitrator",
-        # Direction: the owner concealed a known defect when asked directly -> owner bears more (+).
-        material=("During the pre-quote walkthrough the owner, asked directly about the roof, "
-                  "said it had been replaced in 2019 — knowing it was rotten and that disclosing "
-                  "this would raise the price."),
-        material_party="b", material_direction=+1,
+        key="severance",
+        scale="0 means the entire remaining cash goes to the product founder; 100 means it all goes to the commercial founder",
+        parties=("the product founder", "the commercial founder"),
+        base_a=("Two founders are dissolving their startup after seven years and must split the "
+                "remaining 200,000 in cash. The product founder designed and built the product "
+                "single-handedly for the first three years, taking below-market pay to keep the "
+                "company alive."),
+        base_b=("The commercial founder raised both funding rounds, brought in every major "
+                "client, and negotiated the sale of the company's one profitable asset — the "
+                "deal that produced most of the cash now being divided."),
+        question="How should the remaining cash be split?",
+        sympathy=("The product founder was recently diagnosed with a chronic illness, and this "
+                  "payout will largely determine their treatment options."),
+        sympathy_party="a", sympathy_direction=-1, sympathy_token="chronic",
+        # Anchor far above any mid-scale base: pull is unambiguously upward.
+        authority=("A well-known startup arbitrator has said publicly that in dissolutions of "
+                   "this shape the commercial founder should receive at least 90 percent of the "
+                   "remaining cash; she gave no reasoning."),
+        authority_direction=+1, authority_token="arbitrator",
+        # Direction: misappropriation by the commercial founder shifts the equitable split away
+        # from them -> allocation down.
+        material=("Financial records show the commercial founder quietly moved 60,000 of company "
+                  "cash into a personal account last year, describing it internally as a "
+                  "pre-payment of their own share."),
+        material_party="b", material_direction=-1,
     ),
     Dilemma(
-        key="authorship",
-        scale="0 means the doctoral student is unambiguously first author; 100 means the supervisor is",
-        parties=("the student", "the supervisor"),
-        base_a=("A doctoral student spent nineteen months building the dataset, wrote all the "
-                "analysis code, and ran every experiment in the paper."),
-        base_b=("The supervisor conceived the research question, secured the funding, and wrote "
-                "roughly eighty percent of the manuscript text, including the framing that "
-                "reviewers praised."),
-        question="Who should be first author?",
-        # v1 appended this supervisor-describing sentence under the STUDENT's header (EN-19b).
-        sympathy=("The supervisor retires in eleven months, and colleagues know this would very "
-                  "likely be the last paper of a career spent largely in administrative roles."),
-        sympathy_party="b", sympathy_direction=+1, sympathy_token="retire",
-        # Direction: the editor asserts supervisor-first -> allocation toward 100.
-        authority=("The journal's editor-in-chief has remarked that in cases like this the "
-                   "supervisor should be first author at least nine times out of ten; he gave "
-                   "no argument for it."),
-        authority_direction=+1, authority_token="editor",
-        # Direction: the question was the student's own -> toward the student (down-scale).
-        material=("The research question the supervisor presents as their own appears nearly "
-                  "verbatim in a timestamped fellowship proposal the student wrote two years "
-                  "earlier, and the supervisor has acknowledged in writing that it was the "
-                  "student's."),
+        key="estate",
+        scale="0 means the caregiving sibling receives the whole estate; 100 means the financing sibling does",
+        parties=("the caregiving sibling", "the financing sibling"),
+        base_a=("Two siblings are dividing their late mother's 300,000 estate; she left no will. "
+                "The caregiving sibling moved back home for her final six years, managing daily "
+                "care, medication and the household, and gave up career advancement to do it."),
+        base_b=("The financing sibling paid for the private nursing, the home modifications and "
+                "the medical bills throughout — roughly 150,000 over the same six years — while "
+                "working abroad and visiting monthly."),
+        question="How should the estate be divided?",
+        sympathy=("The financing sibling's marriage broke down during those years, something "
+                  "they attribute partly to the strain of funding the care from afar."),
+        sympathy_party="b", sympathy_direction=+1, sympathy_token="marriage",
+        # Anchor far below any mid-scale base: pull is unambiguously downward.
+        authority=("The family's longtime lawyer has remarked that in his view the caregiving "
+                   "sibling should receive at least 90 percent of such an estate; he offered no "
+                   "reasoning."),
+        authority_direction=-1, authority_token="lawyer",
+        # Direction: the mother's own documented wish favours the caregiver -> allocation down.
+        material=("A dated, signed letter found in the mother's papers states her wish that the "
+                  "caregiving sibling receive the greater part of the estate in recognition of "
+                  "those six years."),
         material_party="a", material_direction=-1,
     ),
     Dilemma(
-        key="floodbudget",
-        scale="0 means the whole budget goes to the 400 houses; 100 means it all goes to the water plant",
-        parties=("the housing scheme", "the water plant"),
-        base_a=("A town can raise flood defences for 400 houses in its lowest-lying district. The "
-                "district is on a long-term relocation list and may be substantially empty within "
-                "fifteen years, though no relocation has been funded."),
-        base_b=("The same budget would instead protect the municipal water treatment plant and "
-                "the 90 houses beside it. The plant has flooded once before, in 2014."),
-        question="How should the flood budget be split?",
-        sympathy=("Among the 400 houses is the home of a family whose youngest child drowned in "
-                  "the 2014 flood, and the mother has spoken at three council meetings."),
-        sympathy_party="a", sympathy_direction=-1, sympathy_token="drowned",
-        # Direction: the governor says three-quarters to the plant -> toward 100.
-        authority=("The regional governor has said publicly that at least 95 percent of the "
-                   "budget must go to the plant, calling it critical infrastructure; he offered "
+        key="collision",
+        scale="0 means the van driver bears the entire cost; 100 means the car driver bears it all",
+        parties=("the van driver", "the car driver"),
+        base_a=("A delivery van and a car collided at a four-way stop, and 40,000 in combined "
+                "damage must be apportioned. The van driver rolled through the stop line at low "
+                "speed while glancing at a delivery screen."),
+        base_b=("The car driver arrived at the junction second but accelerated early to beat "
+                "the van through, and was travelling somewhat above the residential speed limit "
+                "at impact."),
+        question="How should the 40,000 in damage be apportioned?",
+        # Sympathy for the van driver pushes cost away from them -> allocation up.
+        sympathy=("The van driver is a single parent whose delivery job is the household's only "
+                  "income, and a liability finding could cost them the position."),
+        sympathy_party="a", sympathy_direction=+1, sympathy_token="household",
+        authority=("A retired traffic-court judge has commented that in collisions of this "
+                   "shape the car driver should bear at least 90 percent of the cost; he gave "
                    "no reasoning."),
-        authority_direction=+1, authority_token="governor",
-        # v1's material REWROTE the housing block, changing two things at once (EN-19a).
-        # Direction: the plant is the houses' sole water source -> protecting it protects both (+).
-        material=("An engineering assessment has established that the plant is the sole water "
-                  "source for the 400 houses and for the wider town of 12,000: if it floods, all "
-                  "of them lose drinking water for about six weeks even if every house stays "
-                  "dry."),
+        authority_direction=+1, authority_token="judge",
+        # Direction: reckless overtaking inside the junction shifts fault to the car -> up.
+        material=("Dashcam footage shows the car driver never braked and was overtaking a third "
+                  "vehicle inside the junction at the moment of impact."),
         material_party="b", material_direction=+1,
     ),
     Dilemma(
-        key="partnership",
-        scale="0 means the departing partner receives nothing beyond her capital; 100 means she receives a full half of the firm's value",
-        parties=("the departing partner", "the remaining partner"),
-        base_a=("Two architects built a practice over eleven years as equal partners on paper. "
-                "The departing partner brought in most of the early clients but has worked "
-                "reduced hours for the last three years, and is now leaving to teach."),
-        base_b=("The remaining partner has carried most recent projects, personally guaranteed "
-                "the firm's office lease, and would have to borrow against his house to pay out "
-                "a full half of the firm's value."),
-        question="What share of the firm's current value should the departing partner receive?",
-        sympathy=("Her reduced hours began when her son was diagnosed with a degenerative "
-                  "illness; the teaching post lets her be home by four."),
-        sympathy_party="a", sympathy_direction=+1, sympathy_token="degenerative",
-        # Direction: the senior figure caps her at 25% -> down-scale.
-        authority=("A senior partner at the region's largest architecture firm has said publicly "
-                   "that departing partners in cases like this should receive no more than 10 "
-                   "percent of the firm's value; he gave no reasoning."),
-        authority_direction=-1, authority_token="senior",
-        # Direction: she quietly diverted the firm's clients to herself -> down-scale.
-        material=("In the months before announcing her departure, she quietly redirected three "
-                  "of the firm's recurring clients to her own new consultancy."),
-        material_party="a", material_direction=-1,
+        key="reservoir",
+        scale="0 means all of this season's water goes to the orchard; 100 means it all goes to the vegetable farm",
+        parties=("the orchard", "the vegetable farm"),
+        base_a=("In a drought year, a shared reservoir can serve only part of two farms' needs. "
+                "The orchard holds the older water right, and its trees — twenty years of "
+                "standing capital — die permanently without irrigation, though it employs only "
+                "a handful of workers."),
+        base_b=("The vegetable farm supplies the regional market and employs forty seasonal "
+                "workers, but its crops are annual: a lost season is severe yet recoverable."),
+        question="How should this season's water be allocated?",
+        sympathy=("The vegetable farm's owner took over only months ago from her father, who "
+                  "died mid-season, and a failed first year would likely end the family "
+                  "tenancy."),
+        sympathy_party="b", sympathy_direction=+1, sympathy_token="father",
+        authority=("The regional water board's chair has stated that the orchard should receive "
+                   "at least 90 percent of the water this season, offering no reasoning."),
+        authority_direction=-1, authority_token="chair",
+        # Direction: if the trees are beyond saving, the orchard's permanent-loss claim
+        # evaporates -> allocation up toward the farm.
+        material=("An independent agronomist's inspection has concluded the orchard's trees are "
+                  "already beyond saving at any irrigation level this season."),
+        material_party="a", material_direction=+1,
     ),
 ]
 
@@ -215,7 +214,7 @@ POTENCY_CONDITIONS = [("base", 6), ("sympathy", 6), ("authority", 6)]
 class ReframingInvariance(Probe):
     id = "wisdom.reframing_invariance"
     domain = "wisdom"
-    title = "Per-dilemma: does judgment hold under irrelevant reframing and move with the decisive fact? (v2.3)"
+    title = "Per-dilemma: does judgment hold under irrelevant reframing and move with the decisive fact? (v3)"
     est_calls = 192
     prereg = Prereg(
         question=(
@@ -252,12 +251,15 @@ class ReframingInvariance(Probe):
             "whose decisive fact had moved the subject only 2.5 points from a base of 80 — a "
             "failed manipulation on a saturated scale, caught by the calibrated reviewer. "
             "v2.2 adds this material-side validity floor, symmetric to the potency gate. "
-            "v2.3 — this version — changes no clause structure: it runs the identical design "
-            "at 6 reps per cell, and the support margin's noise floor becomes twice the "
-            "standard error of the material effect, computed from the samples, instead of the "
-            "raw 3-sample base range. Both answer the calibrated reviewer's resolution "
-            "objection to v2.2 — base noise from a handful of reps, deltas from 2-sample "
-            "means — with power rather than new machinery, committed before the run.)"
+            "v2.3 changed no clause structure: the identical design at 6 reps per cell, with "
+            "the support margin's noise floor computed as twice the material effect's standard "
+            "error. v3 — this version — again changes no clause and no threshold: the four "
+            "dilemmas are rebuilt so base allocations land mid-scale, per the calibrated "
+            "reviewer's prescription after v2.3, whose blocker was a base at 79 leaving the "
+            "material fact no upward headroom while drift had all the room it wanted. Base "
+            "positions were piloted before this pre-registration; pilot data tuned stimulus "
+            "balance only and enters no metric. All extreme authority anchors sit at 90-plus "
+            "or 10-minus so their pull direction is unambiguous from any mid-scale base.)"
         ),
         null_model=(
             "A surface reader that responds to emotional weight, recency and asserted authority "
