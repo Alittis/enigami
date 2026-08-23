@@ -346,6 +346,34 @@ what links this file to git history.
   novel-structure puzzles — a candidate future item, not this one.
 
 
+### EN-27 ✨ The product is a skill: evaluate and improve W/C/I in-session — P1 — Doing
+
+- **Problem:** The goal crystallised on 2026-08-23: enigami's deliverable is a Claude Code
+  **skill** that evaluates and improves wisdom, creativity and imagination for users working
+  with Claude on prepaid plans — not an open-ended API research program. The skill's users have
+  no API keys, so the product must run in-session; its remaining development therefore moves
+  in-session too (fresh-context subagents on plan usage, $0 marginal API cost). The $23.90 of
+  API spend to date is the R&D that bought the calibrated method and the evidence base the
+  skill will teach.
+- **Want:** A skill with three parts. (1) A compact eval battery run via subagents — one
+  subagent per item, fresh context = independence — e.g. order-swap vignette pairs, a
+  creativity diversity sample, imagination free-response with a leakage check; ≤ ~30 calls per
+  run. (2) A scorecard comparing the user's readings against this repo's baselines. (3) An
+  improvement playbook applying the measured findings as prompt patterns: judge in both orders
+  and average (order effects of 10–15 points, twice replicated); ask for the first idea to be
+  discarded (novelty push added ideas and themes); restate invented rules explicitly (92–100%
+  adherence); strip or flag unargued authority claims (moderate anchors dragged 16.7 points;
+  extreme named ones were resisted); lead with decisive facts (12/12 right-direction).
+- **Mechanism demo (2026-08-23):** the collision order-swap item ran as 4 in-session subagents
+  (2 per order): van-first 35/55, car-first 50/55 — direction matches the API finding (car
+  presented first bears more), magnitude unresolved at n=2, ~31k plan tokens per call, $0 API.
+- **The catch:** In-session subjects carry the Claude Code system prompt — ecologically right
+  for the skill's purpose but not comparable 1:1 with the bare-API baselines; subagents have no
+  structured-output enforcement (lenient parsing needed); plan caps bound battery size. The
+  eval is a screening instrument; the API harness stays frozen as the calibration lab.
+- **Verify:** The skill runs end-to-end in a fresh session on plan usage only and produces a
+  scorecard plus applied playbook.
+
 ### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
 
 - **Problem:** Twice-replicated across independent designs and dilemmas: the order in which two
@@ -488,6 +516,16 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **Pivot: the product is a skill, and the API's job is done.** After ~$23.90
+  of metered spend the user redefined the goal — a Claude Code skill that evaluates and
+  improves wisdom, creativity and imagination for users on prepaid plans — and asked why probes
+  cannot run as sessions inside the desktop app. They can: a 4-subagent mechanism demo ran the
+  collision order-swap item in-session at $0 API (van-first 35/55, car-first 50/55 — direction
+  consistent with the API finding, n=2 noise acknowledged). Decisive argument: the skill's
+  users have no API keys, so the deliverable must run in-session — and therefore so does the
+  remaining development. EN-27 filed as the product item; EN-26/EN-3/EN-4/EN-5 will run under
+  its in-session runner; the API harness freezes as the calibration lab whose findings are the
+  playbook's evidence. Recorded in global memory (enigami-skill-pivot).
 - **2026-08-23** — **EN-25: the order-swap effect survives de-confounding — bigger, on a fresh
   dilemma, with headroom everywhere.** Wisdom v3 rebuilt all four dilemmas for mid-scale bases;
   the pilot passed first round (50.0/50.0/44.0/40.0, $0.18) and the full run cost $2.35 against

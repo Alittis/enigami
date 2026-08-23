@@ -8,7 +8,7 @@
   "openQuestions": [
     "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-23 (EN-25 done, ~$23.9 total). Wisdom's answer is a shape, not a verdict: facts dominate and always point right; sympathy does nothing; extreme named authority is resisted; presentation order moves some dilemmas 10-15 points (EN-26 files it as its own probe with a pre-registered primacy-penalty hypothesis, ~$1.5+review). Standing supports: imagination 3/3@0.78, creativity 2/3@0.62, isomorph-transfer 3/3@0.75. Open: EN-26, EN-3 (sycophancy, needs multi-turn Subject), EN-4, EN-5, EN-7, EN-8. Read project/ARCHITECTURE.md section 2 and findings/INDEX.md first.",
+  "nextStep": "STATE AS OF 2026-08-23 (pivot). The deliverable is a Claude Code skill (EN-27): compact in-session eval battery via subagents + scorecard + improvement playbook built from the measured findings. No further metered-API runs without an explicit ask; the API harness is the frozen calibration lab. Remaining probes (EN-26 order-swap, EN-3 sycophancy, EN-4, EN-5) run under EN-27's in-session runner. Mechanism demo done: 4 subagents, $0 API, direction consistent with the API order-swap finding. Read project/BACKLOG.md EN-27 and findings/INDEX.md first.",
   "repo": {
     "remote": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION (no GitHub remote created yet)",
     "visibility": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION"
@@ -109,5 +109,11 @@
     "intelligence.calibration": "CLOSED by user decision (c): unmeasurable at high effort stands as the result of record - three ceilings (19/19, 42/42, 23/23), guard reading survived review twice; trap resistance 15/15 kept as a directional finding",
     "wisdom.reframing_invariance": "v3 inconclusive, SURVIVED 3/3 at 0.60 - facts dominate 4/4 (12 straight right-direction), sympathy inert, extreme authority named 23/24 and resisted; blocker is the twice-replicated order-swap effect (+14.8 on mid-scale base), promoted to EN-26",
     "intelligence.isomorph_transfer": "SUPPORTS, survived 3/3 at 0.75 - 100% famous / 100% isomorph, gap 0.0, zero famous-answer intrusions; method transfers; successor construct: method-derivation vs method-retrieval"
+  },
+  "pivot": {
+    "date": "2026-08-23",
+    "product": "Claude Code skill: evaluate + improve wisdom/creativity/imagination in-session",
+    "runtime": "in-session subagents on plan usage; metered API frozen as the calibration lab",
+    "apiSpendFinal": 23.9
   }
 }
