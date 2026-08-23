@@ -80,8 +80,9 @@ def write_finding(result: dict) -> Path | None:
         lines += [
             "## Adversarial review",
             "",
-            f"A hostile reviewer, shown the design with the subject anonymised, was asked to "
-            f"break this finding. It **{verdict}**.",
+            f"A methodological reviewer, shown the design with the subject anonymised, was "
+            f"asked to break this finding. Instrument: {result.get('reviewer') or 'v1 artifact-prior (retired; failed its calibration)'}. "
+            f"The finding **{verdict}**.",
             "",
             f"- **Survives with probability** {refutation['survives_probability']:.2f}",
             f"- **Judged an artifact** {refutation['is_likely_artifact']}",
@@ -93,6 +94,16 @@ def write_finding(result: dict) -> Path | None:
             f"**What would settle it.** {refutation['what_would_settle_it']}",
             "",
         ]
+        history = result.get("review_history") or []
+        if history:
+            prev = history[-1]
+            prev_p = (prev.get("refutation") or {}).get("survives_probability")
+            lines += [
+                f"_This reading supersedes {len(history)} earlier one(s) — most recently the "
+                f"retired artifact-prior reviewer at survival {prev_p}. Full history in the "
+                "transcript's result.json._",
+                "",
+            ]
 
     elif result.get("refutation_error"):
         lines += [

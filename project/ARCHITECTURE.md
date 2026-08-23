@@ -64,7 +64,7 @@ enigami/            harness
   refute.py         anonymised adversarial review
   runner.py         execution, transcripts, prereg-ordering verification
   report.py         findings/*.md, refuses offline runs
-  cli.py            list · run · report · verify · doctor
+  cli.py            list · run · report · verify · calibrate · rereview · doctor
 probes/<domain>/    one module per probe, exporting PROBE
 transcripts/        raw runs, gitignored (manifest, events, calls, result)
 findings/           committed markdown, one file per probe plus INDEX.md

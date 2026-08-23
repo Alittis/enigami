@@ -18,7 +18,7 @@ from typing import Any
 
 from . import config, refute
 from .client import ProbeError, Subject
-from .probe import Context, Finding, Probe
+from .probe import Context, Finding, Prereg, Probe
 
 
 @dataclass
@@ -142,6 +142,7 @@ class Run:
             "finding": result.finding.as_dict() if result.finding else None,
             "refutation": result.refutation.model_dump() if result.refutation else None,
             "survived_refutation": result.survived,
+            "reviewer": refute.REVIEWER if result.refutation else None,
         }
         (self.dir / "result.json").write_text(json.dumps(payload, indent=2, default=str))
         (self.dir / "calls.json").write_text(
@@ -164,6 +165,94 @@ def latest_results() -> list[dict]:
         if probe not in by_probe or rid > by_probe[probe][0]:
             by_probe[probe] = (rid, data)
     return [d for _, d in sorted(by_probe.values(), key=lambda x: x[0], reverse=True)]
+
+
+def latest_live_runs(root: Path | None = None) -> dict[str, tuple[Path, dict]]:
+    """Newest live run that produced a finding, per probe id: {probe: (result_path, data)}."""
+    root = root or config.TRANSCRIPTS
+    picked: dict[str, tuple[str, Path, dict]] = {}
+    for path in sorted(root.glob("*/result.json")):
+        try:
+            data = json.loads(path.read_text())
+        except json.JSONDecodeError:
+            continue
+        if data.get("offline") or not data.get("finding"):
+            continue
+        probe, rid = data.get("probe", ""), data.get("run_id", "")
+        if probe and (probe not in picked or rid > picked[probe][0]):
+            picked[probe] = (rid, path, data)
+    return {k: (p, d) for k, (_, p, d) in picked.items()}
+
+
+class _RecordedProbe:
+    """The probe-shaped view of a recorded run: an id and its stored pre-registration."""
+
+    def __init__(self, probe_id: str, prereg: Prereg):
+        self.id = probe_id
+        self.prereg = prereg
+
+
+def rereview(targets: list[str] | None = None, *, offline: bool = False,
+             root: Path | None = None) -> list[dict]:
+    """Redo the review reading on the newest recorded live run of each probe.
+
+    The subject's recorded responses stand untouched — only the refutation is re-run, with
+    the current reviewer. The superseded review moves into review_history in the run's
+    result.json: a re-review updates the reading, never the record it read. The `offline`
+    flag exists for tests against fabricated records and is not exposed on the CLI, because
+    a stub review overwriting a real reading would corrupt the record.
+    """
+    runs = latest_live_runs(root)
+    wanted = list(targets or ["all"])
+    if "all" not in wanted:
+        known = set(runs) | {d.get("domain") for _, d in runs.values()}
+        for t in wanted:
+            if t not in known:
+                raise KeyError(f"Unknown probe or domain {t!r}. Recorded: {', '.join(sorted(runs))}")
+        runs = {pid: v for pid, v in runs.items() if pid in wanted or v[1].get("domain") in wanted}
+
+    judge = Subject(config.JUDGE_MODEL, offline=offline)
+    out: list[dict] = []
+    for probe_id in sorted(runs):
+        path, data = runs[probe_id]
+        with open(path.parent / "events.jsonl", "a") as events:
+            def log(event: str, d: dict | None = None, **kw) -> None:
+                events.write(json.dumps({"t": _now(), "event": event, **(d or {}), **kw},
+                                        default=str) + "\n")
+                events.flush()
+
+            ctx = Context(judge, judge, log, workers=1)
+            probe_stub = _RecordedProbe(probe_id, Prereg(**data["preregistration"]))
+            finding = Finding(**data["finding"])
+            cost_before = judge.total_cost
+            refutation = refute.challenge(ctx, probe_stub, finding)
+
+            prev = data.get("refutation") or {}
+            row = {
+                "probe": probe_id,
+                "run_id": data.get("run_id", ""),
+                "before": "survived" if data.get("survived_refutation") else "refuted",
+                "p_before": prev.get("survives_probability"),
+                "after": "survived" if refute.survives(refutation) else "refuted",
+                "p_now": refutation.survives_probability,
+                "cost_usd": round(judge.total_cost - cost_before, 4),
+            }
+            data.setdefault("review_history", []).append({
+                "refutation": data.get("refutation"),
+                "survived_refutation": data.get("survived_refutation"),
+                "reviewer": data.get("reviewer",
+                                     "v1 artifact-prior (retired; failed calibration 2026-08-23)"),
+                "reviewed_at": data.get("rereviewed_at") or data.get("finished_at"),
+            })
+            data["refutation"] = refutation.model_dump()
+            data["survived_refutation"] = refute.survives(refutation)
+            data["reviewer"] = refute.REVIEWER
+            data["rereviewed_at"] = _now()
+            path.write_text(json.dumps(data, indent=2, default=str))
+            log("rereview", probe=probe_id,
+                **{k: row[k] for k in ("before", "p_before", "after", "p_now")})
+        out.append(row)
+    return out
 
 
 def verify_ordering(run_dir: Path) -> tuple[bool, str]:

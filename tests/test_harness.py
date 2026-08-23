@@ -274,3 +274,35 @@ def test_offline_calibration_writes_no_report_and_no_result_json():
     # never result.json: latest_results() must not pick calibration up as a finding
     assert not (run_dir / "result.json").exists()
     assert report_path.exists() == existed_before
+
+
+def test_rereview_preserves_history_and_swaps_reading(tmp_path):
+    """A re-review must supersede the reading while keeping the old one in review_history."""
+    import json as _json
+
+    from enigami import runner
+
+    run = tmp_path / "20260101-000000-x.y"
+    run.mkdir()
+    old_ref = {"strongest_alternative_explanation": "a", "specific_flaw": "b",
+               "is_likely_artifact": True, "survives_probability": 0.2,
+               "what_would_settle_it": "c"}
+    (run / "result.json").write_text(_json.dumps({
+        "run_id": "20260101-000000-x.y", "probe": "x.y", "domain": "wisdom",
+        "offline": False, "finished_at": "2026-01-01T00:00:00+00:00",
+        "preregistration": Prereg(**REAL).as_dict(),
+        "finding": Finding(verdict="supports", headline="h").as_dict(),
+        "refutation": old_ref, "survived_refutation": False,
+    }))
+
+    rows = runner.rereview(["all"], offline=True, root=tmp_path)
+
+    assert len(rows) == 1
+    assert rows[0]["before"] == "refuted" and rows[0]["after"] == "survived"
+    data = _json.loads((run / "result.json").read_text())
+    assert len(data["review_history"]) == 1
+    assert data["review_history"][0]["refutation"] == old_ref
+    assert "retired" in data["review_history"][0]["reviewer"]
+    assert data["refutation"]["strongest_alternative_explanation"] == "offline-stub"
+    assert data["survived_refutation"] is True
+    assert "calibrated" in data["reviewer"]

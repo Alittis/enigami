@@ -106,6 +106,29 @@ def cmd_verify(args) -> int:
     return 1 if bad else 0
 
 
+def cmd_rereview(args) -> int:
+    from .runner import rereview
+
+    if not config.have_credentials():
+        print("No Anthropic credentials found. Run ./deploy/scripts/setup-anthropic-env.sh", file=sys.stderr)
+        return 1
+    try:
+        rows = rereview(args.targets)
+    except KeyError as e:
+        print(e, file=sys.stderr)
+        return 2
+    if not rows:
+        print("No recorded live runs match.", file=sys.stderr)
+        return 1
+    for r in rows:
+        print(f"  {r['probe']:36} {r['before']} (p {r['p_before']}) -> {r['after']} (p {r['p_now']})")
+    written, _ = report.regenerate()
+    total = sum(r["cost_usd"] for r in rows)
+    print(f"\nRe-reviewed {len(rows)} finding(s) with the current reviewer (${total:.3f}); "
+          f"{written} finding page(s) regenerated.")
+    return 0
+
+
 def cmd_calibrate(args) -> int:
     from . import reviewer_control as rc
 
@@ -187,6 +210,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--reps", type=int, default=3)
     p.add_argument("--offline", action="store_true")
     p.set_defaults(fn=cmd_calibrate)
+
+    p = sub.add_parser("rereview", help="redo the review reading on recorded findings with the current reviewer")
+    p.add_argument("targets", nargs="*", default=["all"])
+    p.set_defaults(fn=cmd_rereview)
 
     p = sub.add_parser("doctor", help="check environment, credentials and probe loading")
     p.add_argument("--ping", action="store_true", help="make one cheap live API call")

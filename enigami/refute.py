@@ -55,6 +55,9 @@ class Refutation(BaseModel):
     )
 
 
+#: Stamped into every run record so any reading can be traced to the instrument that made it.
+REVIEWER = "v2 neutral-prior, anchored probabilities — calibrated 2026-08-23, PASSES 8/8"
+
 SYSTEM = (
     "You are a rigorous methodological reviewer. You are reviewing an experiment run on an "
     "unnamed AI system, referred to as System S.\n\n"
