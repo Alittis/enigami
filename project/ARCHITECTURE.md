@@ -93,7 +93,7 @@ Verified against the `claude-api` skill and `anthropic` 1.0.0 on 2026-08-23.
 
 ## 7. Cost
 
-Roughly 114 API calls for a full run, mostly short. At Opus 5 rates ($5/$25 per MTok) the
+Roughly 305 API calls for a full v2 run (imagination's free-text arms plus blind grading account for half), mostly short. At Opus 5 rates ($5/$25 per MTok) the
 expected cost is a few dollars. `enigami list` prints per-probe call estimates; every run
 records actual spend in `result.json`. Batch API (50% cheaper) is not used — tracked as `EN-8`.
 

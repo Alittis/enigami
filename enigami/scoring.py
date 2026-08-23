@@ -117,3 +117,56 @@ def mean_pairwise_jaccard(texts: Sequence[str]) -> float:
     if not pairs:
         return float("nan")
     return sum(jaccard(texts[i], texts[j]) for i, j in pairs) / len(pairs)
+
+
+def fisher_exact_two_tail(a_success: int, a_total: int, b_success: int, b_total: int) -> float:
+    """Two-tailed Fisher exact p for a 2x2 table, summing tables as or less probable.
+
+    Same method that verified the v1 imagination review's claim (12/12 vs 10/12 -> 0.4783).
+    """
+    from math import comb
+
+    successes = a_success + b_success
+    n = a_total + b_total
+
+    def p_of(k: int) -> float:
+        if k < 0 or k > a_total or successes - k < 0 or successes - k > b_total:
+            return 0.0
+        return comb(successes, k) * comb(n - successes, a_total - k) / comb(n, a_total)
+
+    observed = p_of(a_success)
+    return sum(p for k in range(0, min(a_total, successes) + 1)
+               if (p := p_of(k)) <= observed + 1e-12)
+
+
+def bootstrap_ci(pairs, stat, n_resamples: int = 2000, seed: int = 1729,
+                 lo: float = 2.5, hi: float = 97.5):
+    """Seeded percentile bootstrap CI for `stat` over (confidence, correct) pairs.
+
+    Resamples on which the statistic is undefined (stat returns None) are skipped; if fewer
+    than half the resamples are valid, returns (None, None) — the caller must treat the
+    metric as unresolved rather than inventing an interval.
+    """
+    rng = random.Random(seed)
+    pairs = list(pairs)
+    values = []
+    for _ in range(n_resamples):
+        sample = [pairs[rng.randrange(len(pairs))] for _ in pairs]
+        v = stat(sample)
+        if v is not None:
+            values.append(v)
+    if len(values) < n_resamples / 2:
+        return None, None
+    values.sort()
+    def pct(q: float):
+        return values[min(len(values) - 1, max(0, int(round(q / 100 * (len(values) - 1)))))]
+    return pct(lo), pct(hi)
+
+
+def discrimination(pairs) -> float | None:
+    """Mean confidence when correct minus mean confidence when wrong; None if undefined."""
+    right = [c for c, ok in pairs if ok]
+    wrong = [c for c, ok in pairs if not ok]
+    if not right or not wrong:
+        return None
+    return sum(right) / len(right) - sum(wrong) / len(wrong)

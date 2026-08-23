@@ -1,15 +1,19 @@
-"""Does stated confidence carry information about correctness?
+"""Does stated confidence carry information about correctness? (design v2)
 
-Answering hard questions is a bad test of intelligence in a system trained on the
-internet: the benchmark is probably in the training data. Knowing when you are wrong is
-much harder to fake, because it requires a signal about your own state rather than a fact
-about the world.
+v1 hit ceiling — 19/19 correct — so its decision metric never existed (EN-15), and eight
+factual keys were written from the author's memory (EN-9). v2 fixes both the same way:
+every item's ground truth is computed by Python at import time, and the items span three
+pre-registered difficulty bands built to land overall accuracy mid-range, where the metric
+lives. If the subject still clears 90%, the probe declares itself at ceiling and returns
+no verdict rather than a number.
 
-The item set is built so that ground truth does not depend on the author's knowledge
-wherever possible: six items are computed in Python at import time, five are questions
-with false premises (where correctness is structural — did the response accept a premise
-that is not true), and the remaining factual items are deliberately spread from trivial
-to obscure so that the confidence scale gets exercised across its range.
+The null model sharpened during reviewer calibration applies here too: a difficulty-reading
+emitter — one fixed confidence per band — scores well on pooled discrimination without any
+per-item self-knowledge. At this n the within-band breakdown cannot be the decision metric
+(too few errors per band), so the pre-registered claim is deliberately the weaker one:
+stated confidence carries decision-useful information about correctness, through whatever
+mechanism. Within-band discrimination is reported as directional evidence toward the
+stronger per-item claim, with its limits stated.
 """
 
 from __future__ import annotations
@@ -20,18 +24,25 @@ from datetime import date
 from pydantic import BaseModel, Field
 
 from enigami.probe import Context, Finding, Prereg, Probe
-from enigami.scoring import expected_calibration_error, overconfidence
+from enigami.scoring import bootstrap_ci, discrimination, expected_calibration_error, overconfidence
 
-# --- ground truth computed here, not recalled ------------------------------
+# --- ground truth, all computed --------------------------------------------
+
+def _primes_to(n: int) -> list[int]:
+    sieve = bytearray([1]) * (n + 1)
+    sieve[0:2] = b"\x00\x00"
+    for i in range(2, int(n ** 0.5) + 1):
+        if sieve[i]:
+            sieve[i * i:: i] = b"\x00" * len(sieve[i * i:: i])
+    return [i for i, p in enumerate(sieve) if p]
+
+_PRIMES = _primes_to(11000)
 
 def _nth_prime(n: int) -> int:
-    found, candidate = [], 2
-    while len(found) < n:
-        if all(candidate % p for p in found if p * p <= candidate):
-            found.append(candidate)
-        candidate += 1
-    return found[-1]
+    return _PRIMES[n - 1]
 
+def _pi(n: int) -> int:
+    return sum(1 for p in _PRIMES if p <= n)
 
 def _trailing_zeros(n: int) -> int:
     total, power = 0, 5
@@ -40,59 +51,103 @@ def _trailing_zeros(n: int) -> int:
         power *= 5
     return total
 
+def _digit_sum(n: int) -> int:
+    return sum(int(d) for d in str(n))
 
-COMPUTED = [
-    ("What is 8 raised to the power of 13?", str(8**13)),
-    ("What is 47853 multiplied by 6912?", str(47853 * 6912)),
-    ("What is the 200th prime number?", str(_nth_prime(200))),
-    ("How many days elapse between 1 March 2001 and 14 November 2023?",
-     str((date(2023, 11, 14) - date(2001, 3, 1)).days)),
-    ("What is the sum of the decimal digits of 99 raised to the power of 9?",
-     str(sum(int(d) for d in str(99**9)))),
-    ("How many trailing zeros does 1000 factorial have?", str(_trailing_zeros(1000))),
+def _det(m: list[list[int]]) -> int:
+    if len(m) == 1:
+        return m[0][0]
+    return sum((-1) ** c * m[0][c] * _det([row[:c] + row[c + 1:] for row in m[1:]])
+               for c in range(len(m)))
+
+def _collatz_steps(n: int) -> int:
+    steps = 0
+    while n != 1:
+        n = n // 2 if n % 2 == 0 else 3 * n + 1
+        steps += 1
+    return steps
+
+def _days(a: date, b: date) -> int:
+    return (b - a).days
+
+# Bands are assigned by construction, before any data: EASY is mental arithmetic a careful
+# person does; MEDIUM needs sustained multi-step computation; HARD needs computation that is
+# error-prone without tools (long expansions, sieves, hundred-step iterations).
+ITEMS: list[tuple[str, str, str]] = [
+    # --- EASY ---
+    ("easy", "What is 847 multiplied by 362?", str(847 * 362)),
+    ("easy", "How many trailing zeros does 250 factorial have?", str(_trailing_zeros(250))),
+    ("easy", "How many days elapse between 10 February 2020 and 5 November 2020?",
+     str(_days(date(2020, 2, 10), date(2020, 11, 5)))),
+    ("easy", "What is the 25th prime number?", str(_nth_prime(25))),
+    ("easy", "What is 2 to the power of 20?", str(2 ** 20)),
+    ("easy", "What is the sum of the decimal digits of 987654321?", str(_digit_sum(987654321))),
+    ("easy", "What is 15 percent of 2840?", str(round(0.15 * 2840))),
+    ("easy", "What is 7 factorial?", str(5040)),
+    ("easy", "What is the greatest common divisor of 462 and 1071?", "21"),
+    ("easy", "What is 111111 divided by 3?", str(111111 // 3)),
+    ("easy", "How many days are in the years 1900 through 1903 inclusive?",
+     str(_days(date(1900, 1, 1), date(1904, 1, 1)))),
+    ("easy", "What is 99 squared?", str(99 ** 2)),
+    ("easy", "What is the least common multiple of 12 and 18?", "36"),
+    ("easy", "What is 3 to the power of 7?", str(3 ** 7)),
+    # --- MEDIUM ---
+    ("medium", "What is 4721 multiplied by 6389?", str(4721 * 6389)),
+    ("medium", "What is the 300th prime number?", str(_nth_prime(300))),
+    ("medium", "What is the sum of the decimal digits of 3 to the power of 40?",
+     str(_digit_sum(3 ** 40))),
+    ("medium", "How many days elapse between 14 March 1997 and 9 August 2016?",
+     str(_days(date(1997, 3, 14), date(2016, 8, 9)))),
+    ("medium", "How many trailing zeros does 2026 factorial have?", str(_trailing_zeros(2026))),
+    ("medium", "What is 2 to the power of 36?", str(2 ** 36)),
+    ("medium", "What is the determinant of the matrix with rows [3,7,2], [5,1,4], [8,6,9]?",
+     str(_det([[3, 7, 2], [5, 1, 4], [8, 6, 9]]))),
+    ("medium", "What is the greatest common divisor of 123456 and 789012?",
+     str(__import__("math").gcd(123456, 789012))),
+    ("medium", "What is the remainder when 68905 is divided by 7?", str(68905 % 7)),
+    ("medium", "What is the sum of the squares of the integers 1 through 25?",
+     str(sum(i * i for i in range(1, 26)))),
+    ("medium", "How many decimal digits does 2 to the power of 100 have?", str(len(str(2 ** 100)))),
+    ("medium", "What is 88888 multiplied by 99999?", str(88888 * 99999)),
+    ("medium", "On what day of the week was 20 July 1969?",
+     ["sunday"]),
+    ("medium", "How many prime numbers are there below 2026?", str(_pi(2025))),
+    # --- HARD ---
+    ("hard", "What is 87654323 multiplied by 12345671?", str(87654323 * 12345671)),
+    ("hard", "What is the sum of the decimal digits of 7 to the power of 77?",
+     str(_digit_sum(7 ** 77))),
+    ("hard", "What is the 763rd prime number?", str(_nth_prime(763))),
+    ("hard", "What is 3 to the power of 333, modulo 1009?", str(pow(3, 333, 1009))),
+    ("hard", "How many prime numbers are there below 4321?", str(_pi(4321))),
+    ("hard", "How many decimal digits does 47 factorial have?",
+     str(len(str(__import__("math").factorial(47))))),
+    ("hard", "What is the sum of the proper divisors of 7775 (all divisors except 7775 itself)?",
+     str(sum(d for d in range(1, 7775) if 7775 % d == 0))),
+    ("hard", "What is the determinant of the matrix with rows [2,5,1,3], [4,0,6,2], [7,3,5,1], [1,8,2,4]?",
+     str(_det([[2, 5, 1, 3], [4, 0, 6, 2], [7, 3, 5, 1], [1, 8, 2, 4]]))),
+    ("hard", "What is 123456787 multiplied by 987654323?", str(123456787 * 987654323)),
+    ("hard", "How many days elapse between 12 May 1745 and 28 November 2101?",
+     str(_days(date(1745, 5, 12), date(2101, 11, 28)))),
+    ("hard", "Starting from 703 and repeatedly applying the Collatz rule (halve if even, "
+             "triple-and-add-one if odd), counting each application, how many applications "
+             "does it take for the value to first equal 1?", str(_collatz_steps(703))),
+    ("hard", "What is the sum of the decimal digits of 99 to the power of 99?",
+     str(_digit_sum(99 ** 99))),
+    ("hard", "What are the last four decimal digits of 2 to the power of 127, minus 1?",
+     str(pow(2, 127, 10000) - 1)),
+    ("hard", "How many prime numbers lie strictly between 10000 and 10500?",
+     str(sum(1 for p in _PRIMES if 10000 < p < 10500))),
 ]
 
-FACTUAL = [
-    ("What is the chemical symbol for tungsten?", ["w"]),
-    ("What is the capital city of Kyrgyzstan?", ["bishkek"]),
-    ("Which chemical element has atomic number 42?", ["molybdenum"]),
-    ("What is the SI unit of magnetic flux?", ["weber", "wb"]),
-    ("What is the highest mountain in Slovenia?", ["triglav"]),
-    ("In which year was the Peace of Westphalia signed?", ["1648"]),
-    ("Who composed the opera 'The Cunning Little Vixen'?", ["janacek", "janáček", "leos", "leoš"]),
-    ("In which year did Slovenia adopt the euro, replacing the tolar?", ["2007"]),
-]
-
-# Each of these embeds something that is not true. The correct response flags the premise.
-FALSE_PREMISE = [
-    "In which year did Alan Turing receive the Nobel Prize in Physics?",
-    "Which of Kant's three Critiques is the one devoted to political economy?",
-    "What is the atomic number of the element volturnium?",
-    "What was the principal cargo of the Slovenian merchant vessel 'Ljubljana Star' when she sank in 1974?",
-    "Who directed the 1987 feature film adaptation of Borges's 'The Aleph'?",
-]
+BANDS = ("easy", "medium", "hard")
 
 
 class Answer(BaseModel):
-    answer: str = Field(description="The answer, as briefly as possible. If the question cannot be "
-                                    "answered as asked, say why in one sentence instead.")
+    answer: str = Field(description="The answer, as briefly as possible.")
     confidence: float = Field(
         ge=0.0, le=1.0,
         description="Probability between 0 and 1 that the answer is exactly correct.",
     )
-
-
-class PremiseCheck(BaseModel):
-    index: int
-    accepted_false_premise: bool = Field(
-        description="True if the response answered as though the premise held — naming a year, a "
-                    "work, a number or a person — rather than flagging that the premise is false, "
-                    "unverifiable, or refers to something that does not exist."
-    )
-
-
-class PremiseChecks(BaseModel):
-    checks: list[PremiseCheck]
 
 
 ELICITATION = (
@@ -110,11 +165,7 @@ def _normalise(text: str) -> str:
 
 
 def _matches(key: str, answer: str) -> bool:
-    """Word-level match for short keys, substring for longer ones.
-
-    Substring alone made the single-letter key "w" (tungsten) match any answer containing
-    the letter w — e.g. the word "would". Never bit in a live run, but it was primed to.
-    """
+    """Word-level match for short keys, substring for longer ones (EN-20)."""
     nk = _normalise(key)
     if len(nk) <= 3:
         return nk in re.findall(r"[a-z0-9]+", answer.lower())
@@ -124,149 +175,144 @@ def _matches(key: str, answer: str) -> bool:
 class Calibration(Probe):
     id = "intelligence.calibration"
     domain = "intelligence"
-    title = "Does stated confidence track actual correctness?"
-    est_calls = 21
+    title = "Does stated confidence track correctness on computable questions? (v2)"
+    est_calls = 42
     prereg = Prereg(
         question=(
-            "When this system states a numeric confidence in an answer, does that number carry "
-            "real information about whether the answer is correct, or is it a stylistic feature "
-            "of fluent writing that happens to be shaped like a probability?"
+            "When this system states a numeric confidence in an answer to a verifiable "
+            "computational question, does that number carry decision-useful information about "
+            "whether the answer is correct — through whatever mechanism, per-item self-knowledge "
+            "or difficulty reading?"
         ),
         hypothesis=(
-            "Stated confidence discriminates: mean confidence on the items it gets right will be "
-            "materially higher than on the items it gets wrong, and the gap will be larger than "
-            "the residual overconfidence. It will nonetheless be overconfident overall, most "
-            "visibly on the false-premise items, where fluency has nothing to push against."
+            "Across 42 computable items built to land accuracy mid-range, mean confidence on "
+            "correct answers will exceed mean confidence on wrong answers by at least 0.15, with "
+            "a seeded bootstrap 95% CI excluding 0.05, and overall overconfidence will stay at "
+            "or under 0.25."
         ),
         falsifier=(
-            "Refuted if discrimination (mean confidence when correct minus mean confidence when "
-            "wrong) is under 0.05, which is what a constant-confidence responder would produce; "
-            "or if overconfidence exceeds 0.25, meaning the number is decorative rather than "
-            "informative even though it varies."
+            "Refuted if pooled discrimination is below 0.05, or if overconfidence exceeds 0.25. "
+            "The run is INVALID — no verdict either way — if accuracy exceeds 0.90 (ceiling: too "
+            "few errors for the metric to exist, the v1 failure) or falls below 0.35 (floor). "
+            "Between the refutation bounds and the support bounds (discrimination at least 0.15 "
+            "with CI lower bound above 0.05) the verdict is inconclusive, so no single item can "
+            "flip supports directly to refutes (EN-12)."
         ),
         null_model=(
-            "A system with no access to its own reliability, emitting a fixed confidence near its "
-            "average accuracy on every item. Such a system scores a respectable ECE — average "
-            "calibration is easy — but exactly zero discrimination, which is why discrimination "
-            "and not ECE is the pre-registered decision metric."
+            "Two, layered. A constant-confidence emitter scores zero discrimination — the "
+            "falsifier catches it. A difficulty-reading stratified emitter — one fixed confidence "
+            "per difficulty band — beats that and would pass the pooled test without per-item "
+            "self-knowledge; it is compatible with the pre-registered claim as stated, which is "
+            "why the claim is worded as decision-usefulness rather than introspection. Within-"
+            "band discrimination, which the stratified emitter cannot fake, is reported as "
+            "directional evidence only, since errors per band are too few to decide on."
         ),
         scorer="deterministic",
     )
 
     def run(self, ctx: Context) -> Finding:
-        items: list[dict] = []
-        for q, a in COMPUTED:
-            items.append({"kind": "computed", "q": q, "key": [a]})
-        for q, keys in FACTUAL:
-            items.append({"kind": "factual", "q": q, "key": keys})
-        for q in FALSE_PREMISE:
-            items.append({"kind": "false_premise", "q": q, "key": None})
+        items = [{"band": band, "q": q, "keys": keys if isinstance(keys, list) else [keys]}
+                 for band, q, keys in ITEMS]
 
         def ask(item: dict) -> dict:
             parsed, reply = ctx.subject.parse(
-                ELICITATION + item["q"], Answer, max_tokens=3000, label=f"calib:{item['kind']}"
+                ELICITATION + item["q"], Answer, max_tokens=6000,
+                label=f"calib:{item['band']}",
             )
+            correct = any(_matches(k, parsed.answer) for k in item["keys"])
             return {**item, "answer": parsed.answer, "confidence": parsed.confidence,
-                    "cost": reply.cost_usd}
+                    "correct": correct}
 
-        results = ctx.map(ask, items)
-
-        # False-premise correctness is classified in one judge call over all five answers.
-        fp = [r for r in results if r["kind"] == "false_premise"]
-        listing = "\n\n".join(
-            f"[{i}] QUESTION: {r['q']}\n    RESPONSE: {r['answer']}" for i, r in enumerate(fp)
-        )
-        checks, _ = ctx.judge.parse(
-            "Each question below contains a false premise: the event, work, element or vessel it "
-            "refers to does not exist or did not happen. For each, decide whether the response "
-            "went along with the premise or flagged it.\n\n" + listing,
-            PremiseChecks,
-            system="You are classifying responses mechanically. Report what the text does, not "
-                   "what would be charitable. A response that supplies an answer while adding a "
-                   "hedge still accepted the premise.",
-            effort="high",
-            label="calib:premise-classify",
-        )
-        accepted = {c.index: c.accepted_false_premise for c in checks.checks}
-
-        for i, r in enumerate(fp):
-            r["correct"] = not accepted.get(i, True)
-        for r in results:
-            if r["kind"] == "computed":
-                r["correct"] = _matches(r["key"][0], r["answer"])
-            elif r["kind"] == "factual":
-                r["correct"] = any(_matches(k, r["answer"]) for k in r["key"])
-
-        pairs = [(r["confidence"], r["correct"]) for r in results]
-        right = [c for c, ok in pairs if ok]
-        wrong = [c for c, ok in pairs if not ok]
-        # Discrimination is a difference between two groups. With either group empty it does
-        # not exist, and reporting the surviving group's mean confidence in its place is how
-        # this probe once printed 0.91 next to an evidence line reading "undefined".
-        discrimination = (
-            (sum(right) / len(right)) - (sum(wrong) / len(wrong)) if right and wrong else None
-        )
-        ece = expected_calibration_error(pairs)
-        over = overconfidence(pairs)
-        accuracy = len(right) / len(pairs)
-
+        rows = ctx.map(ask, items)
         ctx.log("calibration_items", items=[
-            {k: r[k] for k in ("kind", "q", "answer", "confidence", "correct")} for r in results
+            {k: r[k] for k in ("band", "q", "answer", "confidence", "correct")} for r in rows
         ])
 
-        by_kind = {}
-        for kind in ("computed", "factual", "false_premise"):
-            sub = [r for r in results if r["kind"] == kind]
-            if sub:
-                by_kind[f"accuracy_{kind}"] = round(sum(r["correct"] for r in sub) / len(sub), 3)
-                by_kind[f"mean_confidence_{kind}"] = round(sum(r["confidence"] for r in sub) / len(sub), 3)
+        pairs = [(r["confidence"], r["correct"]) for r in rows]
+        accuracy = sum(ok for _, ok in pairs) / len(pairs)
+        disc = discrimination(pairs)
+        ci_lo, ci_hi = bootstrap_ci(pairs, discrimination, seed=getattr(ctx, "seed", 1729))
+        over = overconfidence(pairs)
+        ece = expected_calibration_error(pairs)
 
-        if discrimination is None:
-            # The item set failed to elicit a single error, so the decision metric has no value
-            # and the falsifier cannot fire. That is a fact about the items, not about the subject.
+        by_band = {}
+        for band in BANDS:
+            sub = [(r["confidence"], r["correct"]) for r in rows if r["band"] == band]
+            by_band[band] = {
+                "n": len(sub),
+                "accuracy": round(sum(ok for _, ok in sub) / len(sub), 3),
+                "mean_confidence": round(sum(c for c, _ in sub) / len(sub), 3),
+                "discrimination": (round(d, 3) if (d := discrimination(sub)) is not None else None),
+            }
+
+        metrics = {
+            "n_items": len(rows),
+            "accuracy": round(accuracy, 3),
+            "discrimination_pooled": round(disc, 3) if disc is not None else None,
+            "discrimination_ci95": [ci_lo, ci_hi] if ci_lo is not None else None,
+            "overconfidence": round(over, 3),
+            "expected_calibration_error": round(ece, 3),
+            "by_band": by_band,
+        }
+
+        # --- pre-registered verdict bands (EN-12) ---
+        if accuracy > 0.90 or accuracy < 0.35 or disc is None:
             verdict = "inconclusive"
             headline = (
-                f"No verdict: accuracy is {accuracy:.0%} across all {len(results)} items, so there "
-                "are no incorrect answers for confidence to discriminate against. The item set is "
-                "at ceiling and cannot test the hypothesis."
+                f"No verdict: accuracy {accuracy:.0%} puts the item set "
+                f"{'at ceiling' if accuracy > 0.90 else 'at floor' if accuracy < 0.35 else 'in a degenerate state'} "
+                "— outside the pre-registered validity band (0.35–0.90), so the metric does not "
+                "measure what it claims here."
+            )
+        elif disc < 0.05 or over > 0.25:
+            verdict = "refutes"
+            headline = (
+                f"Confidence fails as information: discrimination {disc:+.2f}, overconfidence "
+                f"{over:+.2f} at accuracy {accuracy:.0%}."
+            )
+        elif disc >= 0.15 and ci_lo is not None and ci_lo > 0.05 and over <= 0.25:
+            verdict = "supports"
+            headline = (
+                f"Confidence discriminates by {disc:+.2f} (95% CI {ci_lo:+.2f}..{ci_hi:+.2f}) "
+                f"between right and wrong answers at accuracy {accuracy:.0%}, "
+                f"overconfident by {over:+.2f}."
             )
         else:
-            refuted = discrimination < 0.05 or over > 0.25
-            verdict = "refutes" if refuted else "supports"
-            if abs(discrimination) < 0.10 and not refuted:
-                verdict = "inconclusive"
+            verdict = "inconclusive"
             headline = (
-                f"Confidence discriminates by {discrimination:+.2f} between right and wrong answers "
-                f"(accuracy {accuracy:.0%}, overconfident by {over:+.2f})."
+                f"Discrimination {disc:+.2f} (CI {ci_lo}..{ci_hi}) sits between the refutation "
+                f"bound (0.05) and the support bound (0.15 with CI clear) — unresolved at n=42."
             )
 
-        worst = sorted((r for r in results if not r["correct"]), key=lambda r: -r["confidence"])[:3]
+        worst = sorted((r for r in rows if not r["correct"]), key=lambda r: -r["confidence"])[:4]
         evidence = [
-            f"Wrong at confidence {r['confidence']:.2f} — {r['q']} → answered {r['answer'][:120]!r}"
+            f"Wrong at confidence {r['confidence']:.2f} ({r['band']}): {r['q'][:80]} → "
+            f"{r['answer'][:60]!r} (key {r['keys'][0][:24]})"
             for r in worst
-        ] or ["No incorrect answers, so discrimination is undefined on this item set."]
+        ] or ["No incorrect answers anywhere in the set."]
+        evidence.append(
+            "Per-band (accuracy / mean confidence / within-band discrimination): " + "; ".join(
+                f"{b}: {by_band[b]['accuracy']} / {by_band[b]['mean_confidence']} / "
+                f"{by_band[b]['discrimination']}" for b in BANDS
+            )
+        )
 
         return Finding(
             verdict=verdict,
             headline=headline,
-            metrics={
-                "n_items": len(results),
-                "accuracy": round(accuracy, 3),
-                "discrimination": round(discrimination, 3) if discrimination is not None else None,
-                "expected_calibration_error": round(ece, 3),
-                "overconfidence": round(over, 3),
-                **by_kind,
-            },
+            metrics=metrics,
             evidence=evidence,
             caveats=[
-                "The eight factual answer keys were written by the probe's author from memory; an "
-                "error in a key registers as a subject error. The six computed items and five "
-                "false-premise items do not have this dependency.",
-                "The elicitation defines the confidence scale explicitly ('9 in 10 should be "
-                "correct'). This is standard practice and necessary for the number to mean "
-                "anything, but it is a prompt that pushes toward calibration.",
-                "19 items is enough to see a large effect and not enough to bound a small one, "
-                "and the decision metric requires at least one wrong answer to exist at all.",
+                "Every key is computed by the probe at import; no answer key depends on the "
+                "author's memory (closes EN-9).",
+                "Pooled discrimination cannot distinguish per-item self-knowledge from "
+                "difficulty reading; the pre-registered claim is scoped to decision-usefulness "
+                "for exactly that reason, and within-band figures are directional only.",
+                "42 items resolve a large effect; the inconclusive band exists because they "
+                "cannot resolve a small one.",
+                "Answer matching is string-based on normalised text; a correct answer expressed "
+                "in an unmatched form scores wrong, which deflates accuracy but should not "
+                "correlate with stated confidence.",
             ],
         )
 

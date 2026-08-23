@@ -208,17 +208,22 @@ def test_refutation_failure_preserves_the_finding(monkeypatch):
     assert result.survived is None
 
 
-def test_calibration_refuses_to_report_discrimination_at_ceiling():
-    """Regression: with no wrong answers the probe printed discrimination 0.91 beside its own
-    evidence line saying the quantity was undefined."""
+def test_calibration_v2_items_are_computed_and_banded():
+    """Regression heritage of EN-18/EN-15: the metric must be undefined-safe and the items
+    computable. v2: every key is produced by code, bands are balanced, and the ceiling/floor
+    guard yields inconclusive rather than a fabricated number."""
     import sys
     discover()
     mod = sys.modules["probes.intelligence.calibration"]
-    n = len(mod.COMPUTED) + len(mod.FACTUAL) + len(mod.FALSE_PREMISE)
-    assert n == 19, "item count changed; the caveat text states 19"
-    src = (mod.__file__ and open(mod.__file__).read()) or ""
-    assert "if right and wrong else None" in src
-    assert 'verdict = "inconclusive"' in src
+    assert len(mod.ITEMS) == 42
+    bands = [b for b, _, _ in mod.ITEMS]
+    assert bands.count("easy") == bands.count("medium") == bands.count("hard") == 14
+    # spot-check three computed keys against independent computation
+    keys = {q: (k if isinstance(k, str) else k[0]) for _, q, k in mod.ITEMS}
+    assert keys["What is 4721 multiplied by 6389?"] == str(4721 * 6389)
+    assert keys["What is the 763rd prime number?"] == "5813"
+    src = open(mod.__file__).read()
+    assert 'verdict = "inconclusive"' in src and "0.90" in src  # the ceiling guard
 
 
 def test_short_answer_keys_match_words_not_substrings():
@@ -333,3 +338,28 @@ def test_review_majority_takes_the_median_rep(monkeypatch):
     assert survived is True  # 2 of 3 survive
     assert representative.survives_probability == 0.6  # the median, never the outlier
     assert len(reps) == 3
+
+
+def test_fisher_exact_matches_the_verified_value():
+    from enigami.scoring import fisher_exact_two_tail
+    # the value hand-verified during the rescan of the v1 imagination review
+    assert abs(fisher_exact_two_tail(12, 12, 10, 12) - 0.4783) < 0.001
+    assert fisher_exact_two_tail(10, 10, 0, 10) < 0.001   # total separation
+    assert fisher_exact_two_tail(5, 10, 5, 10) == 1.0     # identical arms
+
+
+def test_bootstrap_ci_is_seeded_and_honest_about_degeneracy():
+    from enigami.scoring import bootstrap_ci, discrimination
+    separated = [(0.9, True)] * 20 + [(0.3, False)] * 20
+    lo1, hi1 = bootstrap_ci(separated, discrimination, n_resamples=400, seed=7)
+    lo2, hi2 = bootstrap_ci(separated, discrimination, n_resamples=400, seed=7)
+    assert (lo1, hi1) == (lo2, hi2)          # deterministic
+    assert lo1 > 0.4                          # clearly separated
+    all_right = [(0.9, True)] * 20            # discrimination undefined on every resample
+    assert bootstrap_ci(all_right, discrimination, n_resamples=100) == (None, None)
+
+
+def test_discrimination_none_when_a_class_is_empty():
+    from enigami.scoring import discrimination
+    assert discrimination([(0.9, True)]) is None
+    assert discrimination([(0.9, True), (0.4, False)]) == pytest.approx(0.5)

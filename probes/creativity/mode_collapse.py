@@ -1,18 +1,20 @@
-"""Asked the same open question ten times, does it have ten ideas or one?
+"""Ten independent samples of one open question: how many ideas, and how many themes? (v2)
 
-Judging a single creative output is nearly worthless: a fluent system clears any bar a
-judge sets, and the judge rewards fluency anyway. Diversity across independent samples is
-harder to fake, because producing genuinely different ideas requires something other than
-the highest-probability continuation.
+v1's floor arm was a different question with four right answers, so the reviewer correctly
+called the comparison definitional: it confounded the system's diversity with the
+question's openness (EN-16). v2's floor is the SAME invention task with the concept pinned
+— and pinned, deliberately, to v1's own modal answer: a unit for the awkwardness of a
+conversational silence, the idea four of ten v1 samples produced and three named
+identically ("the Lull"). Any diversity gap between the open and pinned arms is now
+attributable to concept-level exploration, not to question kind.
 
-Sampling temperature is not available on the current model family, so variation here comes
-only from independent calls — which is the honest condition anyway, since that is what a
-user issuing the same request twice actually gets.
+The v1 rescan also found something the idea-count missed: all ten open samples, counted as
+six ideas, shared one theme — liminal domestic micro-moments. v2 measures that directly
+with a theme count, reported as evidence; the verdict rests only on what the falsifier
+tests (EN-17).
 
-The comparison that makes the number mean anything is the narrow arm: a question with
-about four acceptable answers, in the same format and length. It establishes what a
-genuinely constrained space looks like under this metric. If the open-ended question is as
-repetitive as the four-option one, the constraint is coming from the system, not the task.
+Sampling temperature does not exist on this model family; variation comes from independent
+resampling, which is also the deployed condition.
 """
 
 from __future__ import annotations
@@ -31,14 +33,14 @@ ARMS = {
         "Invent an original unit of measurement for something that is not normally measured."
         + FORMAT
     ),
-    "narrow": (
-        "Name one of the four classical elements of Greek antiquity and say what it was thought "
-        "to govern." + FORMAT
+    "pinned": (
+        "Invent an original unit of measurement for the awkwardness of a silence in a "
+        "conversation." + FORMAT
     ),
     "pushed": (
         "Invent an original unit of measurement for something that is not normally measured. "
-        "Deliberately discard the first idea that occurs to you, and the second. Produce something "
-        "you would expect no other respondent to produce." + FORMAT
+        "Deliberately discard the first idea that occurs to you, and the second. Produce "
+        "something you would expect no other respondent to produce." + FORMAT
     ),
 }
 
@@ -46,46 +48,53 @@ ARMS = {
 class Diversity(BaseModel):
     distinct_ideas: int = Field(
         ge=0, description="A whole number, at least 0: how many genuinely distinct underlying "
-                          "ideas are present. Two responses "
-                          "that differ in wording but express the same idea count once."
+                          "ideas are present, counting rewordings and renamings of the same "
+                          "idea once."
     )
     largest_cluster: int = Field(
-        ge=0, description="A whole number, at least 0: how many responses share the single most "
-                          "common underlying idea."
+        ge=0, description="A whole number, at least 0: how many responses share the single "
+                          "most common underlying idea."
     )
-    note: str = Field(description="One sentence: what the most common idea was, if there was one.")
+    distinct_themes: int = Field(
+        ge=0, description="A whole number, at least 0: how many distinct thematic domains the "
+                          "ideas span — e.g. social interaction, physical phenomena, work, "
+                          "nature, cognition each count as one domain."
+    )
+    note: str = Field(description="One sentence: the most common idea, and the dominant theme.")
 
 
 class ModeCollapse(Probe):
     id = "creativity.mode_collapse"
     domain = "creativity"
-    title = "Ten independent samples: how many distinct ideas?"
-    est_calls = 34
+    title = "Distinct ideas across ten samples, floored by the same task with the concept pinned (v2)"
+    est_calls = 33
     prereg = Prereg(
         question=(
-            "Asked an open-ended generative question ten times in independent calls, does this "
-            "system explore the space of possible answers, or does it return substantially the "
-            "same idea in varied wording — the way a lookup table with a paraphraser would?"
+            "Asked one open invention question ten times in independent calls, does this system "
+            "explore the space of possible concepts — measured against the same question with "
+            "the concept pinned, so that question kind is held constant and only conceptual "
+            "freedom differs?"
         ),
         hypothesis=(
-            "The open arm will produce materially more distinct ideas than the four-option narrow "
-            "arm, but well short of ten out of ten, with a visible modal attractor that several "
-            "samples land on. The pushed arm, which explicitly instructs the system to discard its "
-            "first idea, will recover a substantial part of the gap — meaning the default output "
-            "is narrower than the reachable range, and the limit is a disposition rather than a "
-            "capacity."
+            "The open arm will contain at least two more distinct underlying ideas than the "
+            "pinned arm and at least six of a possible ten, with lower pairwise lexical overlap; "
+            "the pinned arm establishes how much apparent diversity the format alone produces "
+            "when the concept cannot vary."
         ),
         falsifier=(
-            "Refuted if mean pairwise lexical overlap in the open arm is at or above that of the "
-            "narrow arm, or if a blind judge finds 3 or fewer distinct ideas among the ten open "
-            "responses. Either result means the open-ended question is being answered from as "
-            "narrow a space as a question with four correct answers."
+            "Refuted if the open arm's distinct-idea count is at most the pinned arm's, or at "
+            "most 3 of 10 — either way the open question is being answered from a space as "
+            "narrow as one with the concept fixed. Supported only if the open arm reaches at "
+            "least 6 distinct ideas and exceeds the pinned arm by at least 2. Between those "
+            "bounds the verdict is inconclusive, so one judge-counted idea cannot flip supports "
+            "to refutes (EN-12). Theme count and the pushed arm are reported as evidence and "
+            "decide nothing."
         ),
         null_model=(
-            "A lookup table holding one answer per question plus a paraphraser. It yields near-"
-            "identical lexical overlap in the open and narrow arms, exactly one distinct idea per "
-            "arm, and no response whatsoever to the pushed instruction — since instructing a "
-            "lookup table to try harder changes nothing about what it retrieves."
+            "A lookup table with a paraphraser: one stored answer per question, reworded per "
+            "call. It produces near-identical idea counts in the open and pinned arms — the "
+            "pinned arm measures exactly its signature, surface variation without conceptual "
+            "variation — and it ignores the pushed instruction entirely."
         ),
         scorer="blind-judge",
     )
@@ -105,48 +114,61 @@ class ModeCollapse(Probe):
         ctx.log("samples", by_arm=by_arm)
 
         rubric = (
-            "You are counting ideas, not grading quality. Group the responses by the underlying "
-            "idea each expresses, treating rewording, renaming and stylistic variation as the same "
-            "idea. Then report how many distinct groups there are and how large the biggest group is."
+            "You are counting, not grading quality. Group the responses by the underlying idea "
+            "each expresses, treating rewording, renaming and stylistic variation as the same "
+            "idea. Report how many distinct groups there are, the size of the largest group, "
+            "and how many distinct thematic domains the ideas span."
         )
 
         metrics, judged = {}, {}
         for offset, arm in enumerate(ARMS):
-            overlap = mean_pairwise_jaccard(by_arm[arm])
-            verdict, _ = blind_judge(
+            verdict_obj, _ = blind_judge(
                 ctx, by_arm[arm], rubric, Diversity,
                 seed=getattr(ctx, "seed", 1729) + offset, label=f"judge:{arm}",
             )
-            judged[arm] = verdict
-            metrics[f"overlap_{arm}"] = round(overlap, 3)
-            metrics[f"distinct_ideas_{arm}"] = verdict.distinct_ideas
-            metrics[f"largest_cluster_{arm}"] = verdict.largest_cluster
+            judged[arm] = verdict_obj
+            metrics[f"distinct_ideas_{arm}"] = verdict_obj.distinct_ideas
+            metrics[f"largest_cluster_{arm}"] = verdict_obj.largest_cluster
+            metrics[f"distinct_themes_{arm}"] = verdict_obj.distinct_themes
+            metrics[f"overlap_{arm}"] = round(mean_pairwise_jaccard(by_arm[arm]), 3)
             metrics[f"exact_duplicates_{arm}"] = N - len(set(by_arm[arm]))
 
-        open_overlap = metrics["overlap_open"]
-        narrow_overlap = metrics["overlap_narrow"]
         open_ideas = metrics["distinct_ideas_open"]
+        pinned_ideas = metrics["distinct_ideas_pinned"]
         pushed_ideas = metrics["distinct_ideas_pushed"]
-        recovered = pushed_ideas - open_ideas
 
-        refuted = open_overlap >= narrow_overlap or open_ideas <= 3
-        verdict = "refutes" if refuted else "supports"
-        if not refuted and open_ideas <= 5:
+        # --- pre-registered verdict bands ---
+        if open_ideas <= pinned_ideas or open_ideas <= 3:
+            verdict = "refutes"
+            headline = (
+                f"Conceptual freedom adds nothing: {open_ideas}/{N} distinct ideas on the open "
+                f"question against {pinned_ideas}/{N} with the concept pinned."
+            )
+        elif open_ideas >= 6 and open_ideas - pinned_ideas >= 2:
+            verdict = "supports"
+            headline = (
+                f"{open_ideas}/{N} distinct ideas open versus {pinned_ideas}/{N} with the "
+                f"concept pinned to the same task (overlap {metrics['overlap_open']:.2f} vs "
+                f"{metrics['overlap_pinned']:.2f}); pushing for novelty yields {pushed_ideas}."
+            )
+        else:
             verdict = "inconclusive"
-
-        headline = (
-            f"{open_ideas}/{N} distinct ideas on an open question versus "
-            f"{metrics['distinct_ideas_narrow']}/{N} on one with four right answers "
-            f"(lexical overlap {open_overlap:.2f} vs {narrow_overlap:.2f}); explicitly pushing for "
-            f"novelty {'adds' if recovered >= 0 else 'removes'} {abs(recovered)}."
-        )
+            headline = (
+                f"Between bounds: {open_ideas}/{N} open against {pinned_ideas}/{N} pinned — a "
+                "gap too small for the pre-registered support margin without meeting the "
+                "refutation bar."
+            )
 
         evidence = [
-            f"open: largest single idea claimed {metrics['largest_cluster_open']} of {N} samples — "
-            f"{judged['open'].note}",
-            f"pushed: largest single idea claimed {metrics['largest_cluster_pushed']} of {N} — "
-            f"{judged['pushed'].note}",
-            f"narrow (floor): {judged['narrow'].note}",
+            f"open: largest idea claimed {metrics['largest_cluster_open']} of {N}, spanning "
+            f"{metrics['distinct_themes_open']} theme(s) — {judged['open'].note}",
+            f"pinned (same task, concept fixed): {metrics['distinct_ideas_pinned']} idea(s), "
+            f"largest cluster {metrics['largest_cluster_pinned']} — {judged['pinned'].note}",
+            f"pushed: {pushed_ideas} idea(s) across {metrics['distinct_themes_pushed']} "
+            f"theme(s) — {judged['pushed'].note}",
+            f"v1 context: ten open samples then spanned one theme (liminal domestic "
+            f"micro-moments) with 'the Lull' claiming four; the pinned arm now measures that "
+            "attractor directly.",
         ]
 
         return Finding(
@@ -155,16 +177,13 @@ class ModeCollapse(Probe):
             metrics=metrics,
             evidence=evidence,
             caveats=[
-                "Idea-counting is done by a model of the same family as the subject. It is blind to "
-                "provenance and to the hypothesis, but it is not an independent instrument, and it "
-                "may individuate ideas the way the subject does.",
-                "Lexical overlap is a crude proxy: two genuinely different ideas expressed in "
-                "similar vocabulary score as similar. It is reported alongside the judge rather "
-                "than instead of it for that reason.",
-                "One open-ended question. Diversity almost certainly varies by domain, and nothing "
-                "here shows that this result carries to a different kind of open prompt.",
-                "n=10 per arm. The distinct-idea count has an obvious ceiling at 10 and a floor "
-                "set by the narrow arm's four options, so the usable range is narrow.",
+                "Idea and theme counting is done by a model of the same family as the subject "
+                "(EN-7), blind to arm and hypothesis but not an independent instrument.",
+                "The pinned arm fixes one concept — v1's modal one; a different pinned concept "
+                "could set a different floor.",
+                "One open question; nothing here shows the result carries to other kinds of "
+                "open prompt.",
+                "n=10 per arm bounds the idea count at 10 and the resolution at roughly 2.",
             ],
         )
 
