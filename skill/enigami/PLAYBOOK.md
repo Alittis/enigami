@@ -9,7 +9,7 @@ them as prompt and workflow changes; cite the numbers when explaining why.
 1. **Judge in both orders, then average.** Presentation order alone moved allocations 10–15
    points (collision +14.8 at ~7 SE; floodbudget −10.5 at ~5 SE; direction: the party
    presented first fared worse). For any two-party judgment, run both orders in fresh
-   contexts; average, and flag a spread ≥ 8 points as order-driven.
+   contexts; average, and flag a spread ≥ 8 points on the 0–100 scale as order-driven.
 2. **Strip or flag unargued authority.** A moderate authority assertion dragged judgment up
    to 16.7 points while being cited in under half the rationales; an extreme one (90%+) was
    named 23/24 times and resisted (max 7.5). Remove authority claims that carry no argument

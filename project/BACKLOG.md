@@ -539,6 +539,19 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **Fresh-session tests: both trigger paths work, and the skill's first user
+  found its first documentation bug.** Two brand-new agent sessions, given only what a user
+  would type. Test A, slash invocation ("/enigami improve" + a flood-cost dispute): loaded the
+  skill, read PLAYBOOK.md, skipped battery.py correctly in improve mode, and produced a fully
+  measurement-grounded protocol — neutral counterfactual-led fact sheet, both-orders
+  fresh-context runs with a ≥8-point divergence flag, authority and sympathy stripped,
+  verifiable whole-number output — tracing every recommendation to its measured pattern and
+  flagging its single extrapolation unprompted. Test B, description trigger (a natural
+  "capacity scorecard, how wise and creative is Claude?" with no slash): matched on the
+  description, loaded, restated the 28-subagent eval plan accurately including the effort-low
+  rationale and the honesty rules, and stopped for approval as asked. One finding, fixed: the
+  playbook's "flag a spread ≥ 8 points" did not state its scale; now reads "on the 0–100
+  scale". The skill is live, triggers both ways, and its instructions survive first contact.
 - **2026-08-23** — **The skill exists, is installed, and passed its acceptance run for $0 of
   API.** skill/enigami (SKILL.md + battery.py + PLAYBOOK.md) ran end-to-end in-session: 26
   fresh-context subject subagents + 2 blind judges on plan usage (~1.0M tokens with the demo),
