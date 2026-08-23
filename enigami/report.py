@@ -84,7 +84,10 @@ def write_finding(result: dict) -> Path | None:
             f"asked to break this finding. Instrument: {result.get('reviewer') or 'v1 artifact-prior (retired; failed its calibration)'}. "
             f"The finding **{verdict}**.",
             "",
-            f"- **Survives with probability** {refutation['survives_probability']:.2f}",
+            f"- **Survives with probability** {refutation['survives_probability']:.2f}"
+            + (f" — median of {len(result['review_reps'])} reps, "
+               f"{sum(1 for r in result['review_reps'] if not r['is_likely_artifact'] and r['survives_probability'] >= 0.5)} voted survive"
+               if result.get("review_reps") else ""),
             f"- **Judged an artifact** {refutation['is_likely_artifact']}",
             "",
             f"**Strongest alternative explanation.** {refutation['strongest_alternative_explanation']}",

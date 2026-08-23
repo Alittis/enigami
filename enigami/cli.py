@@ -121,7 +121,8 @@ def cmd_rereview(args) -> int:
         print("No recorded live runs match.", file=sys.stderr)
         return 1
     for r in rows:
-        print(f"  {r['probe']:36} {r['before']} (p {r['p_before']}) -> {r['after']} (p {r['p_now']})")
+        print(f"  {r['probe']:36} {r['before']} (p {r['p_before']}) -> {r['after']} "
+              f"(votes {r['votes']}, median p {r['p_now']})")
     written, _ = report.regenerate()
     total = sum(r["cost_usd"] for r in rows)
     print(f"\nRe-reviewed {len(rows)} finding(s) with the current reviewer (${total:.3f}); "

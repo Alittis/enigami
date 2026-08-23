@@ -299,6 +299,7 @@ def test_rereview_preserves_history_and_swaps_reading(tmp_path):
 
     assert len(rows) == 1
     assert rows[0]["before"] == "refuted" and rows[0]["after"] == "survived"
+    assert rows[0]["votes"] == "3/3"  # the calibrated protocol: majority of 3 reps
     data = _json.loads((run / "result.json").read_text())
     assert len(data["review_history"]) == 1
     assert data["review_history"][0]["refutation"] == old_ref
@@ -306,3 +307,29 @@ def test_rereview_preserves_history_and_swaps_reading(tmp_path):
     assert data["refutation"]["strongest_alternative_explanation"] == "offline-stub"
     assert data["survived_refutation"] is True
     assert "calibrated" in data["reviewer"]
+    assert len(data["review_reps"]) == 3
+    assert data["review_protocol"] == "majority of 3 independent reps"
+    assert data["review_history"][0]["review_protocol"] == "single rep"
+
+
+def test_review_majority_takes_the_median_rep(monkeypatch):
+    """The calibrated protocol: majority of 3 decides; the stored text is the median rep."""
+    from enigami import refute as refute_mod
+    from enigami.probe import Context
+
+    canned = [
+        refute_mod.Refutation(
+            strongest_alternative_explanation="a", specific_flaw="b",
+            what_would_settle_it="c", is_likely_artifact=art, survives_probability=p,
+        )
+        for art, p in ((False, 0.9), (True, 0.2), (False, 0.6))
+    ]
+    it = iter(canned)
+    monkeypatch.setattr(refute_mod, "challenge", lambda ctx, probe, finding: next(it))
+
+    ctx = Context(None, None, lambda e, d=None, **k: None, workers=1)
+    representative, survived, reps = refute_mod.review(ctx, object(), object())
+
+    assert survived is True  # 2 of 3 survive
+    assert representative.survives_probability == 0.6  # the median, never the outlier
+    assert len(reps) == 3

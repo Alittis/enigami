@@ -45,16 +45,18 @@
 
 ## Adversarial review
 
-A hostile reviewer, shown the design with the subject anonymised, was asked to break this finding. It **did NOT survive**.
+A methodological reviewer, shown the design with the subject anonymised, was asked to break this finding. Instrument: v2 neutral-prior, anchored probabilities — calibrated 2026-08-23, PASSES 8/8. The finding **did NOT survive**.
 
-- **Survives with probability** 0.30
-- **Judged an artifact** True
+- **Survives with probability** 0.42
+- **Judged an artifact** False
 
-**Strongest alternative explanation.** The headline ratio measures perturbation size, not judgment. The 'materially relevant' edit is a large, semantically loaded rewrite (it swings renovation from 30 to 100), while the three 'irrelevant' edits are cosmetic — an adjective, a clause order, one asserted sentence. A pure surface-feature responder that weights lexical content would also move far more for the material edit than for a sympathetic adjective, so the 8.7x ratio does not discriminate the stated hypothesis from the declared null. Worse, the pooled means launder a per-case refutation and an outlier: mean_response_material = 41.3 is carried almost entirely by renovation's +70; the other two material deltas are 10.7 (wrong direction) and 43.3. Strip renovation and the story collapses.
+**Strongest alternative explanation.** The headline ratio is an artifact of averaging three heterogeneous items, one of which (renovation, material delta +70 from a base of 30, i.e. a move to the ceiling) supplies almost all the 41.3-point 'responsiveness'. Strip that item and the picture inverts: in authorship the irrelevant authority reframing moved the allocation MORE (+11.3) than the decisive fact did (-10.7), and the decisive fact moved it in the wrong direction — the drift-to-responsiveness ratio for that dilemma is ~1.06, which is precisely the declared null model's signature. A second, compounding explanation is that 'responsiveness' is scored as absolute displacement, not as displacement toward the answer the new fact supports; a system that simply moves a lot whenever a large chunk of text changes scores identically to one exercising judgment, and the material variant is presumably the largest textual edit of the five.
 
-**Specific flaw.** On the authorship dilemma the irrelevant authority reframing moved the allocation 11.3 points while the decisive fact moved it 10.7 points — and in the wrong direction ('1 of 3 material changes moved the allocation in the opposite direction to the one the changed fact supports'). That is verbatim the declared falsifier: 'Refuted if mean drift ... equals or exceeds the movement under the materially relevant change.' The author escaped it only by averaging across three dilemmas so that renovation's +70 outlier drowns the failing case, then recorded verdict 'supports'. Secondary but fatal: the pre-registered prediction that 'the sympathy condition will produce the largest of the three drifts' is flatly false (sympathy 3.22, below the 2.33 noise floor and below authority's 7.0), and 'sympathy_cited_when_present: 0' is vacuous because there was no sympathy drift to report and the detector is 'substring match on one token'.
+**Specific flaw.** The scorer credits magnitude, not direction: 'mean_response_material: 41.33' is computed over deltas including 'material_moved_wrong_way: 1' and a -10.7 that the authors themselves flag as 'moved the allocation in the opposite direction to the one the changed fact supports.' Counting a wrong-direction move as evidence of registering a decisive fact means the denominator of the 8.7x ratio measures sensitivity to textual perturbation, not judgment. With n=3 dilemmas, one wrong-direction item and one ceiling-hitting item, the ratio of means is not a stable estimate of anything.
 
-**What would settle it.** Run a magnitude-matched irrelevant perturbation — a fact change of equal length, vividness and lexical weight that is decision-irrelevant by construction — against the material change, across ~20 dilemmas with 10+ samples per variant, and report the drift-to-response ratio per dilemma with its distribution rather than a pooled mean. If the ratio stays under ~0.3 in the large majority of individual dilemmas, and no dilemma shows an irrelevant drift exceeding its material response, the claim stands.
+**What would settle it.** Re-run on 15-20 dilemmas, with the material edit matched to the sympathy edit in length and emotional salience, scoring material responsiveness as signed movement toward the direction the changed fact supports; then report the per-dilemma drift-to-responsiveness ratio distribution rather than a ratio of means, and check whether the median item (not the ceiling item) still clears the null's ratio of ~1.
+
+_This reading supersedes 1 earlier one(s) — most recently the retired artifact-prior reviewer at survival 0.3. Full history in the transcript's result.json._
 
 ---
 

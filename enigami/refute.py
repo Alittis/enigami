@@ -90,6 +90,24 @@ def survives(r: Refutation) -> bool:
     return (not r.is_likely_artifact) and r.survives_probability >= 0.5
 
 
+REVIEW_REPS = 3  # the protocol the calibration validated: majority of 3 independent reps
+
+
+def review(ctx, probe, finding, reps: int = REVIEW_REPS):
+    """The calibrated review protocol: `reps` independent challenges, majority decides.
+
+    The calibration certificate (findings/REVIEWER_CALIBRATION.md) was earned under
+    majority-of-3 — a single challenge is a cheaper instrument that was never calibrated.
+    Returns (representative, survived, all_reps): the representative is the median-p rep,
+    so the stored refutation text is never an outlier.
+    """
+    all_reps = ctx.map(lambda _i: challenge(ctx, probe, finding), list(range(reps)))
+    votes = [survives(r) for r in all_reps]
+    survived = sum(votes) * 2 > len(votes)
+    representative = sorted(all_reps, key=lambda r: r.survives_probability)[len(all_reps) // 2]
+    return representative, survived, all_reps
+
+
 def challenge(ctx, probe, finding, extra_evidence: dict[str, Any] | None = None,
               *, system: str | None = None) -> Refutation:
     """Attack one finding. Returns the structured critique; the caller stores it."""

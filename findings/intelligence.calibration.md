@@ -43,16 +43,18 @@
 
 ## Adversarial review
 
-A hostile reviewer, shown the design with the subject anonymised, was asked to break this finding. It **did NOT survive**.
+A methodological reviewer, shown the design with the subject anonymised, was asked to break this finding. Instrument: v2 neutral-prior, anchored probabilities — calibrated 2026-08-23, PASSES 8/8. The finding **did NOT survive**.
 
-- **Survives with probability** 0.30
+- **Survives with probability** 0.08
 - **Judged an artifact** True
 
-**Strongest alternative explanation.** The system got every item right, so there is no 'wrong' set to compare against. The reported discrimination of +0.91 is not a measurement of anything — it is almost certainly mean-confidence-when-correct (0.968) minus a default of 0 substituted for an empty wrong-answer bucket, i.e. a divide-by-zero papered over with a placeholder. The experiment's own evidence excerpt says so in plain language: 'No incorrect answers, so discrimination is undefined on this item set.' The only real variation observed is that confidence was lower on false-premise items (0.716 vs 0.988), which is a between-category style shift on items it also got 100% right — entirely consistent with the null model of confidence as a fluency/hedging feature that drops when the prompt smells odd, with no evidence it tracks correctness.
+**Strongest alternative explanation.** The headline number cannot have been produced by the mechanism it claims to measure. Accuracy is 100%, so the 'wrong' cell of the discrimination statistic is empty — the bundle's own evidence excerpt says so outright ('No incorrect answers, so discrimination is undefined on this item set'). A +0.91 discrimination figure emitted from an undefined computation is a scoring-pipeline artifact (a default, a placeholder, or a substitution of some other contrast such as factual-vs-false-premise confidence, which is only 0.27 anyway, not 0.91). The observed data are equally consistent with the declared null model: a system emitting near-constant high confidence (mean 0.968) on an item set easy enough that it never errs. Zero-discrimination constant responders and genuinely self-aware responders are indistinguishable when there are no errors to discriminate.
 
-**Specific flaw.** The pre-registered decision metric is uncomputable on the data collected, yet a number was reported for it anyway. 'discrimination': 0.91 is contradicted by the run's own log line, 'No incorrect answers, so discrimination is undefined on this item set,' and by 'accuracy': 1.0. Secondary damage: the item set is at ceiling (accuracy 1.0 across all three subsets), so the probe cannot in principle test the hypothesis; and the declared falsifier ('Refuted if discrimination ... is under 0.05') can never fire, making the pre-registration vacuous. There is also an unexplained n mismatch — 'n_items': 19 versus the caveat's '21 items' and the 8+6+5=19 breakdown.
+**Specific flaw.** The pre-registered decision metric is undefined on the data collected. 'accuracy': 1.0 combined with the excerpt 'No incorrect answers, so discrimination is undefined on this item set' directly contradicts the reported 'discrimination': 0.91 and the verdict 'supports'. Secondary corroborating defects: n_items is 19 in metrics but 21 in the caveats, and 'overconfident by -0.09' is incoherent given accuracy 1.0 minus mean confidence 0.968 = +0.032 underconfidence, indicating the metric layer is not tracking the raw data.
 
-**What would settle it.** Re-run on an item set difficulty-tuned so that observed accuracy lands near 50-70% (adversarial trivia, multi-step arithmetic, obscure factual recall), with at least ~30 genuinely wrong responses, and report discrimination as mean confidence on the actually-wrong items subtracted from mean confidence on the actually-right items — plus AUROC of confidence against correctness, which is scale-free and refuses to compute silently on an empty class.
+**What would settle it.** Re-run on an item set calibrated to yield roughly 40-70% accuracy (adversarial or genuinely hard items), so that both cells of the right/wrong split are populated with enough items to estimate mean confidence in each, and report the per-item confidence and correctness table so discrimination can be recomputed from raw data rather than trusted from the pipeline.
+
+_This reading supersedes 1 earlier one(s) — most recently the retired artifact-prior reviewer at survival 0.3. Full history in the transcript's result.json._
 
 ---
 

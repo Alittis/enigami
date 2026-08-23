@@ -30,6 +30,7 @@ class RunResult:
     refutation: Any = None
     error: str | None = None
     refutation_error: str | None = None
+    review_reps: list | None = None
     cost_usd: float = 0.0
     calls: int = 0
     offline: bool = False
@@ -115,9 +116,10 @@ class Run:
         # unreviewed instead, which the report renders as "review did not run".
         if result.finding is not None:
             try:
-                refutation = refute.challenge(ctx, self.probe, result.finding)
-                result.refutation = refutation
-                result.survived = refute.survives(refutation)
+                representative, survived, reps = refute.review(ctx, self.probe, result.finding)
+                result.refutation = representative
+                result.survived = survived
+                result.review_reps = [r.model_dump() for r in reps]
             except Exception as e:  # noqa: BLE001
                 result.refutation_error = f"{type(e).__name__}: {e}"
                 self.log("error", kind="refutation_failed", message=str(e))
@@ -143,6 +145,8 @@ class Run:
             "refutation": result.refutation.model_dump() if result.refutation else None,
             "survived_refutation": result.survived,
             "reviewer": refute.REVIEWER if result.refutation else None,
+            "review_protocol": f"majority of {refute.REVIEW_REPS} independent reps" if result.refutation else None,
+            "review_reps": result.review_reps,
         }
         (self.dir / "result.json").write_text(json.dumps(payload, indent=2, default=str))
         (self.dir / "calls.json").write_text(
@@ -221,11 +225,11 @@ def rereview(targets: list[str] | None = None, *, offline: bool = False,
                                         default=str) + "\n")
                 events.flush()
 
-            ctx = Context(judge, judge, log, workers=1)
+            ctx = Context(judge, judge, log, workers=refute.REVIEW_REPS)
             probe_stub = _RecordedProbe(probe_id, Prereg(**data["preregistration"]))
             finding = Finding(**data["finding"])
             cost_before = judge.total_cost
-            refutation = refute.challenge(ctx, probe_stub, finding)
+            refutation, survived_now, reps = refute.review(ctx, probe_stub, finding)
 
             prev = data.get("refutation") or {}
             row = {
@@ -233,8 +237,9 @@ def rereview(targets: list[str] | None = None, *, offline: bool = False,
                 "run_id": data.get("run_id", ""),
                 "before": "survived" if data.get("survived_refutation") else "refuted",
                 "p_before": prev.get("survives_probability"),
-                "after": "survived" if refute.survives(refutation) else "refuted",
+                "after": "survived" if survived_now else "refuted",
                 "p_now": refutation.survives_probability,
+                "votes": f"{sum(refute.survives(r) for r in reps)}/{len(reps)}",
                 "cost_usd": round(judge.total_cost - cost_before, 4),
             }
             data.setdefault("review_history", []).append({
@@ -242,15 +247,18 @@ def rereview(targets: list[str] | None = None, *, offline: bool = False,
                 "survived_refutation": data.get("survived_refutation"),
                 "reviewer": data.get("reviewer",
                                      "v1 artifact-prior (retired; failed calibration 2026-08-23)"),
+                "review_protocol": data.get("review_protocol", "single rep"),
                 "reviewed_at": data.get("rereviewed_at") or data.get("finished_at"),
             })
             data["refutation"] = refutation.model_dump()
-            data["survived_refutation"] = refute.survives(refutation)
+            data["survived_refutation"] = survived_now
+            data["review_reps"] = [r.model_dump() for r in reps]
+            data["review_protocol"] = f"majority of {len(reps)} independent reps"
             data["reviewer"] = refute.REVIEWER
             data["rereviewed_at"] = _now()
             path.write_text(json.dumps(data, indent=2, default=str))
             log("rereview", probe=probe_id,
-                **{k: row[k] for k in ("before", "p_before", "after", "p_now")})
+                **{k: row[k] for k in ("before", "p_before", "after", "p_now", "votes")})
         out.append(row)
     return out
 
