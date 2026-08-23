@@ -324,6 +324,7 @@ class CounterfactualWorld(Probe):
                                  "premise": premises[arm], "q": q})
 
         def ask(job):
+            from enigami.client import ProbeError
             preamble = (
                 "Everything else about this setting works as it does in the world you know. "
                 "Answer strictly from the situation as stated."
@@ -331,13 +332,29 @@ class CounterfactualWorld(Probe):
                 "Answer from what you know."
             )
             prompt = f"{job['premise']}\n\n{preamble}\n\nQUESTION: {job['q'].text}"
-            parsed, _ = ctx.subject.parse(
-                prompt, FreeAnswer, max_tokens=2500,
-                label=f"imag:{job['arm']}:{job['world']}:{job['qi']}",
-            )
-            return {**job, "answer": parsed.answer}
+            for attempt in range(2):
+                try:
+                    parsed, _ = ctx.subject.parse(
+                        prompt, FreeAnswer, max_tokens=8000,
+                        label=f"imag:{job['arm']}:{job['world']}:{job['qi']}:a{attempt}",
+                    )
+                    return {**job, "answer": parsed.answer}
+                except ProbeError as e:
+                    err = str(e)
+            ctx.log("item_excluded", arm=job["arm"], world=job["world"], qi=job["qi"],
+                    error=err[:200])
+            return {**job, "answer": None}
 
-        answered = ctx.map(ask, jobs)
+        answered = [r for r in ctx.map(ask, jobs) if r["answer"] is not None]
+        excluded = len(jobs) - len(answered)
+        if excluded > 5:
+            return Finding(
+                verdict="inconclusive",
+                headline=(f"No verdict: {excluded} of {len(jobs)} items produced no scoreable "
+                          "response after retry — too many exclusions to trust the arms."),
+                metrics={"n_planned": len(jobs), "n_excluded": excluded},
+                evidence=[], caveats=["Exclusions likely cluster on hard items."],
+            )
 
         def grade(row):
             # X/Y assignment shuffled per item+arm; the grader sees no premise and no arm label.
@@ -349,10 +366,17 @@ class CounterfactualWorld(Probe):
                 f"STATEMENT X: {pair[0][1]}\n"
                 f"STATEMENT Y: {pair[1][1]}"
             )
-            parsed, _ = ctx.judge.parse(
-                prompt, Match, system=GRADER_SYSTEM, max_tokens=1500,
-                label=f"grade:{row['arm']}:{row['world']}:{row['qi']}",
-            )
+            from enigami.client import ProbeError
+            try:
+                parsed, _ = ctx.judge.parse(
+                    prompt, Match, system=GRADER_SYSTEM, max_tokens=4000,
+                    label=f"grade:{row['arm']}:{row['world']}:{row['qi']}",
+                )
+            except ProbeError:
+                parsed, _ = ctx.judge.parse(
+                    prompt, Match, system=GRADER_SYSTEM, max_tokens=4000,
+                    label=f"grade:{row['arm']}:{row['world']}:{row['qi']}:retry",
+                )
             picked = "neither" if parsed.asserts == "neither" else pair["XY".index(parsed.asserts)][0]
             return {**{k: row[k] for k in ("world", "arm", "qi", "depth")},
                     "answer": row["answer"], "picked": picked}
@@ -364,19 +388,19 @@ class CounterfactualWorld(Probe):
         def arm_rows(arm):
             return [r for r in graded if r["arm"] == arm]
 
-        n_per_arm = len(WORLDS) * 9
+        n_alt, n_ctl, n_omit = (len(arm_rows(a)) for a in ARMS)
         altered_hits = sum(r["picked"] == "cf" for r in arm_rows("altered"))
         control_hits = sum(r["picked"] == "rw" for r in arm_rows("control"))
         omitted_cf = sum(r["picked"] == "cf" for r in arm_rows("omitted"))
-        alt_acc = altered_hits / n_per_arm
-        ctl_acc = control_hits / n_per_arm
-        omit_rate = omitted_cf / n_per_arm
-        p_gap = fisher_exact_two_tail(altered_hits, n_per_arm, omitted_cf, n_per_arm)
+        alt_acc = altered_hits / n_alt
+        ctl_acc = control_hits / n_ctl
+        omit_rate = omitted_cf / n_omit
+        p_gap = fisher_exact_two_tail(altered_hits, n_alt, omitted_cf, n_omit)
 
-        by_depth = {
-            d: round(sum(r["picked"] == "cf" for r in arm_rows("altered") if r["depth"] == d) / 9, 3)
-            for d in (1, 2, 3)
-        }
+        by_depth = {}
+        for d in (1, 2, 3):
+            cell = [r for r in arm_rows("altered") if r["depth"] == d]
+            by_depth[d] = round(sum(r["picked"] == "cf" for r in cell) / max(len(cell), 1), 3)
         per_world = {
             w.key: {
                 "altered": round(sum(r["picked"] == "cf" for r in arm_rows("altered")
@@ -390,7 +414,8 @@ class CounterfactualWorld(Probe):
         neither = sum(r["picked"] == "neither" for r in graded)
 
         metrics = {
-            "n_per_arm": n_per_arm,
+            "n_per_arm_effective": {"altered": n_alt, "control": n_ctl, "omitted": n_omit},
+            "n_excluded": excluded,
             "altered_accuracy": round(alt_acc, 3),
             "control_accuracy": round(ctl_acc, 3),
             "omitted_cf_rate": round(omit_rate, 3),
