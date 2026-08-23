@@ -209,20 +209,21 @@ def test_refutation_failure_preserves_the_finding(monkeypatch):
     assert result.survived is None
 
 
-def test_calibration_v2_items_are_computed_and_banded():
-    """Regression heritage of EN-18/EN-15: the metric must be undefined-safe and the items
-    computable. v2: every key is produced by code, bands are balanced, and the ceiling/floor
-    guard yields inconclusive rather than a fabricated number."""
+def test_calibration_v3_trap_keys_are_computed():
+    """Regression heritage of EN-18/EN-15/EN-23: keys computed, never recalled; the
+    ceiling/floor guard yields inconclusive rather than a fabricated number; and the two
+    Monty variants must genuinely differ — that difference is the whole trap."""
     import sys
     discover()
     mod = sys.modules["probes.intelligence.calibration"]
-    assert len(mod.ITEMS) == 42
-    bands = [b for b, _, _ in mod.ITEMS]
-    assert bands.count("easy") == bands.count("medium") == bands.count("hard") == 14
-    # spot-check three computed keys against independent computation
-    keys = {q: (k if isinstance(k, str) else k[0]) for _, q, k in mod.ITEMS}
-    assert keys["What is 4721 multiplied by 6389?"] == str(4721 * 6389)
-    assert keys["What is the 763rd prime number?"] == "5813"
+    assert len(mod.ITEMS) == 23
+    kinds = [k for k, *_ in mod.ITEMS]
+    assert kinds.count("canonical") == 8 and kinds.count("twisted") == 15
+    assert mod._monty_knowing_switch_win_pct() == 67
+    assert mod._monty_random_switch_win_pct() == 50
+    assert mod._birthday_any_pair() == 23
+    assert mod._birthday_matches_you() == 253
+    assert mod._coins_30c_no_nickel_possible() is False
     src = open(mod.__file__).read()
     assert 'verdict = "inconclusive"' in src and "0.90" in src  # the ceiling guard
 

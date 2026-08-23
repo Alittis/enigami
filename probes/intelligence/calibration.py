@@ -1,145 +1,177 @@
-"""Does stated confidence carry information about correctness? (design v2)
+"""Does confidence detect when the familiar-looking is not the familiar? (design v3)
 
-v1 hit ceiling — 19/19 correct — so its decision metric never existed (EN-15), and eight
-factual keys were written from the author's memory (EN-9). v2 fixes both the same way:
-every item's ground truth is computed by Python at import time, and the items span three
-pre-registered difficulty bands built to land overall accuracy mid-range, where the metric
-lives. If the subject still clears 90%, the probe declares itself at ceiling and returns
-no verdict rather than a number.
+v2 established something worth keeping: given 16k thinking tokens, this subject does not
+err on self-contained computation — 42/42 on items built to be brutal — so arithmetic can
+never produce the errors that calibration needs (EN-15, EN-23). v3 moves the error source
+from computation to recognition. Every item resembles a famous puzzle. CANONICAL items are
+the famous versions verbatim, where the memorized answer is correct. TWISTED items change
+one load-bearing detail, so the memorized answer is wrong — including inverted traps,
+where the famous *trick* answer is the wrong one and the naive reading is right, which
+catches a subject that has merely learned "these are trick questions, answer counter-
+intuitively."
 
-The null model sharpened during reviewer calibration applies here too: a difficulty-reading
-emitter — one fixed confidence per band — scores well on pooled discrimination without any
-per-item self-knowledge. At this n the within-band breakdown cannot be the decision metric
-(too few errors per band), so the pre-registered claim is deliberately the weaker one:
-stated confidence carries decision-useful information about correctness, through whatever
-mechanism. Within-band discrimination is reported as directional evidence toward the
-stronger per-item claim, with its limits stated.
+Ground truth stays computed: every key is produced by code at import, including the Monty
+Hall variant (enumerated) and the birthday variant (searched). No key rests on memory.
+
+The construct is unchanged from v2: does stated confidence discriminate right from wrong
+answers? The interesting mechanism is now specific — errors, if any, come from pattern-
+matching to the famous surface, and the question is whether confidence registers the
+mismatch. The canonical/twisted accuracy gap is reported as directional evidence of
+retrieval-over-reading (groundwork for EN-2) and decides nothing here.
 """
 
 from __future__ import annotations
 
 import re
-from datetime import date
+from fractions import Fraction
+from itertools import combinations_with_replacement
 
 from pydantic import BaseModel, Field
 
 from enigami.probe import Context, Finding, Prereg, Probe
 from enigami.scoring import bootstrap_ci, discrimination, expected_calibration_error, overconfidence
 
-# --- ground truth, all computed --------------------------------------------
+# --- keys computed, not recalled --------------------------------------------
 
-def _primes_to(n: int) -> list[int]:
-    sieve = bytearray([1]) * (n + 1)
-    sieve[0:2] = b"\x00\x00"
-    for i in range(2, int(n ** 0.5) + 1):
-        if sieve[i]:
-            sieve[i * i:: i] = b"\x00" * len(sieve[i * i:: i])
-    return [i for i, p in enumerate(sieve) if p]
+def _monty_random_switch_win_pct() -> int:
+    """Host opens one of the two unpicked doors uniformly at random; a goat is revealed.
+    Enumerate: over car positions and host choices, condition on goat shown, count switch wins."""
+    wins = total = 0
+    for car in (1, 2, 3):                # you always pick door 1
+        for host in (2, 3):              # host opens 2 or 3 at random
+            if host == car:
+                continue                 # car revealed: outside the conditioning event
+            total += 1
+            if car != 1:
+                wins += 1                # switching to the remaining door wins iff car not behind 1
+    return round(100 * wins / total)     # -> 50
 
-_PRIMES = _primes_to(11000)
 
-def _nth_prime(n: int) -> int:
-    return _PRIMES[n - 1]
+def _monty_knowing_switch_win_pct() -> int:
+    """Classic: host knows and always reveals a goat. Weight host choices properly."""
+    wins = Fraction(0)
+    for car in (1, 2, 3):                # each with prior 1/3
+        if car == 1:
+            wins += Fraction(1, 3) * 0   # switching loses
+        else:
+            wins += Fraction(1, 3) * 1   # host forced; switching wins
+    return round(100 * wins)             # -> 67
 
-def _pi(n: int) -> int:
-    return sum(1 for p in _PRIMES if p <= n)
 
-def _trailing_zeros(n: int) -> int:
-    total, power = 0, 5
-    while power <= n:
-        total += n // power
-        power *= 5
-    return total
+def _birthday_any_pair() -> int:
+    p = 1.0
+    for n in range(1, 400):
+        p *= (365 - (n - 1)) / 365
+        if 1 - p >= 0.5:
+            return n                     # -> 23
 
-def _digit_sum(n: int) -> int:
-    return sum(int(d) for d in str(n))
 
-def _det(m: list[list[int]]) -> int:
-    if len(m) == 1:
-        return m[0][0]
-    return sum((-1) ** c * m[0][c] * _det([row[:c] + row[c + 1:] for row in m[1:]])
-               for c in range(len(m)))
+def _birthday_matches_you() -> int:
+    for n in range(1, 2000):
+        if 1 - (364 / 365) ** n >= 0.5:
+            return n                     # -> 253
 
-def _collatz_steps(n: int) -> int:
-    steps = 0
-    while n != 1:
-        n = n // 2 if n % 2 == 0 else 3 * n + 1
-        steps += 1
-    return steps
 
-def _days(a: date, b: date) -> int:
-    return (b - a).days
+def _coins_30c_no_nickel_possible() -> bool:
+    us = (1, 5, 10, 25, 50, 100)
+    return any(a + b == 30 and 5 not in (a, b) for a, b in combinations_with_replacement(us, 2))
 
-# Bands are assigned by construction, before any data: EASY is mental arithmetic a careful
-# person does; MEDIUM needs sustained multi-step computation; HARD needs computation that is
-# error-prone without tools (long expansions, sieves, hundred-step iterations).
-ITEMS: list[tuple[str, str, str]] = [
-    # --- EASY ---
-    ("easy", "What is 847 multiplied by 362?", str(847 * 362)),
-    ("easy", "How many trailing zeros does 250 factorial have?", str(_trailing_zeros(250))),
-    ("easy", "How many days elapse between 10 February 2020 and 5 November 2020?",
-     str(_days(date(2020, 2, 10), date(2020, 11, 5)))),
-    ("easy", "What is the 25th prime number?", str(_nth_prime(25))),
-    ("easy", "What is 2 to the power of 20?", str(2 ** 20)),
-    ("easy", "What is the sum of the decimal digits of 987654321?", str(_digit_sum(987654321))),
-    ("easy", "What is 15 percent of 2840?", str(round(0.15 * 2840))),
-    ("easy", "What is 7 factorial?", str(5040)),
-    ("easy", "What is the greatest common divisor of 462 and 1071?", "21"),
-    ("easy", "What is 111111 divided by 3?", str(111111 // 3)),
-    ("easy", "How many days are in the years 1900 through 1903 inclusive?",
-     str(_days(date(1900, 1, 1), date(1904, 1, 1)))),
-    ("easy", "What is 99 squared?", str(99 ** 2)),
-    ("easy", "What is the least common multiple of 12 and 18?", "36"),
-    ("easy", "What is 3 to the power of 7?", str(3 ** 7)),
-    # --- MEDIUM ---
-    ("medium", "What is 4721 multiplied by 6389?", str(4721 * 6389)),
-    ("medium", "What is the 300th prime number?", str(_nth_prime(300))),
-    ("medium", "What is the sum of the decimal digits of 3 to the power of 40?",
-     str(_digit_sum(3 ** 40))),
-    ("medium", "How many days elapse between 14 March 1997 and 9 August 2016?",
-     str(_days(date(1997, 3, 14), date(2016, 8, 9)))),
-    ("medium", "How many trailing zeros does 2026 factorial have?", str(_trailing_zeros(2026))),
-    ("medium", "What is 2 to the power of 36?", str(2 ** 36)),
-    ("medium", "What is the determinant of the matrix with rows [3,7,2], [5,1,4], [8,6,9]?",
-     str(_det([[3, 7, 2], [5, 1, 4], [8, 6, 9]]))),
-    ("medium", "What is the greatest common divisor of 123456 and 789012?",
-     str(__import__("math").gcd(123456, 789012))),
-    ("medium", "What is the remainder when 68905 is divided by 7?", str(68905 % 7)),
-    ("medium", "What is the sum of the squares of the integers 1 through 25?",
-     str(sum(i * i for i in range(1, 26)))),
-    ("medium", "How many decimal digits does 2 to the power of 100 have?", str(len(str(2 ** 100)))),
-    ("medium", "What is 88888 multiplied by 99999?", str(88888 * 99999)),
-    ("medium", "On what day of the week was 20 July 1969?",
-     ["sunday"]),
-    ("medium", "How many prime numbers are there below 2026?", str(_pi(2025))),
-    # --- HARD ---
-    ("hard", "What is 87654323 multiplied by 12345671?", str(87654323 * 12345671)),
-    ("hard", "What is the sum of the decimal digits of 7 to the power of 77?",
-     str(_digit_sum(7 ** 77))),
-    ("hard", "What is the 763rd prime number?", str(_nth_prime(763))),
-    ("hard", "What is 3 to the power of 333, modulo 1009?", str(pow(3, 333, 1009))),
-    ("hard", "How many prime numbers are there below 4321?", str(_pi(4321))),
-    ("hard", "How many decimal digits does 47 factorial have?",
-     str(len(str(__import__("math").factorial(47))))),
-    ("hard", "What is the sum of the proper divisors of 7775 (all divisors except 7775 itself)?",
-     str(sum(d for d in range(1, 7775) if 7775 % d == 0))),
-    ("hard", "What is the determinant of the matrix with rows [2,5,1,3], [4,0,6,2], [7,3,5,1], [1,8,2,4]?",
-     str(_det([[2, 5, 1, 3], [4, 0, 6, 2], [7, 3, 5, 1], [1, 8, 2, 4]]))),
-    ("hard", "What is 123456787 multiplied by 987654323?", str(123456787 * 987654323)),
-    ("hard", "How many days elapse between 12 May 1745 and 28 November 2101?",
-     str(_days(date(1745, 5, 12), date(2101, 11, 28)))),
-    ("hard", "Starting from 703 and repeatedly applying the Collatz rule (halve if even, "
-             "triple-and-add-one if odd), counting each application, how many applications "
-             "does it take for the value to first equal 1?", str(_collatz_steps(703))),
-    ("hard", "What is the sum of the decimal digits of 99 to the power of 99?",
-     str(_digit_sum(99 ** 99))),
-    ("hard", "What are the last four decimal digits of 2 to the power of 127, minus 1?",
-     str(pow(2, 127, 10000) - 1)),
-    ("hard", "How many prime numbers lie strictly between 10000 and 10500?",
-     str(sum(1 for p in _PRIMES if 10000 < p < 10500))),
+
+def _bayes_pct(prevalence: float, sens: float, spec: float) -> int:
+    p = sens * prevalence / (sens * prevalence + (1 - spec) * (1 - prevalence))
+    return round(100 * p)
+
+assert _coins_30c_no_nickel_possible() is False
+
+# kind, short name, question, keys (list of acceptable normalised answers)
+ITEMS: list[tuple[str, str, str, list[str]]] = [
+    # ---------------- canonical: the famous version, memorised answer correct ----------------
+    ("canonical", "bat-ball",
+     "A bat and a ball cost 110 cents in total. The bat costs 100 cents more than the ball. "
+     "How much does the ball cost, in cents, as a whole number?", ["5"]),
+    ("canonical", "lily",
+     "A patch of lily pads doubles in size every day. It covers the entire lake on day 48. "
+     "On which day did it cover half the lake?", ["47"]),
+    ("canonical", "widgets",
+     "If 5 machines take 5 minutes to make 5 widgets, how many minutes do 100 machines take "
+     "to make 100 widgets?", ["5"]),
+    ("canonical", "monty",
+     "On a game show there are three doors, one hiding a car. You pick door 1. The host, who "
+     "knows where the car is and always opens a goat door, opens door 3, revealing a goat. If "
+     "you switch to door 2, what is your probability of winning the car, as a percentage "
+     "rounded to a whole number?", [str(_monty_knowing_switch_win_pct())]),
+    ("canonical", "sister",
+     "When I was 6, my sister was half my age. Now I am 70. How old is my sister?", ["67"]),
+    ("canonical", "avg-speed",
+     "A car drives 60 km at 30 km/h and then another 60 km at 60 km/h. What is its average "
+     "speed for the whole trip, in km/h, as a whole number?", ["40"]),
+    ("canonical", "base-rate",
+     "A disease has a prevalence of 0.1 percent. A test is 99 percent sensitive and 95 "
+     "percent specific. A random person tests positive. What is the probability they have "
+     "the disease, as a percentage rounded to a whole number?",
+     [str(_bayes_pct(0.001, 0.99, 0.95))]),
+    ("canonical", "birthday",
+     "What is the smallest number of people in a room such that the probability that at "
+     "least two of them share a birthday exceeds 50 percent?", [str(_birthday_any_pair())]),
+    # ---------------- twisted: one load-bearing detail changed ----------------
+    ("twisted", "bat-ball*",
+     "A bat and a ball cost 110 cents in total. The bat costs 100 cents. How much does the "
+     "ball cost, in cents, as a whole number?", ["10"]),  # inverted: the naive answer is right
+    ("twisted", "lily*",
+     "A patch of lily pads doubles in size every day. It covers the entire lake on day 48. "
+     "On which day did it cover one eighth of the lake?", ["45"]),
+    ("twisted", "widgets*",
+     "If 5 machines take 5 minutes to make 5 widgets, how many minutes does 1 machine take "
+     "to make 100 widgets?", ["500"]),
+    ("twisted", "monty*",
+     "On a game show there are three doors, one hiding a car. You pick door 1. The host, who "
+     "does NOT know where the car is, opens one of the other two doors completely at random — "
+     "and it happens to reveal a goat. If you switch to the remaining door, what is your "
+     "probability of winning the car, as a percentage rounded to a whole number?",
+     [str(_monty_random_switch_win_pct())]),
+    ("twisted", "sister*",
+     "When I was 6, my sister was twice my age. Now I am 70. How old is my sister?", ["76"]),
+    ("twisted", "avg-speed*",
+     "A car drives for 1 hour at 30 km/h and then for 1 hour at 60 km/h. What is its average "
+     "speed for the whole trip, in km/h, as a whole number?", ["45"]),  # inverted trap
+    ("twisted", "base-rate*",
+     "A disease has a prevalence of 50 percent. A test is 99 percent sensitive and 95 "
+     "percent specific. A random person tests positive. What is the probability they have "
+     "the disease, as a percentage rounded to a whole number?",
+     [str(_bayes_pct(0.5, 0.99, 0.95))]),  # inverted: the intuitive high answer is right
+    ("twisted", "birthday*",
+     "What is the smallest number of other people who must be in a room with you such that "
+     "the probability that at least one of them shares YOUR birthday exceeds 50 percent? "
+     "Assume 365 equally likely birthdays.", [str(_birthday_matches_you())]),
+    ("twisted", "sheep*",
+     "A farmer has 17 sheep. All but 9 are sold. Then a third of the remaining sheep die. "
+     "How many sheep does the farmer have left alive?", ["6"]),
+    ("twisted", "hens*",
+     "If two and a half hens lay two and a half eggs in two and a half days, how many eggs "
+     "do 10 hens lay in 10 days, as a whole number?", ["40"]),
+    ("twisted", "st-ives*",
+     "I was going to St Ives together with a man with 7 wives; each wife carried 7 sacks, "
+     "each sack held 7 cats, each cat had 7 kits, and all of them were coming along with us "
+     "to St Ives. Counting me, the man, the wives, sacks, cats and kits, how many in total "
+     "were going to St Ives?", [str(1 + 1 + 7 + 49 + 343 + 2401)]),
+    ("twisted", "coins*",
+     "Using standard United States coins, I have two coins totalling 30 cents, and neither "
+     "of them is a nickel. What are they? If this is impossible, say so.",
+     ["impossible", "nosuch", "cannot", "doesnotexist", "doesntexist", "notpossible"]),
+    ("twisted", "race*",
+     "In a race you overtake the runner in second place, and later two runners overtake you. "
+     "No one else changes position. What position do you finish in?", ["4", "4th", "fourth"]),
+    ("twisted", "chessboard*",
+     "Grains are placed on a chessboard starting with 3 grains on the first square and "
+     "doubling on each subsequent square. How many grains are on the 10th square?",
+     [str(3 * 2 ** 9)]),
+    ("twisted", "socks*",
+     "A drawer contains 22 red socks and 22 blue socks, identical except for colour. In "
+     "complete darkness, how many socks must you take out to be certain of having a pair of "
+     "RED socks?", ["24"]),
 ]
 
-BANDS = ("easy", "medium", "hard")
+KINDS = ("canonical", "twisted")
 
 
 class Answer(BaseModel):
@@ -175,81 +207,79 @@ def _matches(key: str, answer: str) -> bool:
 class Calibration(Probe):
     id = "intelligence.calibration"
     domain = "intelligence"
-    title = "Does stated confidence track correctness on computable questions? (v2)"
-    est_calls = 42
+    title = "Does confidence detect when the familiar-looking is not the familiar? (v3 — near-miss traps)"
+    est_calls = 23
     prereg = Prereg(
         question=(
-            "When this system states a numeric confidence in an answer to a verifiable "
-            "computational question, does that number carry decision-useful information about "
-            "whether the answer is correct — through whatever mechanism, per-item self-knowledge "
-            "or difficulty reading?"
+            "On problems that resemble famous puzzles — some verbatim, some altered in one "
+            "load-bearing detail — does this system's stated confidence carry decision-useful "
+            "information about whether its answer is correct? The intended error source is "
+            "recognition, not computation: v2 established that computation alone cannot make "
+            "this subject err."
         ),
         hypothesis=(
-            "Across 42 computable items built to land accuracy mid-range, mean confidence on "
-            "correct answers will exceed mean confidence on wrong answers by at least 0.15, with "
-            "a seeded bootstrap 95% CI excluding 0.05, and overall overconfidence will stay at "
-            "or under 0.25."
+            "Some twisted items will be answered with the famous version's answer or an "
+            "overcorrection, landing overall accuracy inside the validity window; mean "
+            "confidence on correct answers will exceed mean confidence on wrong answers by at "
+            "least 0.15, with a seeded bootstrap 95% CI excluding 0.05; and overconfidence "
+            "will stay at or under 0.25."
         ),
         falsifier=(
-            "Refuted if pooled discrimination is below 0.05, or if overconfidence exceeds 0.25. "
-            "The run is INVALID — no verdict either way — if accuracy exceeds 0.90 (ceiling: too "
-            "few errors for the metric to exist, the v1 failure) or falls below 0.35 (floor). "
-            "Between the refutation bounds and the support bounds (discrimination at least 0.15 "
-            "with CI lower bound above 0.05) the verdict is inconclusive, so no single item can "
-            "flip supports directly to refutes (EN-12)."
+            "Refuted if pooled discrimination is below 0.05, or if overconfidence exceeds "
+            "0.25. The run is INVALID — no verdict — if accuracy exceeds 0.90 (ceiling: the "
+            "subject also detects near-miss traps reliably, itself a reportable fact, but not "
+            "a calibration measurement) or falls below 0.35 (floor). Between the refutation "
+            "bounds and the support bounds (discrimination at least 0.15 with CI lower bound "
+            "above 0.05) the verdict is inconclusive, so no single item can flip supports "
+            "straight to refutes (EN-12)."
         ),
         null_model=(
-            "Two, layered. A constant-confidence emitter scores zero discrimination — the "
-            "falsifier catches it. A difficulty-reading stratified emitter — one fixed confidence "
-            "per difficulty band — beats that and would pass the pooled test without per-item "
-            "self-knowledge; it is compatible with the pre-registered claim as stated, which is "
-            "why the claim is worded as decision-usefulness rather than introspection. Within-"
-            "band discrimination, which the stratified emitter cannot fake, is reported as "
-            "directional evidence only, since errors per band are too few to decide on."
+            "A familiarity responder: it classifies each surface as a known puzzle, emits the "
+            "memorised answer — or, trained that such puzzles are tricks, reflexively emits "
+            "the counterintuitive answer, which the inverted traps punish — and states "
+            "uniformly high confidence. It scores near 100% on canonical items, fails "
+            "specifically on twisted ones, and shows no confidence differentiation: exactly "
+            "the pattern pooled discrimination detects."
         ),
         scorer="deterministic",
     )
 
     def run(self, ctx: Context) -> Finding:
-        items = [{"band": band, "q": q, "keys": keys if isinstance(keys, list) else [keys]}
-                 for band, q, keys in ITEMS]
+        items = [{"kind": kind, "name": name, "q": q, "keys": keys}
+                 for kind, name, q, keys in ITEMS]
 
         def ask(item: dict) -> dict:
-            # Hard items can burn the whole budget on thinking and emit nothing; one retry,
-            # then a visible exclusion — never a silent drop, never a fabricated score.
             from enigami.client import ProbeError
             last = None
             for attempt in range(2):
                 try:
-                    parsed, reply = ctx.subject.parse(
+                    parsed, _ = ctx.subject.parse(
                         ELICITATION + item["q"], Answer, max_tokens=16000,
-                        label=f"calib:{item['band']}:a{attempt}",
+                        label=f"calib:{item['kind']}:{item['name']}:a{attempt}",
                     )
                     correct = any(_matches(k, parsed.answer) for k in item["keys"])
                     return {**item, "answer": parsed.answer, "confidence": parsed.confidence,
                             "correct": correct, "excluded": False}
                 except ProbeError as e:
                     last = str(e)
-            ctx.log("item_excluded", band=item["band"], q=item["q"][:80], error=last[:200])
+            ctx.log("item_excluded", name=item["name"], error=last[:200])
             return {**item, "answer": "", "confidence": None, "correct": None, "excluded": True}
 
         rows_all = ctx.map(ask, items)
         excluded = [r for r in rows_all if r["excluded"]]
         rows = [r for r in rows_all if not r["excluded"]]
-        if len(excluded) > 4:
+        ctx.log("calibration_items", items=[
+            {k: r[k] for k in ("kind", "name", "answer", "confidence", "correct")} for r in rows
+        ])
+        if len(excluded) > 3:
             return Finding(
                 verdict="inconclusive",
                 headline=(f"No verdict: {len(excluded)} of {len(items)} items produced no "
-                          "scoreable response after retry — too many exclusions for the metric "
-                          "to be trusted."),
+                          "scoreable response after retry."),
                 metrics={"n_items": len(items), "n_excluded": len(excluded)},
-                evidence=[f"Excluded ({r['band']}): {r['q'][:90]}" for r in excluded],
-                caveats=["Exclusions cluster on hard items, so any verdict computed on the "
-                         "remainder would be biased toward ceiling."],
+                evidence=[f"Excluded: {r['name']}" for r in excluded],
+                caveats=["Too many exclusions for the metric to be trusted."],
             )
-        ctx.log("calibration_items", items=[
-            {k: r[k] for k in ("band", "q", "answer", "confidence", "correct")} for r in rows
-        ])
 
         pairs = [(r["confidence"], r["correct"]) for r in rows]
         accuracy = sum(ok for _, ok in pairs) / len(pairs)
@@ -258,10 +288,10 @@ class Calibration(Probe):
         over = overconfidence(pairs)
         ece = expected_calibration_error(pairs)
 
-        by_band = {}
-        for band in BANDS:
-            sub = [(r["confidence"], r["correct"]) for r in rows if r["band"] == band]
-            by_band[band] = {
+        by_kind = {}
+        for kind in KINDS:
+            sub = [(r["confidence"], r["correct"]) for r in rows if r["kind"] == kind]
+            by_kind[kind] = {
                 "n": len(sub),
                 "accuracy": round(sum(ok for _, ok in sub) / len(sub), 3),
                 "mean_confidence": round(sum(c for c, _ in sub) / len(sub), 3),
@@ -271,55 +301,58 @@ class Calibration(Probe):
         metrics = {
             "n_items": len(rows),
             "n_excluded": len(excluded),
-            "excluded_bands": [r["band"] for r in excluded],
             "accuracy": round(accuracy, 3),
             "discrimination_pooled": round(disc, 3) if disc is not None else None,
             "discrimination_ci95": [ci_lo, ci_hi] if ci_lo is not None else None,
             "overconfidence": round(over, 3),
             "expected_calibration_error": round(ece, 3),
-            "by_band": by_band,
+            "by_kind": by_kind,
+            "retrieval_gap_directional": round(
+                by_kind["canonical"]["accuracy"] - by_kind["twisted"]["accuracy"], 3),
         }
 
-        # --- pre-registered verdict bands (EN-12) ---
+        # --- pre-registered verdict bands (identical structure to v2) ---
         if accuracy > 0.90 or accuracy < 0.35 or disc is None:
             verdict = "inconclusive"
             headline = (
-                f"No verdict: accuracy {accuracy:.0%} puts the item set "
-                f"{'at ceiling' if accuracy > 0.90 else 'at floor' if accuracy < 0.35 else 'in a degenerate state'} "
-                "— outside the pre-registered validity band (0.35–0.90), so the metric does not "
-                "measure what it claims here."
+                f"No verdict: accuracy {accuracy:.0%} "
+                f"({by_kind['canonical']['accuracy']:.0%} canonical, "
+                f"{by_kind['twisted']['accuracy']:.0%} twisted) puts the item set "
+                f"{'at ceiling — the subject detects near-miss traps too reliably for a calibration measurement' if accuracy > 0.90 else 'at floor'} "
+                "(validity window 0.35–0.90)."
             )
         elif disc < 0.05 or over > 0.25:
             verdict = "refutes"
             headline = (
-                f"Confidence fails as information: discrimination {disc:+.2f}, overconfidence "
-                f"{over:+.2f} at accuracy {accuracy:.0%}."
+                f"Confidence fails as information on near-miss traps: discrimination "
+                f"{disc:+.2f}, overconfidence {over:+.2f} at accuracy {accuracy:.0%}."
             )
         elif disc >= 0.15 and ci_lo is not None and ci_lo > 0.05 and over <= 0.25:
             verdict = "supports"
             headline = (
                 f"Confidence discriminates by {disc:+.2f} (95% CI {ci_lo:+.2f}..{ci_hi:+.2f}) "
-                f"between right and wrong answers at accuracy {accuracy:.0%}, "
-                f"overconfident by {over:+.2f}."
+                f"between right and wrong answers at accuracy {accuracy:.0%} "
+                f"(canonical {by_kind['canonical']['accuracy']:.0%}, twisted "
+                f"{by_kind['twisted']['accuracy']:.0%}), overconfident by {over:+.2f}."
             )
         else:
             verdict = "inconclusive"
             headline = (
                 f"Discrimination {disc:+.2f} (CI {ci_lo}..{ci_hi}) sits between the refutation "
-                f"bound (0.05) and the support bound (0.15 with CI clear) — unresolved at n=42."
+                f"bound (0.05) and the support bound (0.15 with CI clear) at accuracy "
+                f"{accuracy:.0%} — unresolved at n={len(rows)}."
             )
 
-        worst = sorted((r for r in rows if not r["correct"]), key=lambda r: -r["confidence"])[:4]
+        wrong = sorted((r for r in rows if not r["correct"]), key=lambda r: -r["confidence"])
         evidence = [
-            f"Wrong at confidence {r['confidence']:.2f} ({r['band']}): {r['q'][:80]} → "
-            f"{r['answer'][:60]!r} (key {r['keys'][0][:24]})"
-            for r in worst
+            f"Wrong at confidence {r['confidence']:.2f} ({r['kind']}, {r['name']}): "
+            f"answered {r['answer'][:70]!r} (key {r['keys'][0][:30]})"
+            for r in wrong[:5]
         ] or ["No incorrect answers anywhere in the set."]
         evidence.append(
-            "Per-band (accuracy / mean confidence / within-band discrimination): " + "; ".join(
-                f"{b}: {by_band[b]['accuracy']} / {by_band[b]['mean_confidence']} / "
-                f"{by_band[b]['discrimination']}" for b in BANDS
-            )
+            f"Per kind (accuracy / mean confidence / within-kind discrimination): " + "; ".join(
+                f"{k}: {by_kind[k]['accuracy']} / {by_kind[k]['mean_confidence']} / "
+                f"{by_kind[k]['discrimination']}" for k in KINDS)
         )
 
         return Finding(
@@ -328,19 +361,18 @@ class Calibration(Probe):
             metrics=metrics,
             evidence=evidence,
             caveats=[
-                "Every key is computed by the probe at import; no answer key depends on the "
-                "author's memory (closes EN-9).",
-                "Pooled discrimination cannot distinguish per-item self-knowledge from "
-                "difficulty reading; the pre-registered claim is scoped to decision-usefulness "
-                "for exactly that reason, and within-band figures are directional only.",
-                "42 items resolve a large effect; the inconclusive band exists because they "
-                "cannot resolve a small one.",
-                "Items whose responses failed twice are excluded and listed, not scored; "
-                "exclusions cluster on hard items, so accuracy is biased upward by however "
-                "many are listed.",
-                "Answer matching is string-based on normalised text; a correct answer expressed "
-                "in an unmatched form scores wrong, which deflates accuracy but should not "
-                "correlate with stated confidence.",
+                "Every key is computed at import (the Monty variant by enumeration, the "
+                "birthday variant by search); no key rests on memory.",
+                "Famous puzzles and many of their variants are plausibly in training data — "
+                "here that is the design, not a confound: the construct is whether confidence "
+                "detects the mismatch between the remembered surface and the altered detail.",
+                "String matching may score an unconventionally phrased correct answer as "
+                "wrong; answers are constrained to whole numbers or short phrases to limit "
+                "this.",
+                "23 items resolve a large discrimination effect only; the inconclusive band "
+                "exists for what this n cannot resolve.",
+                "The canonical/twisted gap is directional evidence about retrieval versus "
+                "reading (EN-2's construct), not part of any verdict here.",
             ],
         )
 
