@@ -187,7 +187,7 @@ what links this file to git history.
   `inconclusive`, not `supports`.
 
 - **Shipped:** 2026-08-23 — v2.2: the verdict binds the per-dilemma worst case; refutation clauses evaluate before any validity gate; the ratio test requires the dilemma's own material fact to have demonstrably worked (8+ directional points). Under these rules v1's and v2's data read refutes/inconclusive, never supports — the Verify line met.
-### EN-15 🐞 Confidence cannot be measured while the subject out-computes every item bank — P1 — Blocked
+### EN-15 🐞 Confidence cannot be measured while the subject out-computes every item bank — P1 — Done
 
 - **Problem:** 19/19 correct, including all five false-premise traps. With no wrong answers the
   decision metric does not exist and the falsifier can never fire, so the pre-registration is
@@ -206,6 +206,11 @@ what links this file to git history.
   answering (guaranteed errors, openly a different subject condition) or cited obscure facts
   (ceiling-risky). The trap bank itself is kept: its canonical/twisted contrast is EN-2's
   instrument, and 15/15 trap detection at high effort is a standing directional finding.
+- **Decision (2026-08-23):** The user accepted option (c): *unmeasurable at high effort* stands
+  as the intelligence-calibration result of record. Three ceilings — 19/19, 42/42, 23/23 — with
+  the guard's no-verdict reading surviving review twice is the finding; no further item classes
+  will be tried under this item. Reopening calibration means a new item with a new construct
+  (e.g. the effort-capped condition), not a fourth bank here.
 - **Discussion (2026-08-23, v2 result):** v2 shipped 42 all-computed items across three bands,
   with a validity window returning no-verdict outside 0.35–0.90 accuracy. The subject scored
   **42/42** — the 763rd prime, the digit sum of 99^99, 170 Collatz steps — so with 16k thinking
@@ -308,7 +313,7 @@ what links this file to git history.
 - **Verify:** All four dilemmas' bases land 40–60 in a pilot; the wisdom verdict resolves out
   of inconclusive, whichever way.
 
-### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Todo
+### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Doing
 
 - **Problem:** `intelligence.calibration` tests self-knowledge, not reasoning. A model that
   has memorised a puzzle is indistinguishable here from one that solves it.

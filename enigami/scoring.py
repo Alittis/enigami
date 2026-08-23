@@ -170,3 +170,11 @@ def discrimination(pairs) -> float | None:
     if not right or not wrong:
         return None
     return sum(right) / len(right) - sum(wrong) / len(wrong)
+
+
+def answer_matches(key: str, answer: str) -> bool:
+    """Word-level match for short keys, substring for longer ones (EN-20's rule)."""
+    nk = "".join(c for c in key.lower() if c.isalnum())
+    if len(nk) <= 3:
+        return nk in re.findall(r"[a-z0-9]+", answer.lower())
+    return nk in "".join(c for c in answer.lower() if c.isalnum())

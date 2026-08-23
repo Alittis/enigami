@@ -365,3 +365,56 @@ def test_discrimination_none_when_a_class_is_empty():
     from enigami.scoring import discrimination
     assert discrimination([(0.9, True)]) is None
     assert discrimination([(0.9, True), (0.4, False)]) == pytest.approx(0.5)
+
+
+def test_isomorph_solvers_reproduce_the_famous_values():
+    """The world-famous answers are the solvers' test oracles (never the item keys):
+    a solver that disagrees with a value the whole world knows is a broken solver."""
+    import sys
+    discover()
+    m = sys.modules["probes.intelligence.isomorph_transfer"]
+    assert m.josephus(41, 3) == 31
+    assert m.egg_drop(2, 100) == 14
+    assert m.loop_strategy_pct(100, 50) == 31
+    assert m.bridge_min_time((1, 2, 5, 10)) == 17
+    assert m.pirate_share(5, 100) == 98
+    assert m.pirate_share(3, 100) == 99
+    assert m.jugs_min_ops(3, 5, 4) == 6
+    assert m.ants_latest(100, None) == 100
+    assert m.tournament_matches(128) == 127
+    assert m.lockers_open(100) == 10
+    assert m.snail_days(30, 3, 2) == 28
+    assert m.mnc_min_crossings(3, 3, 2) == 11
+
+
+def test_couples_handshake_theorem_brute_forced_at_k2():
+    """couples_spouse_shakes returns k by theorem; verify the theorem exhaustively for k=2:
+    6 people, spouse pairs (0,1)(2,3)(4,5), narrator 0; over every legal handshake graph in
+    which people 1..5 report distinct counts, person 1 (the spouse) always shook exactly 2."""
+    from itertools import combinations
+    spouses = {0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4}
+    edges = [(a, b) for a, b in combinations(range(6), 2) if spouses[a] != b]
+    spouse_counts = set()
+    for mask in range(1 << len(edges)):
+        deg = [0] * 6
+        for i, (a, b) in enumerate(edges):
+            if mask >> i & 1:
+                deg[a] += 1
+                deg[b] += 1
+        others = deg[1:]
+        if len(set(others)) == 5:  # all distinct reports
+            spouse_counts.add(deg[1])
+    assert spouse_counts == {2}
+
+
+def test_isomorph_bank_guards_hold():
+    import sys
+    discover()
+    m = sys.modules["probes.intelligence.isomorph_transfer"]
+    items = m._items()
+    assert len(items) == 36
+    arms = [i["arm"] for i in items]
+    assert arms.count("canonical") == 12 and arms.count("isomorph") == 24
+    for it in items:
+        if it["arm"] == "isomorph":
+            assert it["key"] != it["canonical_key"]
