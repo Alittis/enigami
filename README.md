@@ -6,7 +6,33 @@ A probe harness for investigating four capacities in a Claude model — **intell
 **wisdom**, **creativity**, **imagination** — designed so that "the capacity is not there" is a
 result it can actually produce.
 
-## The problem it is built around
+## What's in this repo
+
+Two things, and the second exists because of the first:
+
+1. **The calibration lab** (`enigami/`, `probes/`, `findings/`) — a pre-registered,
+   adversarially reviewed probe harness that measured four capacities in `claude-opus-5`
+   against the metered API. Its findings, its calibrated reviewer, and its full
+   mistake-by-mistake provenance (`project/BACKLOG.md`) are the evidence base.
+2. **The skill** (`skill/enigami/`) — the field instrument built from those measurements: a
+   compact eval battery plus an improvement playbook that runs entirely inside Claude Code on
+   plan usage. No API key needed.
+
+### Install the skill
+
+```bash
+git clone <this-repo> && ln -s "$(pwd)/enigami/skill/enigami" ~/.claude/skills/enigami
+```
+
+(or copy `skill/enigami/` into `~/.claude/skills/`). Then in any Claude Code session:
+`/enigami eval` for a scorecard, `/enigami improve` to apply the measured patterns to your
+task, `/enigami full` for both. All baselines were measured on `claude-opus-5`, 2026-08-23 —
+on your model they are priors; eval mode reads your configuration. Battery items are public
+(they ship in this repo), so ceiling readings on models trained after publication should be
+discounted accordingly — `--custom` lets you swap in private items (schema in
+`skill/enigami/SKILL.md`).
+
+## The problem the lab is built around
 
 The subject of the investigation is also part of the instrument. The model generating the
 responses is the same family as the model grading them, and the probes were written by an
@@ -75,8 +101,8 @@ repo produces, and probes are not to be adjusted because they refuted.
 
 ## Status
 
-The harness is complete — 34 tests, offline mode exercising every guard, a calibrated
-adversarial reviewer, and history-preserving re-review machinery.
+The harness is complete — a tested suite, offline mode exercising every guard, a calibrated
+adversarial reviewer, and history-preserving re-review machinery. Licensed MIT.
 
 **Current state (2026-08-23, v2 wave):** the reviewer is calibrated (8/8 known-answer cases,
 majority-of-3 protocol) and all four probes have run live in redesigned v2 forms. Two findings

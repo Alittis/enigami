@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import os
+import pathlib
 import threading
 import time
 from dataclasses import dataclass
@@ -663,7 +664,8 @@ def write_report(result: dict) -> None:
         row = result["stage1"]["per_case"][key]
         found = row["reviewer_flaws"][0] if row["reviewer_flaws"] else "(no successful rep)"
         lines += [f"### `{key}`", "", f"**Planted.** {text}", "", f"**Reviewer said.** {found}", ""]
-    lines += ["---", "", f"_Raw run: `{result['run_dir']}`. Qualitative flaw-match judgments are "
+    run_dir_rel = str(pathlib.Path(result["run_dir"])).replace(str(config.REPO_ROOT) + "/", "")
+    lines += ["---", "", f"_Raw run: `{run_dir_rel}`. Qualitative flaw-match judgments are "
               "the reader's to make; the binary statistics above are the pre-registered result._", ""]
     config.FINDINGS.mkdir(parents=True, exist_ok=True)
     (config.FINDINGS / "REVIEWER_CALIBRATION.md").write_text("\n".join(lines))

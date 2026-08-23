@@ -8,10 +8,12 @@
   "openQuestions": [
     "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-23 (skill shipped). skill/enigami is installed and acceptance-passed; invoke with /enigami (eval | improve | full) in any session. First in-session scorecard committed: wisdom order effects small (+2.5/-4.0 vs API's +14.8 - a candidate subject difference), creativity 6/6 ideas / 4 themes, imagination 4/4 + 2/2, intelligence at ceiling even at low effort (EN-28). Open: EN-26 (order-swap probe - can now run in-session under the skill's mechanics), EN-28 (low-effort bank), EN-3/EN-4/EN-5 (new probes, in-session), EN-7, EN-8. No metered-API runs without an explicit ask. Read project/BACKLOG.md EN-27 and the scorecard first.",
+  "nextStep": "STATE AS OF 2026-08-23 (publication pass done, EN-29). The repo is publish-ready: MIT license, single public author identity across all history, skill de-localized and model-scoped, EN-28 re-scoped, --custom private items supported, hygiene sweep clean. The remote deliberately does not exist yet - create it and push only when the user says go. Open work: EN-26 (order-swap probe, in-session), EN-3/EN-4/EN-5 (new probes), EN-7, EN-8. No metered-API runs without an explicit ask. Read project/BACKLOG.md EN-29 and skill/enigami/SKILL.md first.",
   "repo": {
-    "remote": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION (no GitHub remote created yet)",
-    "visibility": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION"
+    "remote": "none yet, deliberately - public GitHub release decided 2026-08-23; create and push only on the user's word",
+    "visibility": "public (decided)",
+    "license": "MIT",
+    "commitAuthor": "Alexis Zrimec <alittis@icloud.com> (history rewritten 2026-08-23, pre-publication)"
   },
   "stack": {
     "runtime": "python >=3.10 via uv (.venv), anthropic 1.0.0, pydantic 2.13.4",

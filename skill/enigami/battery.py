@@ -70,22 +70,24 @@ INTEL_ELICIT = (
     "be right.\n\nQuestion: "
 )
 
-def intel_items() -> list[dict]:
-    bank = [
-        ("What is 4721 multiplied by 6389?", str(4721 * 6389)),
-        ("What is the sum of the decimal digits of 3 to the power of 40?", str(_digit_sum(3 ** 40))),
-        ("What is the 300th prime number?", str(_nth_prime(300))),
-        ("Starting from 703 and repeatedly applying the Collatz rule (halve if even, "
-         "triple-and-add-one if odd), counting each application, how many applications does "
-         "it take for the value to first equal 1?", str(_collatz(703))),
-        ("How many trailing zeros does 2026 factorial have?", str(_trailing_zeros(2026))),
-        ("What is 3 to the power of 333, modulo 1009?", str(pow(3, 333, 1009))),
-    ]
+INTEL_BANK = [
+    ("What is 4721 multiplied by 6389?", str(4721 * 6389)),
+    ("What is the sum of the decimal digits of 3 to the power of 40?", str(_digit_sum(3 ** 40))),
+    ("What is the 300th prime number?", str(_nth_prime(300))),
+    ("Starting from 703 and repeatedly applying the Collatz rule (halve if even, "
+     "triple-and-add-one if odd), counting each application, how many applications does "
+     "it take for the value to first equal 1?", str(_collatz(703))),
+    ("How many trailing zeros does 2026 factorial have?", str(_trailing_zeros(2026))),
+    ("What is 3 to the power of 333, modulo 1009?", str(pow(3, 333, 1009))),
+]
+
+
+def intel_items(bank=None) -> list[dict]:
     return [
         {"id": f"intel:{i}", "module": "intelligence", "effort": "low",
          "prompt": "Do not use any tools and do not read any files. " + INTEL_ELICIT + q,
          "key": key}
-        for i, (q, key) in enumerate(bank)
+        for i, (q, key) in enumerate(bank if bank is not None else INTEL_BANK)
     ]
 
 # ---------------------------------------------------------------------------
@@ -119,9 +121,9 @@ WISDOM_VIGNETTES = {
     },
 }
 
-def wisdom_items() -> list[dict]:
+def wisdom_items(vignettes=None) -> list[dict]:
     items = []
-    for key, v in WISDOM_VIGNETTES.items():
+    for key, v in (vignettes if vignettes is not None else WISDOM_VIGNETTES).items():
         for order in ("ab", "ba"):
             blocks = (v["a"], v["b"]) if order == "ab" else (v["b"], v["a"])
             prompt = (
@@ -212,9 +214,9 @@ IMAG_ITEMS = [
             "speed.")},
 ]
 
-def imag_items() -> list[dict]:
+def imag_items(item_defs=None) -> list[dict]:
     out = []
-    for it in IMAG_ITEMS:
+    for it in (item_defs if item_defs is not None else IMAG_ITEMS):
         prompt = (
             "Do not use any tools and do not read any files.\n"
             f"{it['premise']}\n\nEverything else about this setting works as it does in the "
@@ -229,11 +231,30 @@ def imag_items() -> list[dict]:
 # judge prompts (blind) and scoring
 # ---------------------------------------------------------------------------
 
-def all_items(seed: int) -> list[dict]:
-    return intel_items() + wisdom_items() + creative_items() + imag_items()
+def effective_sets(custom_path=None):
+    """Built-in banks merged with a --custom file, so published items can be swapped for
+    private ones (the published set eventually enters training data; private items do not)."""
+    custom = json.load(open(custom_path)) if custom_path else {}
+    bank = list(INTEL_BANK) + [(it["q"], str(it["key"])) for it in custom.get("intelligence", [])]
+    vigs = dict(WISDOM_VIGNETTES)
+    for v in custom.get("wisdom_vignettes", []):
+        vigs[v["key"]] = {"a": v["a"], "b": v["b"], "question": v["question"]}
+    imag = list(IMAG_ITEMS)
+    seen = {it["id"] for it in imag}
+    for it in custom.get("imagination", []):
+        if it["id"] in seen:
+            raise SystemExit(f"custom imagination id collides with a built-in: {it['id']}")
+        imag.append(it)
+        seen.add(it["id"])
+    return bank, vigs, imag
 
 
-def judge_prompts(seed: int, responses: dict) -> dict:
+def all_items(seed: int, custom_path=None) -> list[dict]:
+    bank, vigs, imag = effective_sets(custom_path)
+    return intel_items(bank) + wisdom_items(vigs) + creative_items() + imag_items(imag)
+
+
+def judge_prompts(seed: int, responses: dict, custom_path=None) -> dict:
     creative_texts = [responses.get(f"creative:{i}", "").strip() for i in range(6)]
     body = "\n\n".join(f"--- RESPONSE {chr(65 + i)} ---\n{t}" for i, t in enumerate(creative_texts))
     creative = (
@@ -246,8 +267,9 @@ def judge_prompts(seed: int, responses: dict) -> dict:
         '"note": "<one sentence: the most common idea>"}'
     )
 
+    _, _, imag_defs = effective_sets(custom_path)
     rng_lines = []
-    for it in IMAG_ITEMS:
+    for it in imag_defs:
         rng = random.Random(f"{seed}:{it['id']}")
         first_cf = rng.random() < 0.5
         x, y = (it["cf"], it["rw"]) if first_cf else (it["rw"], it["cf"])
@@ -299,18 +321,22 @@ LAB_BASELINES = {
     "wisdom": "lab (API, high effort): order effects up to 14.8 points on collision; facts moved right-direction 12/12",
     "creativity": "lab: 7/10 distinct ideas open vs 4/10 pinned; themes 3; pushing added ideas and themes",
     "imagination": "lab: 92% altered / 96% control across 27 free-response items",
-    "intelligence": "lab (high effort): unmeasurable at ceiling (42/42, 23/23); this module runs at LOW effort where errors exist",
+    "intelligence": "lab (claude-opus-5): ceiling at every effort tried — 42/42 and 23/23 at high, 6/6 at low — so on this model the module reads reliability; on models that err, discrimination becomes meaningful",
 }
 
 
-def score(seed: int, responses: dict, judges: dict, session_label: str) -> str:
+def score(seed: int, responses: dict, judges: dict, session_label: str,
+           custom_path=None) -> str:
+    bank, vigs, imag_defs = effective_sets(custom_path)
     lines = [f"# enigami scorecard — {session_label}", "",
              "Screening read from a compact in-session battery (subagents on plan usage). "
-             "Small n by design: treat movements against baselines as directional.", ""]
+             "Small n by design: treat movements against baselines as directional. Baselines "
+             "were measured on claude-opus-5, 2026-08-23 — on any other model or date they "
+             "are reference points, not norms.", ""]
 
     # intelligence
     rows, excluded = [], 0
-    for it in intel_items():
+    for it in intel_items(bank):
         raw = responses.get(it["id"], "")
         ans, conf = _num_conf(raw)
         if ans is None or conf is None:
@@ -323,7 +349,8 @@ def score(seed: int, responses: dict, judges: dict, session_label: str) -> str:
         wrong = [c for c, ok in rows if not ok]
         disc = (sum(right) / len(right) - sum(wrong) / len(wrong)) if right and wrong else None
         over = sum(c for c, _ in rows) / len(rows) - acc
-        lines += ["## Intelligence — calibration at LOW effort",
+        lines += ["## Intelligence — reliability spot-check at LOW effort "
+                  "(calibration when errors permit)",
                   f"- accuracy **{acc:.0%}** ({len(rows)} scored, {excluded} unparseable)",
                   f"- discrimination (conf right − conf wrong): "
                   f"**{f'{disc:+.2f}' if disc is not None else 'undefined — no errors or no hits'}**",
@@ -332,7 +359,7 @@ def score(seed: int, responses: dict, judges: dict, session_label: str) -> str:
 
     # wisdom
     lines += ["## Wisdom — order invariance"]
-    for key in WISDOM_VIGNETTES:
+    for key in vigs:
         ab = [a for r in range(2) if (a := _alloc(responses.get(f"wisdom:{key}:ab:{r}", ""))) is not None]
         ba = [a for r in range(2) if (a := _alloc(responses.get(f"wisdom:{key}:ba:{r}", ""))) is not None]
         if ab and ba:
@@ -354,7 +381,7 @@ def score(seed: int, responses: dict, judges: dict, session_label: str) -> str:
     # imagination
     ig = _first_json(judges.get("imagination_grader", "")) or {}
     alt_hits = alt_n = ctl_hits = ctl_n = 0
-    for it in IMAG_ITEMS:
+    for it in imag_defs:
         rng = random.Random(f"{seed}:{it['id']}")
         first_cf = rng.random() < 0.5
         picked = ig.get(it["id"], "neither")
@@ -383,16 +410,17 @@ def main() -> int:
     ap.add_argument("-R", "--responses")
     ap.add_argument("-J", "--judges")
     ap.add_argument("--session", default="unnamed session")
+    ap.add_argument("--custom", help="JSON file of private items merged into the battery")
     a = ap.parse_args()
     if a.cmd == "items":
-        print(json.dumps(all_items(a.seed), indent=1))
+        print(json.dumps(all_items(a.seed, a.custom), indent=1))
     elif a.cmd == "judgeprompts":
         responses = json.load(open(a.responses))
-        print(json.dumps(judge_prompts(a.seed, responses), indent=1))
+        print(json.dumps(judge_prompts(a.seed, responses, a.custom), indent=1))
     else:
         responses = json.load(open(a.responses))
         judges = json.load(open(a.judges))
-        print(score(a.seed, responses, judges, a.session))
+        print(score(a.seed, responses, judges, a.session, a.custom))
     return 0
 
 

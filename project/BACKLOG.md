@@ -383,7 +383,7 @@ what links this file to git history.
   imagination 4/4 altered + 2/2 control; intelligence 6/6 at LOW effort — the honesty rule
   reported it as unmeasured-at-ceiling, spawning EN-28.
 
-### EN-28 🐞 "Low effort" does not make the subject err either — P3 — Todo
+### EN-28 🐞 "Low effort" does not make the subject err either — P3 — Done
 
 - **Problem:** The skill's intelligence module pins subagent effort to low, expecting errors
   that make calibration measurable. The acceptance run came back 6/6 — including Collatz-703
@@ -396,6 +396,37 @@ what links this file to git history.
 - **Grounding:** enigami-scorecard-2026-08-23.md; the lab's three previous ceilings (19/19,
   42/42, 23/23) at high effort.
 - **Verify:** Either a run inside the 0.35–0.90 window, or the module's copy re-scoped.
+- **Shipped:** 2026-08-23 — re-scoped (the second option): the module is now titled a
+  reliability spot-check at low effort, calibration when errors permit; the scorecard baseline
+  and PLAYBOOK pattern 2 state plainly that claude-opus-5 stayed at ceiling at every effort
+  tried, and that on models which do err the discrimination reading becomes meaningful.
+
+### EN-29 🔧 Publication readiness: public repo, MIT, portable skill — P1 — Done
+
+- **Problem:** The user decided the repo goes public (skill and lab together), which changes
+  what the skill must survive: strangers, other machines, other models, and permanent git
+  history. Known cracks: local paths in provenance, model-unscoped claims (one measurably
+  falsified for claude-opus-5), the EN-28 mislabel, published-item contamination, and the
+  author's work email in every commit.
+- **Want:** The fine-tune pass before any remote exists; the remote itself is deliberately NOT
+  created yet.
+- **Shipped:** 2026-08-23. (1) All 30 commits' author/committer rewritten to
+  alittis@icloud.com before any push can bake the work address into public history; the
+  backlog's commit references remapped to the post-rewrite SHAs, including one that had
+  pointed at an amended-away commit. (2) LICENSE: MIT. (3) SKILL.md de-localized — provenance
+  points into the repo it ships in, install documented in README, no local paths anywhere
+  tracked. (4) Every claim scoped to claude-opus-5/2026-08-23 with "priors, not norms"
+  language in SKILL.md, PLAYBOOK.md and the scorecard header; the playbook's low-effort
+  premise corrected to what the acceptance run actually measured. (5) EN-28 resolved by
+  re-scope: the intelligence module is now a reliability spot-check that becomes calibration
+  when a model errs. (6) Contamination clause added and `--custom` implemented across
+  items/judgeprompts/score (private intelligence/wisdom/imagination items, schema documented,
+  id-collision refused loudly, tested). (7) Instruction lint: effort-unavailable and
+  judge-failure paths added, all thresholds carry their scale. (8) Hygiene: no work-domain strings and no
+  absolute local paths in tracked files; report generator now writes repo-relative run paths.
+- **Verify:** `git log` shows a single public identity; 39 tests pass; `battery.py items`
+  round-trips with and without `--custom`. **Remaining, deliberately:** create the public
+  remote and push — on the user's word only.
 
 ### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
 
@@ -539,6 +570,16 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **Publication pass done; the remote deliberately still does not exist.**
+  Decisions: public repo, MIT (Claude's call), commits authored as alittis@icloud.com — all 30
+  rewritten before any push could make the work address permanent, with the backlog's commit
+  references remapped (one had pointed at an amended-away commit and now points at its
+  surviving replacement). The skill was made survivable by strangers: provenance de-localized,
+  every number scoped to claude-opus-5/2026-08-23 as priors-not-norms, the playbook's
+  low-effort claim corrected to what the acceptance run falsified, EN-28 closed by re-scoping
+  the intelligence module as a reliability spot-check, a contamination clause plus --custom
+  private-item support added and tested, failure paths written for effort-unavailable and
+  judge-failure cases, and the last absolute local path scrubbed from tracked files. 39 tests.
 - **2026-08-23** — **Fresh-session tests: both trigger paths work, and the skill's first user
   found its first documentation bug.** Two brand-new agent sessions, given only what a user
   would type. Test A, slash invocation ("/enigami improve" + a flood-cost dispute): loaded the

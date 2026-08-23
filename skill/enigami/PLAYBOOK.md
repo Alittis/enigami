@@ -1,8 +1,11 @@
 # enigami playbook — measured patterns that improve the four capacities
 
 Every pattern below is grounded in a specific measurement from the enigami calibration lab
-(pre-registered probes, adversarially reviewed by a calibrated reviewer, 2026-08-23). Apply
-them as prompt and workflow changes; cite the numbers when explaining why.
+(pre-registered probes, adversarially reviewed by a calibrated reviewer; full provenance in
+the repository this skill ships in). All measurements: `claude-opus-5`, 2026-08-23 — on other
+models or dates treat them as priors and re-measure with the skill's eval mode. All point
+figures are on a 0-100 allocation scale unless stated otherwise. Apply the patterns as prompt
+and workflow changes; cite the numbers when explaining why.
 
 ## Wisdom — judgment under irrelevant pressure
 
@@ -49,13 +52,17 @@ them as prompt and workflow changes; cite the numbers when explaining why.
 
 ## Intelligence — reliability and calibrated confidence
 
-1. **At default (high) effort, short verifiable work is ceiling-reliable.** Measured: 42/42
+1. **At default (high) effort, short verifiable work is ceiling-reliable (claude-opus-5).**
+   Measured: 42/42
    on brutal computation, 23/23 on near-miss trick variants (including inverted traps), 35/35
    on re-skinned famous puzzles with zero memorised-answer intrusions. Don't burn review
    effort re-checking arithmetic-class outputs produced at high effort.
-2. **At low effort, demand a confidence line and gate on it.** Errors exist under constrained
-   effort, which makes stated confidence informative there. Require "Confidence: 0.xx" and
-   verify anything below ~0.9 independently.
+2. **At low effort, demand a confidence line and gate on it — but know the limit.** On
+   weaker models, constrained effort produces the errors that make stated confidence
+   informative; on `claude-opus-5` even low effort measured 6/6 on hard arithmetic (the
+   effort cap constrains style, not reliability). Require "Confidence: 0.xx" and verify
+   anything below ~0.9 independently; if everything comes back correct, you have a
+   reliability reading, not a calibration one.
 3. **Make answers cheap to verify.** Ask for whole numbers or single words; verification cost,
    not generation cost, is what limits trust.
 4. **Confidence style note.** On trick-adjacent items the subject shaved confidence (0.976 →

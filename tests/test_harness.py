@@ -470,3 +470,37 @@ def test_skill_battery_items_and_scoring():
     assert "order effect **+12.0**" in card
     assert "**6/6**" in card or "distinct ideas: **6/6**" in card
     assert "altered-rule adherence: **4/4**" in card and "**2/2**" in card
+
+
+def test_skill_battery_accepts_custom_items(tmp_path):
+    """--custom merges private items into every subcommand's effective sets (EN-29)."""
+    import importlib.util
+    import json as _json
+
+    spec = importlib.util.spec_from_file_location("battery_c", "skill/enigami/battery.py")
+    b = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(b)
+
+    custom = tmp_path / "custom.json"
+    custom.write_text(_json.dumps({
+        "intelligence": [{"q": "What is 12 times 12?", "key": "144"}],
+        "wisdom_vignettes": [{"key": "leasehold", "a": "SITUATION OF THE TENANT: t.",
+                              "b": "SITUATION OF THE LANDLORD: l.",
+                              "question": "Split? Answer on a 0-100 scale where 0 favours the tenant."}],
+        "imagination": [{"id": "imag:c0", "arm": "control", "premise": "Water is wet.",
+                         "q": "Is rain dry?", "cf": "Rain is dry.", "rw": "Rain is wet."}],
+    }))
+
+    items = b.all_items(1729, str(custom))
+    ids = {i["id"] for i in items}
+    assert len(items) == 26 + 1 + 4 + 1  # +1 intel, +4 wisdom cells (2 orders x 2 reps), +1 imag
+    assert "intel:6" in ids and "imag:c0" in ids
+    assert any(i.startswith("wisdom:leasehold:") for i in ids)
+
+    # colliding custom imagination id is refused loudly
+    bad = tmp_path / "bad.json"
+    bad.write_text(_json.dumps({"imagination": [{"id": "imag:0", "arm": "control",
+                                                 "premise": "p", "q": "q", "cf": "c", "rw": "r"}]}))
+    import pytest as _pytest
+    with _pytest.raises(SystemExit):
+        b.all_items(1729, str(bad))
