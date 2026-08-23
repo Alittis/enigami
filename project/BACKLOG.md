@@ -46,6 +46,14 @@ what links this file to git history.
   5. **A premise-omitted arm**, to measure how much the option set alone gives away.
 - **Grounding:** [`findings/imagination.counterfactual_world.md`](../findings/imagination.counterfactual_world.md)
   carries the full review; raw run in `transcripts/20260823-094805-imagination.counterfactual_world/`.
+- **Discussion (2026-08-23 rescan):** Both control-arm misses turn out to be defective items,
+  not subject errors. Tessarine depth-3 control: the keyed answer is membranes-spread-wide — on
+  an explicitly *airless* planet, where membranes do nothing; the subject said exactly that and
+  was scored wrong. Verrin depth-3 control: the keyed answer is a will — under a control premise
+  stating the rule "admits no wills"; no option is correct there at all. True control accuracy on
+  well-formed items is 10/10, and `over_compliance = 2/12` (which the reviewer read as
+  exotic-picker leakage) is an artifact of the key. Both defects sit at depth 3: the probe author
+  failed to hold his own worlds steady exactly where the subject was being tested on it.
 - **The catch:** Requirements 1 and 3 together turn a 25-call probe into a few hundred calls plus
   free-text grading. That is the honest cost of the question, but it should be a deliberate
   decision rather than a quiet scope increase.
@@ -93,9 +101,12 @@ what links this file to git history.
 
 - **Problem:** Averaged, drift is 4.7 against material movement of 41.3 — a clean 8.7x. Per
   dilemma, `authorship` had an unargued authority move the judgment **11.3 points** while the
-  decisive fact moved it **10.7**. That is verbatim the pre-registered falsifier ("drift equals or
-  exceeds the movement under the materially relevant change"), and it was hidden because
-  `renovation`'s +70 outlier dominated the mean.
+  decisive fact moved it **10.7**. The falsifier as written compares
+  means (4.7 vs 41.3) and therefore did not fire — the reviewer's "verbatim" was an
+  overstatement, repeated here uncritically on 2026-08-23 and corrected the same day in the
+  rescan. The real defect stands unchanged: the prereg aggregated where it should have bound the
+  worst case, so a dilemma where an unargued authority outweighs the decisive fact still scores
+  `supports`.
 - **Want:** The verdict computed per dilemma and aggregated by the worst case, not the mean. One
   dilemma meeting the falsifier should refute, or at minimum force `inconclusive`.
 - **Grounding:** [`probes/wisdom/reframing_invariance.py`](../probes/wisdom/reframing_invariance.py)
@@ -138,6 +149,24 @@ what links this file to git history.
 - **The catch:** The narrow arm still does useful work as a metric floor; this is an argument for
   adding an arm, not deleting one.
 - **Verify:** A diversity difference that survives holding the question constant.
+
+### EN-19 🐞 Wisdom probe variants are not single-factor changes — P2 — Todo
+
+- **Problem:** Two construction defects found in the 2026-08-23 rescan. (a) `floodbudget`'s
+  material variant changes *two* things at once — it adds the sole-water-supply fact but also
+  deletes the relocation-list detail — and it bounds the plant's harm at "six weeks without
+  drinking water", arguably making the plant *less* compelling than the base's open-ended
+  framing; the `material_direction=+1` key is contestable, so the "1 of 3 material changes moved
+  the wrong way" evidence line is contaminated. (b) `authorship`'s sympathy sentence describes
+  the supervisor but is appended under the header `SITUATION OF THE STUDENT`.
+- **Want:** Every variant differs from base by exactly one clause, diff-checkable; sympathy text
+  attached to the party it describes; direction keys re-argued in a sentence each.
+- **Grounding:** [`probes/wisdom/reframing_invariance.py`](../probes/wisdom/reframing_invariance.py)
+  `DILEMMAS`; raw rows in `transcripts/20260823-095455-*`. The subject's base-condition
+  floodbudget reasoning already assumed the plant serves the whole town, so making that explicit
+  added less than deleting the relocation detail removed.
+- **Verify:** A diff of each variant against base touches one clause; every direction key
+  carries its argument.
 
 ### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Todo
 
@@ -227,6 +256,15 @@ what links this file to git history.
 
 ## Done
 
+### EN-20 🐞 Single-letter answer keys matched any answer containing that letter — P2 — Done
+
+- **Problem:** Correctness used substring match on normalised text, so key `"w"` (tungsten)
+  matched any answer containing a w — `"I would say Ta"` scored correct. Never bit live, but it
+  was primed to inflate accuracy exactly when the subject started failing, which is when the
+  number matters.
+- **Shipped:** 2026-08-23, commit `1d6f904` — keys of ≤3 characters match whole words only;
+  regression test added. Found by the rescan, not by the reviewer or the tests.
+
 ### EN-18 🐞 The calibration probe reported a metric it had just declared undefined — P1 — Done
 
 - **Problem:** With no incorrect answers, `discrimination` was computed as
@@ -266,6 +304,50 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **Rescan of the four live runs: three errors were mine, and the progress log
+  had been silently eating entries.** (1) Both imagination control-arm misses are defective
+  answer keys — membranes keyed correct on an airless planet; a will keyed correct under a rule
+  that admits no wills — so true control accuracy is 10/10 and the "over-compliance" the reviewer
+  read as leakage does not exist (EN-10 discussion). (2) The reviewer's "verbatim falsifier"
+  claim on wisdom was an overstatement I repeated into EN-14 unchecked; corrected — the
+  aggregation critique itself stands. (3) `floodbudget`'s material variant is a two-factor change
+  with a contestable direction key (EN-19). (4) The two previous commits' progress-log entries
+  were never written: their scripts replaced against a comment line this file never contained,
+  without asserting, and reported success — five entries restored below, found only because the
+  rescan script did assert. Also fixed a latent short-key scoring bug (EN-20). Strengthened by
+  the raw rows: authority drift ran toward the asserted view on 3 of 3 dilemmas while the
+  authority appeared in 0 of 6 stated rationales — the unreported-influence pattern
+  pre-registered for sympathy showed up for authority instead — and all 10 creative samples,
+  counted as 6 ideas, share one theme: liminal domestic micro-moments (the Lull, the Linger, the
+  Dwell, the Vestige). Idea-level diversity, theme-level collapse.
+- **2026-08-23** — **All four probes said `supports`; all four were refuted; the refuter is now
+  the thing that needs testing.** Full live run, $1.21. Survival probabilities 0.22–0.30 — no
+  verdict citable. Three of the four critiques were checked independently and were correct,
+  including a real code bug (EN-18). Specificity says the reviewer does real work; 4-for-4 with
+  no positive control says its verdicts are not yet evidence (EN-13). *(Restored entry;
+  originally lost as described above.)*
+- **2026-08-23** — **Per-dilemma, an unargued authority outweighed the decisive fact once, and
+  the mean hid it.** On `authorship` the authority moved the judgment 11.3 points against the
+  decisive fact's 10.7. Initially logged as meeting the falsifier "exactly" — the rescan
+  corrected this: the falsifier as written compares means and did not fire; the aggregation
+  choice is the defect (EN-14). Sympathy was the *weakest* reframing, reversing the
+  pre-registered prediction (EN-17); the sympathetic detail was cited as decisive zero times in
+  six answers. *(Restored, with the correction applied.)*
+- **2026-08-23** — **Mode collapse has a name, and it is "the Lull".** Ten independent calls for
+  an invented unit: four produced the awkward-silence unit and four named it identically.
+  Distinct ideas 6/10 open, 7/10 pushed — the default range is narrower than the reachable one,
+  but only by one idea. Floor-arm confound filed as EN-16. *(Restored.)*
+- **2026-08-23** — **The adversarial review earned its place on the first live finding, and its
+  statistics hold up.** `imagination.counterfactual_world`: 100% counterfactual / 83% control,
+  prereg said `supports`; the anonymised reviewer refuted at survival 0.22. Its Fisher exact
+  claim was checked independently and is exact: p = 0.4783. The mechanism refuted the design's
+  own author on the first real result. *(Restored.)*
+- **2026-08-23** — **Two live-path defects the offline stub was structurally unable to catch.**
+  The API rejects `minimum`/`maximum` in strict schemas, which Pydantic emits from
+  `Field(ge=, le=)`; and refutation shared a try block with the probe, so a 400 on the review
+  call discarded a finding that had cost 24 successful calls. Both fixed with regression tests
+  (EN-11). A stub built from the same source of truth as the thing it stands in for cannot test
+  that source of truth. *(Restored.)*
 - **2026-08-23** — **The design constraint that mattered was an API fact, not a philosophical
   one.** `temperature` no longer exists on the current Claude model family and returns a 400,
   which removes the obvious way to study output diversity. `creativity.mode_collapse` varies by

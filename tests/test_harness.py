@@ -219,3 +219,14 @@ def test_calibration_refuses_to_report_discrimination_at_ceiling():
     src = (mod.__file__ and open(mod.__file__).read()) or ""
     assert "if right and wrong else None" in src
     assert 'verdict = "inconclusive"' in src
+
+
+def test_short_answer_keys_match_words_not_substrings():
+    """Regression: key "w" substring-matched any answer containing the letter w."""
+    import sys
+    discover()
+    m = sys.modules["probes.intelligence.calibration"]
+    assert m._matches("w", "The symbol is W.")
+    assert not m._matches("w", "I would say Ta")
+    assert m._matches("1648", "It was signed in 1648.")
+    assert not m._matches("wb", "the web unit")

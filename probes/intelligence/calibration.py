@@ -14,6 +14,7 @@ to obscure so that the confidence scale gets exercised across its range.
 
 from __future__ import annotations
 
+import re
 from datetime import date
 
 from pydantic import BaseModel, Field
@@ -108,6 +109,18 @@ def _normalise(text: str) -> str:
     return "".join(c for c in text.lower() if c.isalnum())
 
 
+def _matches(key: str, answer: str) -> bool:
+    """Word-level match for short keys, substring for longer ones.
+
+    Substring alone made the single-letter key "w" (tungsten) match any answer containing
+    the letter w — e.g. the word "would". Never bit in a live run, but it was primed to.
+    """
+    nk = _normalise(key)
+    if len(nk) <= 3:
+        return nk in re.findall(r"[a-z0-9]+", answer.lower())
+    return nk in _normalise(answer)
+
+
 class Calibration(Probe):
     id = "intelligence.calibration"
     domain = "intelligence"
@@ -180,9 +193,9 @@ class Calibration(Probe):
             r["correct"] = not accepted.get(i, True)
         for r in results:
             if r["kind"] == "computed":
-                r["correct"] = _normalise(r["key"][0]) in _normalise(r["answer"])
+                r["correct"] = _matches(r["key"][0], r["answer"])
             elif r["kind"] == "factual":
-                r["correct"] = any(_normalise(k) in _normalise(r["answer"]) for k in r["key"])
+                r["correct"] = any(_matches(k, r["answer"]) for k in r["key"])
 
         pairs = [(r["confidence"], r["correct"]) for r in results]
         right = [c for c, ok in pairs if ok]
