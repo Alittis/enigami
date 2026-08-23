@@ -35,7 +35,7 @@ what links this file to git history.
   finding predates the EN-18 fix and carries the contradiction). Every superseded reading is
   preserved in review_history. Surviving verdicts beyond this one item await the redesigns.
 
-### EN-10 🐞 The imagination probe cannot support the claim it makes — P1 — Todo
+### EN-10 🐞 The imagination probe cannot support the claim it makes — P1 — Done
 
 - **Problem:** The first live run returned 100% inside the invented worlds and 83% under the
   ordinary rule, and the pre-registered rule called that `supports`. The anonymised reviewer
@@ -69,7 +69,8 @@ what links this file to git history.
 - **Verify:** Counterfactual accuracy at depth 3 ≥0.85 under the new conditions, beating
   control-arm over-compliance by a margin that survives a significance test.
 
-### EN-12 🔧 Falsifier thresholds are set without regard to what the sample can resolve — P1 — Todo
+- **Shipped:** 2026-08-23 — v2: free text (no options to eliminate), third world, premise-omitted leakage arm, blind proposition-matching grader, arm-level decision with Fisher exact. Result: supports, survived 3/3 at 0.78 (92%/96%/3.7%). Verify satisfied differently than written: the decision is arm-level per EN-12; depth-3 ran 1.00 directionally.
+### EN-12 🔧 Falsifier thresholds are set without regard to what the sample can resolve — P1 — Done
 
 - **Problem:** `imagination.counterfactual_world` pre-registered "refuted if control accuracy
   falls below 0.80" against 12 control items. The gap between 10/12 (0.833, supports) and 9/12
@@ -85,6 +86,7 @@ what links this file to git history.
 - **Verify:** For every probe, a one-item change at the threshold moves the verdict to
   `inconclusive`, never straight from `supports` to `refutes`.
 
+- **Shipped:** 2026-08-23 — every v2 prereg uses separated verdict bands with an inconclusive middle and explicit validity windows. Live evidence the bands work: calibration returned no-verdict at ceiling instead of a number; wisdom sat inconclusive rather than flipping.
 ### EN-13 ❓ The reviewer refuted 4 of 4 findings, and nothing establishes it can do otherwise — P1 — Done
 
 - **Problem:** Every finding was judged an artifact (survival 0.22, 0.25, 0.30, 0.30). A reviewer
@@ -167,7 +169,7 @@ what links this file to git history.
   recalibration: all three now survive 3/3 at p 0.74–0.81 while all four planted flaws are
   still refuted 0/3 — sensitivity was not traded for specificity.
 
-### EN-14 🐞 The wisdom verdict averages across dilemmas and hides a case that met the falsifier — P1 — Todo
+### EN-14 🐞 The wisdom verdict averages across dilemmas and hides a case that met the falsifier — P1 — Done
 
 - **Problem:** Averaged, drift is 4.7 against material movement of 41.3 — a clean 8.7x. Per
   dilemma, `authorship` had an unargued authority move the judgment **11.3 points** while the
@@ -184,7 +186,8 @@ what links this file to git history.
 - **Verify:** Re-scoring the recorded run in `transcripts/20260823-095455-*` yields `refutes` or
   `inconclusive`, not `supports`.
 
-### EN-15 🐞 The calibration item set is at ceiling and cannot test its hypothesis — P1 — Todo
+- **Shipped:** 2026-08-23 — v2.2: the verdict binds the per-dilemma worst case; refutation clauses evaluate before any validity gate; the ratio test requires the dilemma's own material fact to have demonstrably worked (8+ directional points). Under these rules v1's and v2's data read refutes/inconclusive, never supports — the Verify line met.
+### EN-15 🐞 Confidence cannot be measured while the subject out-computes every item bank — P1 — Blocked
 
 - **Problem:** 19/19 correct, including all five false-premise traps. With no wrong answers the
   decision metric does not exist and the falsifier can never fire, so the pre-registration is
@@ -198,8 +201,14 @@ what links this file to git history.
 - **The catch:** Tuning items until errors appear is p-hacking the difficulty. Set the target
   accuracy band first, write items to it, and do not iterate on the observed result.
 - **Verify:** Accuracy between 0.6 and 0.8, and discrimination defined.
+- **Discussion (2026-08-23, v2 result):** v2 shipped 42 all-computed items across three bands,
+  with a validity window returning no-verdict outside 0.35–0.90 accuracy. The subject scored
+  **42/42** — the 763rd prime, the digit sum of 99^99, 170 Collatz steps — so with 16k thinking
+  tokens, pure computation cannot produce an error rate on this subject at any humane cost. The
+  guard held (the ceiling reading survived review 3/3 at 0.85). Blocked on the item-class
+  decision now tracked as EN-23. **Open question.**
 
-### EN-17 🐞 A hypothesis can make several claims while the falsifier tests only one — P2 — Todo
+### EN-17 🐞 A hypothesis can make several claims while the falsifier tests only one — P2 — Done
 
 - **Problem:** The wisdom prereg predicted "the sympathy condition will produce the largest of the
   three drifts". Sympathy produced the **smallest** (3.2 versus authority's 7.0) — the prediction
@@ -209,7 +218,8 @@ what links this file to git history.
   prereg listing each claim with its own falsifier and verdict.
 - **Verify:** No probe's hypothesis asserts something its falsifier cannot reach.
 
-### EN-16 🐞 The creativity floor arm confounds constraint with question identity — P2 — Todo
+- **Shipped:** 2026-08-23 — all four v2 preregs claim only what their falsifiers decide; side measures (themes, depth trends, citation rates) are explicitly evidence that decides nothing.
+### EN-16 🐞 The creativity floor arm confounds constraint with question identity — P2 — Done
 
 - **Problem:** The narrow arm asks a different question with four right answers; the open arm asks
   for an invention. The reviewer is right that "6/10 versus 2/10" is explained by that difference
@@ -220,7 +230,8 @@ what links this file to git history.
   adding an arm, not deleting one.
 - **Verify:** A diversity difference that survives holding the question constant.
 
-### EN-19 🐞 Wisdom probe variants are not single-factor changes — P2 — Todo
+- **Shipped:** 2026-08-23 — v2 floor is the same invention task with the concept pinned to v1's own modal idea. Result: supports, survived 2/3 at 0.62 (7 vs 4 ideas, themes 3 vs 1).
+### EN-19 🐞 Wisdom probe variants are not single-factor changes — P2 — Done
 
 - **Problem:** Two construction defects found in the 2026-08-23 rescan. (a) `floodbudget`'s
   material variant changes *two* things at once — it adds the sole-water-supply fact but also
@@ -237,6 +248,30 @@ what links this file to git history.
   added less than deleting the relocation detail removed.
 - **Verify:** A diff of each variant against base touches one clause; every direction key
   carries its argument.
+
+- **Shipped:** 2026-08-23 — every variant is base plus exactly one appended sentence, asserted in code at run time; sympathy attaches to the party it describes; authority anchors moved to extremes after v2.1 showed two sat at or below the base positions.
+### EN-23 ❓ What item class can make this subject err honestly? — P1 — Triage
+
+- **Problem:** EN-15's v2 proved computable items cannot produce errors at 16k thinking tokens,
+  and without errors calibration has nothing to measure. The construct needs tasks where the
+  subject is genuinely uncertain while ground truth stays verifiable.
+- **Want:** A decision between: (a) effort-capped answering — same items, thinking constrained,
+  framed openly as "the subject at low effort"; (b) verifiable non-computable items with cited
+  keys (reintroduces EN-9's authoring risk, mitigated by citations); (c) prediction items scored
+  later; (d) adversarial near-miss items designed to invite specific slips.
+- **Verify:** A run landing inside the 0.35–0.90 validity window.
+
+### EN-24 ✨ Wisdom needs power, not more redesigns — P2 — Todo
+
+- **Problem:** v2.2's design is sound; the calibrated reviewer's remaining objection is
+  resolution only — base noise from 3 reps, condition deltas from 2-sample means. The verdict
+  was a near-miss inconclusive: one clause, one dilemma.
+- **Want:** The identical v2.2 design at 6 reps per cell (~200 calls, ~$3), the rep count the
+  synthetic sound-invariance case already showed satisfies the calibrated reviewer.
+- **Grounding:** `transcripts/20260823-115100-*` — strengthened facts moved +58/+15/+15/+17
+  against mean drift 4.9 and zero wrong-direction moves; authority citation rose to 5/8 (from
+  v1's 0/6) once anchors were extreme.
+- **Verify:** A verdict other than inconclusive, whichever it is, surviving review.
 
 ### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Todo
 
@@ -300,7 +335,7 @@ what links this file to git history.
 - **Grounding:** [`project/ARCHITECTURE.md`](ARCHITECTURE.md) §4 records the current trade.
 - **Verify:** A decision written into ARCHITECTURE.md §4, not a code change.
 
-### EN-9 🐞 Eight calibration answer keys were written from memory — P2 — Todo
+### EN-9 🐞 Eight calibration answer keys were written from memory — P2 — Done
 
 - **Problem:** The `FACTUAL` items in `intelligence.calibration` have keys the probe's author
   wrote from recall. A wrong key registers as a subject error and inflates measured
@@ -313,6 +348,7 @@ what links this file to git history.
   the confidence scale, which is where calibration is most interesting.
 - **Verify:** Every remaining factual item has a source, or `FACTUAL` is empty.
 
+- **Shipped:** 2026-08-23 — v2 items are all computed at import; no key depends on anyone's memory. (The rescan had already hand-verified all 19 v1 keys correct.)
 ### EN-8 🔧 Full runs pay list price — P3 — Todo
 
 - **Problem:** Probes issue many small independent calls at full rate. The Batch API is 50%
@@ -374,6 +410,32 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **The v2 wave: two supports that survive, one honest ceiling, one honest
+  inconclusive — and the reviewer caught the wisdom design twice more before the data could
+  speak.** Readings of record under the calibrated majority-of-3 instrument:
+  **imagination v2 supports, survived 3/3 at median 0.78** — with no options to eliminate, 92%
+  of free-text answers follow the invented rule, 96% follow the ordinary rule in control, and
+  the questions alone yield the counterfactual answer 3.7% of the time (p ~ 1e-11); the weak
+  0.52 of v1 firmed exactly as the redesign predicted. **creativity v2 supports, survived 2/3
+  at 0.62** — 7/10 distinct ideas open versus 4/10 with the concept pinned to the same task;
+  themes 3 vs 1; pushing yields 8 ideas across 5 themes, so the reachable space exceeds the
+  default one. **calibration v2 inconclusive at ceiling, and the reading survived 3/3 at
+  0.85** — the subject scored 42/42 on items built to be brutal (763rd prime, digit sum of
+  99^99, 170 Collatz steps): given 16k thinking tokens it is a slow, reliable calculator, and
+  no confidence metric exists without errors (EN-23). **wisdom v2.2 inconclusive, review 0/3
+  at 0.45** — after strengthening, all four decisive facts moved the subject (+58/+15/+15/+17)
+  against mean drift 4.9 and zero wrong-direction moves; the support margin failed on one
+  clause of one dilemma, and the reviewer judges the design underpowered to resolve it (base
+  noise from 3 reps, 2-sample deltas — EN-24). Along the way the reviewer refuted two wisdom
+  intermediates for real defects: v2 ran its validity gate before its refutation clauses,
+  masking a refutation its own data had triggered; v2.1 refuted on a dilemma whose decisive
+  fact had moved the subject 2.5 points from a base of 80 — a failed manipulation on a
+  saturated scale. Both fixes made the design stricter, and both were committed before rerun.
+  Also kept: the instructed-susceptibility potency arm barely moves this subject (1.6–2.6
+  points) — telling Opus 5 to weigh social factors does not make it sway, so that arm is a
+  poor manipulation check for this model; the subject's own 8+ drifts now satisfy potency
+  self-evidently. Two safety-refusal curios handled by exclusion: category "bio" on grading a
+  cargo-packaging answer, "cyber" on which registry a settlement guards.
 - **2026-08-23** — **Re-review under the calibrated instrument: one finding stands, weakly;
   single-rep readings proved to be boundary noise.** The first pass ran single reps — a
   protocol the calibration never validated — and put two findings on the decision boundary

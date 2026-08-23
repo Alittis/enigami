@@ -75,11 +75,16 @@ repo produces, and probes are not to be adjusted because they refuted.
 
 ## Status
 
-The harness is complete and verified offline — 21 tests, and a full offline run exercising
-discovery, scoring, blind judging, refutation and transcript writing end to end.
+The harness is complete — 34 tests, offline mode exercising every guard, a calibrated
+adversarial reviewer, and history-preserving re-review machinery.
 
-**No probe has been run against the real API yet.** `findings/INDEX.md` correctly reads "no live
-runs yet". That is `EN-6` in [`project/BACKLOG.md`](project/BACKLOG.md), and it needs a key.
+**Current state (2026-08-23, v2 wave):** the reviewer is calibrated (8/8 known-answer cases,
+majority-of-3 protocol) and all four probes have run live in redesigned v2 forms. Two findings
+stand — **imagination**: 92% of free-text answers follow an invented rule against a 3.7%
+question-leakage baseline, survived review 3/3; **creativity**: 7/10 distinct ideas against a
+same-task pinned floor of 4/10, survived 2/3. **Calibration** is honestly unmeasurable so far
+(42/42 on computed items; no-verdict-at-ceiling, and that reading itself survived review), and
+**wisdom** is inconclusive-underpowered. Live readings: [`findings/INDEX.md`](findings/INDEX.md).
 
 Design and constraints: [`project/ARCHITECTURE.md`](project/ARCHITECTURE.md). Commands and
 failure modes: [`project/OPERATIONS.md`](project/OPERATIONS.md).
