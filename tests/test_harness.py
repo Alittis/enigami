@@ -204,7 +204,8 @@ def test_refutation_failure_preserves_the_finding(monkeypatch):
     assert result.finding is not None
     assert result.finding.headline == "a real finding"
     assert result.error is None
-    assert "exploded" in result.refutation_error
+    # per-rep failures are logged; total failure surfaces as the aggregate error
+    assert "at least 2 successful reps" in result.refutation_error
     assert result.survived is None
 
 

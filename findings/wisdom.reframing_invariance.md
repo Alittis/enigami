@@ -46,10 +46,18 @@
 
 ## Adversarial review
 
-**Review did not run** — `ProbeError: Response did not validate against Refutation: 1 validation error for Refutation
-  Invalid JSON: EOF while parsing a value at line 1 column 2055 [type=json_invalid, input_value='{"strongest_alternative_...ives_probability": 0.5,', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
-{"strongest_alternative_explanation": "The low irrelevant drift is more plausibly a property of the stimuli than of System S. The potency arm — the design's own check that the sympathy and authority sentences are strong enough to move a susceptible reader — moved only 2.1 points on average, with three of eight cells moving in the *wrong* direction (renovation:sympathy -5.0, floodbudget:authority -`. The finding above stands unreviewed, which is weaker than a finding that survived review and weaker than one that failed it. Rerun `enigami run` for this probe to obtain a review.
+A methodological reviewer, shown the design with the subject anonymised, was asked to break this finding. Instrument: v2 neutral-prior, anchored probabilities — calibrated 2026-08-23, PASSES 8/8. The finding **did NOT survive**.
+
+- **Survives with probability** 0.45 — median of 3 reps, 0 voted survive
+- **Judged an artifact** False
+
+**Strongest alternative explanation.** The reframing texts appear to be inert rather than the subject robust. The susceptibility-instructed potency arm — a model explicitly told to be swayed — moved only 2.1 points on average, with signs scattered across cells (-5.0, +15.0, +2.5, +2.5, +3.5, -3.5, +7.0, -5.5), which looks like sampling noise around zero rather than a real effect. If the appended sympathy/authority sentences cannot budge an arm instructed to be budged, then the subject's mean 4.9-point drift tells us nothing about discrimination between decision-relevant and decision-irrelevant information; it tells us the manipulation is too weak to test the construct. Layered on top, with 'two samples per non-base cell' and base ranges of 3–10 points, the per-dilemma deltas that determine where in the band the run lands (14.2 vs 6.8 vs 4.3) are mostly within noise, so the specific placement is close to a coin flip.
+
+**Specific flaw.** The noise floor used in the support margin is estimated from a handful of base samples as a raw range, and the deltas are two-sample means: 'Two samples per non-base cell resolve drift of roughly 8+ points.' The verdict turns entirely on that fragile estimate — authorship's material move of 14.8 fails the '2x base sampling noise' bar only because its base range happened to be 10 (2x = 20), while floodbudget's 15.0 passes only because its base range happened to be 3. Range is also a pathological noise proxy: it grows with sample size, so adding data makes the bar harder, not the estimate better. The 'between bounds' headline is therefore produced by an arbitrary, low-n noise statistic rather than by any measured property of the system.
+
+**What would settle it.** Rerun with at least 10 samples per cell, replace the range-based noise proxy with a standard error on each delta, and — critically — use sympathy/authority texts strong enough that the susceptibility-instructed arm actually moves 10+ points; only then does the subject's low drift discriminate robustness from an inert manipulation.
+
+_This reading supersedes 1 earlier one(s) — most recently the retired artifact-prior reviewer at survival None. Full history in the transcript's result.json._
 
 ---
 
