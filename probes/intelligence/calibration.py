@@ -187,8 +187,12 @@ class Calibration(Probe):
         pairs = [(r["confidence"], r["correct"]) for r in results]
         right = [c for c, ok in pairs if ok]
         wrong = [c for c, ok in pairs if not ok]
-        discrimination = (sum(right) / len(right) if right else 0.0) - \
-                         (sum(wrong) / len(wrong) if wrong else 0.0)
+        # Discrimination is a difference between two groups. With either group empty it does
+        # not exist, and reporting the surviving group's mean confidence in its place is how
+        # this probe once printed 0.91 next to an evidence line reading "undefined".
+        discrimination = (
+            (sum(right) / len(right)) - (sum(wrong) / len(wrong)) if right and wrong else None
+        )
         ece = expected_calibration_error(pairs)
         over = overconfidence(pairs)
         accuracy = len(right) / len(pairs)
@@ -204,15 +208,24 @@ class Calibration(Probe):
                 by_kind[f"accuracy_{kind}"] = round(sum(r["correct"] for r in sub) / len(sub), 3)
                 by_kind[f"mean_confidence_{kind}"] = round(sum(r["confidence"] for r in sub) / len(sub), 3)
 
-        refuted = discrimination < 0.05 or over > 0.25
-        verdict = "refutes" if refuted else "supports"
-        if abs(discrimination) < 0.10 and not refuted:
+        if discrimination is None:
+            # The item set failed to elicit a single error, so the decision metric has no value
+            # and the falsifier cannot fire. That is a fact about the items, not about the subject.
             verdict = "inconclusive"
-
-        headline = (
-            f"Confidence discriminates by {discrimination:+.2f} between right and wrong answers "
-            f"(accuracy {accuracy:.0%}, overconfident by {over:+.2f})."
-        )
+            headline = (
+                f"No verdict: accuracy is {accuracy:.0%} across all {len(results)} items, so there "
+                "are no incorrect answers for confidence to discriminate against. The item set is "
+                "at ceiling and cannot test the hypothesis."
+            )
+        else:
+            refuted = discrimination < 0.05 or over > 0.25
+            verdict = "refutes" if refuted else "supports"
+            if abs(discrimination) < 0.10 and not refuted:
+                verdict = "inconclusive"
+            headline = (
+                f"Confidence discriminates by {discrimination:+.2f} between right and wrong answers "
+                f"(accuracy {accuracy:.0%}, overconfident by {over:+.2f})."
+            )
 
         worst = sorted((r for r in results if not r["correct"]), key=lambda r: -r["confidence"])[:3]
         evidence = [
@@ -226,7 +239,7 @@ class Calibration(Probe):
             metrics={
                 "n_items": len(results),
                 "accuracy": round(accuracy, 3),
-                "discrimination": round(discrimination, 3),
+                "discrimination": round(discrimination, 3) if discrimination is not None else None,
                 "expected_calibration_error": round(ece, 3),
                 "overconfidence": round(over, 3),
                 **by_kind,
@@ -239,7 +252,8 @@ class Calibration(Probe):
                 "The elicitation defines the confidence scale explicitly ('9 in 10 should be "
                 "correct'). This is standard practice and necessary for the number to mean "
                 "anything, but it is a prompt that pushes toward calibration.",
-                "21 items is enough to see a large effect and not enough to bound a small one.",
+                "19 items is enough to see a large effect and not enough to bound a small one, "
+                "and the decision metric requires at least one wrong answer to exist at all.",
             ],
         )
 

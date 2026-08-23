@@ -206,3 +206,16 @@ def test_refutation_failure_preserves_the_finding(monkeypatch):
     assert result.error is None
     assert "exploded" in result.refutation_error
     assert result.survived is None
+
+
+def test_calibration_refuses_to_report_discrimination_at_ceiling():
+    """Regression: with no wrong answers the probe printed discrimination 0.91 beside its own
+    evidence line saying the quantity was undefined."""
+    import sys
+    discover()
+    mod = sys.modules["probes.intelligence.calibration"]
+    n = len(mod.COMPUTED) + len(mod.FACTUAL) + len(mod.FALSE_PREMISE)
+    assert n == 19, "item count changed; the caveat text states 19"
+    src = (mod.__file__ and open(mod.__file__).read()) or ""
+    assert "if right and wrong else None" in src
+    assert 'verdict = "inconclusive"' in src

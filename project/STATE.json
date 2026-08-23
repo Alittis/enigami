@@ -6,9 +6,10 @@
   "lastUpdated": "2026-08-23",
   "itemPrefix": "EN",
   "openQuestions": [
-    "EN-7"
+    "EN-7",
+    "EN-13"
   ],
-  "nextStep": "STATE AS OF 2026-08-23. Harness complete, 24 tests, live path working. One probe has run for real: imagination.counterfactual_world scored 100% counterfactual / 83% control, the pre-registered rule said `supports`, and the anonymised adversarial reviewer refuted it at survival probability 0.22 \u2014 correctly. Its Fisher exact claim (p=0.478 for 12/12 vs 10/12) was verified independently, and the control arm sat one item from the falsifier. That probe's result should not be believed; the redesign is EN-10. EN-12 generalises the lesson: falsifier thresholds across all four probes were set without regard to what their sample sizes can resolve. Next: run the remaining three probes (`uv run enigami run intelligence wisdom creativity`, ~$1), then do EN-12 before trusting any verdict. Read project/ARCHITECTURE.md section 2 first.",
+  "nextStep": "STATE AS OF 2026-08-23. All four probes have run live ($1.21 total). All four scored `supports`; all four were refuted by adversarial review at survival 0.22-0.30. No verdict is citable yet. Three of the four critiques were independently verified and were correct, including a real code bug where intelligence.calibration reported discrimination 0.91 beside its own line saying the metric was undefined (fixed, EN-18). The pressing question is now EN-13: a reviewer that refutes 4 of 4 needs a positive control before its verdicts are evidence. Then EN-14 (wisdom averaging hid a per-dilemma falsifier trigger), EN-15 (calibration at ceiling, 19/19), EN-10 (imagination redesign), EN-12/EN-17 (prereg mechanism flaws). Read project/ARCHITECTURE.md section 2 first. Substantive results worth keeping: an unargued authority moved judgment more than a sympathetic detail did, and 4 of 10 independent samples invented the same unit and gave it the same name.",
   "repo": {
     "remote": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION (no GitHub remote created yet)",
     "visibility": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION"
@@ -87,12 +88,10 @@
   "sensitivity": "credentials \u2014 one Anthropic API key in a gitignored .env at mode 600, written only by deploy/scripts/setup-anthropic-env.sh. transcripts/ is gitignored and holds model outputs, never the key. No personal data.",
   "firstLiveRun": {
     "date": "2026-08-23",
-    "probe": "imagination.counterfactual_world",
-    "verdict": "supports",
-    "survivedReview": false,
-    "reviewSurvivalProbability": 0.22,
-    "costUsd": 0.268,
-    "calls": 25,
-    "note": "Finding refuted by adversarial review; see EN-10. Do not cite this result."
+    "probesRun": 4,
+    "costUsd": 1.212,
+    "verdicts": "all four `supports`",
+    "survivedReview": "none (0.22\u20130.30)",
+    "note": "No verdict from this run is citable. Three of four critiques independently verified correct, one of them a real code bug (EN-18). The reviewer itself now needs a positive control before its verdicts count as evidence \u2014 EN-13."
   }
 }

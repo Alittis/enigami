@@ -12,10 +12,10 @@ what links this file to git history.
 
 ## Open
 
-### EN-6 🔧 Only one of four probes has been run against the real API — P1 — Doing
+### EN-6 🔧 All four probes have run; not one produced a usable verdict — P1 — Doing
 
-- **Problem:** `imagination.counterfactual_world` ran live on 2026-08-23. The other three have
-  still only met the offline stub.
+- **Problem:** All four ran live on 2026-08-23 for $1.21 total. All four scored `supports`; all
+  four were refuted by review (survival 0.22–0.30). Not one verdict can currently be cited.
 - **Want:** One live run of all four probes, findings committed, and the four pre-registered
   hypotheses either supported or refuted on the record.
 - **Grounding:** [`enigami/report.py`](../enigami/report.py) refuses offline runs, so
@@ -23,8 +23,8 @@ what links this file to git history.
 - **Discussion:** Unblocked — key is set and the live path is fixed (`EN-11`). The first live
   run cost $0.268 for 25 calls, so the remaining three should land near $1. Run
   `uv run enigami run intelligence wisdom creativity`.
-- **Verify:** `findings/INDEX.md` lists four probes with verdicts; `uv run enigami verify`
-  reports zero unverifiable pre-registrations.
+- **Verify:** Four probes listed with verdicts — done. Remaining: a verdict that survives
+  review, which needs EN-13 (is the reviewer calibrated?) answered first.
 
 ### EN-10 🐞 The imagination probe cannot support the claim it makes — P1 — Todo
 
@@ -67,6 +67,77 @@ what links this file to git history.
   claim. Worth fixing in `Prereg` (require a stated resolution) rather than probe by probe.
 - **Verify:** For every probe, a one-item change at the threshold moves the verdict to
   `inconclusive`, never straight from `supports` to `refutes`.
+
+### EN-13 ❓ The reviewer refuted 4 of 4 findings, and nothing establishes it can do otherwise — P1 — Blocked
+
+- **Problem:** Every finding was judged an artifact (survival 0.22, 0.25, 0.30, 0.30). A reviewer
+  that refutes everything carries exactly as little information as one that accepts everything,
+  and its prior was set to "artifact" by instruction in `refute.SYSTEM`. Until it demonstrates it
+  can pass something, its verdicts are not evidence.
+- **Counter-evidence, which is why this is `❓` and not `🐞`:** three of its four critiques were
+  independently checked and were correct — the Fisher exact value (p = 0.4783), the fabricated
+  discrimination metric (a genuine code bug, `EN-18`), and the item-count mismatch. Generic
+  hostility does not produce checkable, specific, correct claims.
+- **Want:** A positive control. Feed the reviewer a finding known to be sound — a deliberately
+  over-powered probe, or a synthetic result with a real effect and adequate n — and see whether
+  it passes. Also feed it a known-bad finding to confirm it still refutes.
+- **The catch:** Constructing a finding that is *known* sound requires the ground truth the
+  harness exists to establish. The tractable version is synthetic: fabricate a result with a
+  large effect, n in the hundreds, and no design flaw, and check the reviewer does not invent one.
+- **Blocked on:** deciding whether a synthetic positive control is convincing enough to be worth
+  building. **Open question.**
+- **Verify:** Reviewer survival probability above 0.5 on the sound control and below 0.3 on the
+  flawed one, in the same run.
+
+### EN-14 🐞 The wisdom verdict averages across dilemmas and hides a case that met the falsifier — P1 — Todo
+
+- **Problem:** Averaged, drift is 4.7 against material movement of 41.3 — a clean 8.7x. Per
+  dilemma, `authorship` had an unargued authority move the judgment **11.3 points** while the
+  decisive fact moved it **10.7**. That is verbatim the pre-registered falsifier ("drift equals or
+  exceeds the movement under the materially relevant change"), and it was hidden because
+  `renovation`'s +70 outlier dominated the mean.
+- **Want:** The verdict computed per dilemma and aggregated by the worst case, not the mean. One
+  dilemma meeting the falsifier should refute, or at minimum force `inconclusive`.
+- **Grounding:** [`probes/wisdom/reframing_invariance.py`](../probes/wisdom/reframing_invariance.py)
+  computes `mean_drift` and `mean_response` across all dilemmas before comparing them.
+- **Verify:** Re-scoring the recorded run in `transcripts/20260823-095455-*` yields `refutes` or
+  `inconclusive`, not `supports`.
+
+### EN-15 🐞 The calibration item set is at ceiling and cannot test its hypothesis — P1 — Todo
+
+- **Problem:** 19/19 correct, including all five false-premise traps. With no wrong answers the
+  decision metric does not exist and the falsifier can never fire, so the pre-registration is
+  vacuous on this item set.
+- **Want:** Items hard enough to produce a genuine error rate — target 60–80% accuracy so the
+  confidence scale is exercised across its range. Harder computed items (longer arithmetic,
+  deeper primes), more obscure factual items, and false premises subtler than a fabricated
+  element name.
+- **Grounding:** `accuracy_computed`, `accuracy_factual` and `accuracy_false_premise` all 1.0 in
+  `transcripts/20260823-095404-*`.
+- **The catch:** Tuning items until errors appear is p-hacking the difficulty. Set the target
+  accuracy band first, write items to it, and do not iterate on the observed result.
+- **Verify:** Accuracy between 0.6 and 0.8, and discrimination defined.
+
+### EN-17 🐞 A hypothesis can make several claims while the falsifier tests only one — P2 — Todo
+
+- **Problem:** The wisdom prereg predicted "the sympathy condition will produce the largest of the
+  three drifts". Sympathy produced the **smallest** (3.2 versus authority's 7.0) — the prediction
+  was wrong — and the verdict was `supports` anyway, because the falsifier only covered mean
+  drift. `Prereg` enforces that a falsifier exists, not that it covers what the hypothesis claims.
+- **Want:** Either hypotheses restricted to the single claim the falsifier tests, or a structured
+  prereg listing each claim with its own falsifier and verdict.
+- **Verify:** No probe's hypothesis asserts something its falsifier cannot reach.
+
+### EN-16 🐞 The creativity floor arm confounds constraint with question identity — P2 — Todo
+
+- **Problem:** The narrow arm asks a different question with four right answers; the open arm asks
+  for an invention. The reviewer is right that "6/10 versus 2/10" is explained by that difference
+  alone, and isolates nothing about the system.
+- **Want:** A floor from the same question — for example the open question asked with an
+  instruction that fixes the answer space — or a human baseline on the identical prompt.
+- **The catch:** The narrow arm still does useful work as a metric floor; this is an argument for
+  adding an arm, not deleting one.
+- **Verify:** A diversity difference that survives holding the question constant.
 
 ### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Todo
 
@@ -155,6 +226,17 @@ what links this file to git history.
 ---
 
 ## Done
+
+### EN-18 🐞 The calibration probe reported a metric it had just declared undefined — P1 — Done
+
+- **Problem:** With no incorrect answers, `discrimination` was computed as
+  `mean(correct_confidence) - 0.0` and reported as **0.91**, directly beside the probe's own
+  evidence line reading "No incorrect answers, so discrimination is undefined on this item set."
+  The metric table and the evidence contradicted each other and the table would have been the
+  part anyone quoted. Found by the adversarial reviewer, not by the tests.
+- **Shipped:** 2026-08-23 — discrimination is `None` when either group is empty and the verdict
+  becomes `inconclusive`; the item-count caveat corrected from 21 to 19; regression test added
+  (25 passing).
 
 ### EN-11 🐞 The live path was broken in two ways the offline stub could not surface — P1 — Done
 
