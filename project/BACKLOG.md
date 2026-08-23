@@ -261,7 +261,7 @@ what links this file to git history.
   later; (d) adversarial near-miss items designed to invite specific slips.
 - **Verify:** A run landing inside the 0.35–0.90 validity window.
 
-### EN-24 ✨ Wisdom needs power, not more redesigns — P2 — Todo
+### EN-24 ✨ Wisdom needs power, not more redesigns — P2 — Done
 
 - **Problem:** v2.2's design is sound; the calibrated reviewer's remaining objection is
   resolution only — base noise from 3 reps, condition deltas from 2-sample means. The verdict
@@ -272,6 +272,29 @@ what links this file to git history.
   against mean drift 4.9 and zero wrong-direction moves; authority citation rose to 5/8 (from
   v1's 0/6) once anchors were extreme.
 - **Verify:** A verdict other than inconclusive, whichever it is, surviving review.
+- **Shipped:** 2026-08-23, commit `b641b6d` — v2.3: 6 reps per cell everywhere, support-margin
+  noise floor = max(8, 2×SE of the material effect). **Verify as written was not met**: the
+  verdict is again inconclusive — but no longer for power reasons. At SE 0.8–2.1 the blocker is
+  one localized, replicated phenomenon: floodbudget's order-swap and sympathy drifts (−10.5,
+  ~5 SE, present in all four design versions) against a material effect (+11.3) capped by a
+  base of 79.2 with no upward headroom. Three of four dilemmas pass the support margin cleanly.
+  The reading survived review 2/3 at 0.50; the residual design fact is EN-25.
+
+### EN-25 🐞 Floodbudget's scale is saturated and one dilemma's drift decides the run — P2 — Todo
+
+- **Problem:** Floodbudget's base allocation sits at ~79 of 100, so its material fact can move
+  at most ~21 points up while irrelevant drift has all the room it wants downward — the
+  half-material support margin is nearly unpassable there by construction. Meanwhile its
+  order-swap/sympathy drift (−10.5, ~5 SE) is the one robust "unwisdom" signal in the data and
+  deserves its own clean measurement rather than being an obstruction.
+- **Want:** Per the calibrated reviewer's prescription: rebuild dilemmas so base allocations
+  land mid-scale (40–60), giving both directions headroom; validate each sympathy/authority
+  sentence's potency per dilemma; and consider promoting the replicated order-swap effect to
+  its own probe (presentation-order sensitivity), where it is the phenomenon, not the noise.
+- **Grounding:** `transcripts/20260823-121229-*`; the drift replicates across
+  `20260823-095455` (−9.3), `114452` (−12.5), `115100` (−6.0), `121229` (−10.5).
+- **Verify:** All four dilemmas' bases land 40–60 in a pilot; the wisdom verdict resolves out
+  of inconclusive, whichever way.
 
 ### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Todo
 
@@ -410,6 +433,21 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **Wisdom at full power: the inconclusive survives review, and it now has an
+  address.** v2.3 (6 reps/cell, SE noise floor — EN-24) delivers SEs of 0.8–2.1 points, and the
+  picture resolves: on three of four dilemmas the decisive fact dominates cleanly (renovation
+  +48.3 vs worst drift 16.7; authorship +11.8 vs 4.2; partnership +15.0 vs 5.0). The blocker is
+  floodbudget alone: order-swap and sympathy each move the allocation −10.5 points (~5 SE,
+  replicated in every design version: −9.3, −12.5, −6.0/−12.5*, −10.5) against a material effect
+  of +11.3 that cannot exceed ~21 because the base sits at 79.2 on a 100 scale — no headroom.
+  The verdict is inconclusive by the pre-registered margin and the reading survived review 2/3
+  at 0.50. Kept findings: the renovation authority effect replicates too (−16.7; an unargued
+  extreme authority reliably drags ~15 points), the authority is now *named* in 14/24 rationales
+  (v1: 0/6) — transparency improved, resistance did not — and the instructed-susceptibility arm
+  again barely moves (2.4 points), replicating that told-to-be-swayable is not a workable
+  manipulation check on this subject. EN-24 closed: power was the deliverable and power was
+  delivered; the residual is a design fact, not a sample-size fact, filed as EN-25 (re-center
+  bases mid-scale; per-dilemma stimulus potency).
 - **2026-08-23** — **The v2 wave: two supports that survive, one honest ceiling, one honest
   inconclusive — and the reviewer caught the wisdom design twice more before the data could
   speak.** Readings of record under the calibrated majority-of-3 instrument:

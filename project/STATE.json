@@ -8,7 +8,7 @@
   "openQuestions": [
     "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-23 (v2 wave complete). Two evidential positives stand: imagination (92% free-text counterfactual reasoning vs 3.7% leakage baseline, survived 3/3) and creativity (concept-level diversity above a same-task floor, survived 2/3). Calibration is honestly unmeasurable on computable items (42/42 at ceiling; EN-23 open on item class). Wisdom v2.2 is sound but underpowered - EN-24 reruns it at 6 reps/cell (~$3). Next wave: EN-24 (cheap), EN-23 (needs a decision), then the unbuilt probes EN-2 (reasoning vs retrieval), EN-3 (sycophancy under pushback, needs multi-turn Subject support), EN-4, EN-5. Recorded API spend to date: ~$16. Read project/ARCHITECTURE.md section 2 and findings/INDEX.md first.",
+  "nextStep": "STATE AS OF 2026-08-23 (EN-24 done). Wisdom at full power: inconclusive that survives review, localized to one design fact (EN-25: floodbudget base saturation; the replicated ~10-point order-swap effect deserves its own probe). Two supports stand (imagination 3/3 at 0.78, creativity 2/3 at 0.62); calibration blocked on EN-23 (user decision pending on item class: effort-capped / cited non-computable / prediction / near-miss items). Next: EN-23 decision, EN-25, then new probes EN-2 (reasoning vs retrieval), EN-3 (sycophancy, needs multi-turn), EN-4, EN-5. Recorded spend ~$19. Read project/ARCHITECTURE.md section 2 and findings/INDEX.md first.",
   "repo": {
     "remote": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION (no GitHub remote created yet)",
     "visibility": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION"
@@ -107,6 +107,6 @@
     "imagination.counterfactual_world": "v2 SUPPORTS, survived 3/3 at 0.78 - 92% free-text altered / 96% control / 3.7% leakage, p~1e-11",
     "creativity.mode_collapse": "v2 SUPPORTS, survived 2/3 at 0.62 - 7 vs 4 ideas against a same-task pinned floor; themes 3 vs 1; pushed reaches 8/5",
     "intelligence.calibration": "v2 inconclusive AT CEILING, reading survived 3/3 at 0.85 - 42/42 on computed items; item class must change (EN-23)",
-    "wisdom.reframing_invariance": "v2.2 inconclusive, review 0/3 at 0.45 - facts move +58/+15/+15/+17 vs drift 4.9, one support clause missed; underpowered (EN-24)"
+    "wisdom.reframing_invariance": "v2.3 inconclusive, SURVIVED review 2/3 at 0.50 - 3 of 4 dilemmas pass cleanly (fact dominates 48/12/15 vs drift 17/4/5); blocker localized to floodbudget's replicated -10.5 order/sympathy drift on a saturated base (EN-25)"
   }
 }
