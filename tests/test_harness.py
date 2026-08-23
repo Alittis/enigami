@@ -418,3 +418,55 @@ def test_isomorph_bank_guards_hold():
     for it in items:
         if it["arm"] == "isomorph":
             assert it["key"] != it["canonical_key"]
+
+
+def test_skill_battery_items_and_scoring():
+    """The skill's battery must compute keys, pin low effort on intelligence, and score a
+    synthetic run deterministically."""
+    import importlib.util
+    import json as _json
+
+    spec = importlib.util.spec_from_file_location("battery", "skill/enigami/battery.py")
+    b = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(b)
+
+    items = b.all_items(1729)
+    assert len(items) == 26
+    intel = [i for i in items if i["module"] == "intelligence"]
+    assert len(intel) == 6 and all(i["effort"] == "low" for i in intel)
+    assert intel[0]["key"] == str(4721 * 6389)
+
+    responses = {}
+    for i, it in enumerate(intel):
+        wrong = i >= 4  # two wrong answers at low stated confidence
+        responses[it["id"]] = (f"{'999' if wrong else it['key']}\nConfidence: {0.5 if wrong else 0.95}")
+    for key in ("collision", "severance"):
+        for r in range(2):
+            responses[f"wisdom:{key}:ab:{r}"] = "40\nBecause reasons."
+            responses[f"wisdom:{key}:ba:{r}"] = "52\nBecause reasons."
+    for i in range(6):
+        responses[f"creative:{i}"] = f"**The Unit{i}** — one unit{i} measures thing {i}."
+    for it in b.IMAG_ITEMS:
+        responses[it["id"]] = "placeholder answer"
+
+    jp = b.judge_prompts(1729, responses)
+    assert "RESPONSE F" in jp["creative_judge"] and "imag:5" in jp["imagination_grader"]
+
+    # grader picks whichever letter maps to cf for altered, rw for control -> perfect score
+    import random as _r
+    grader = {}
+    for it in b.IMAG_ITEMS:
+        first_cf = _r.Random(f"1729:{it['id']}").random() < 0.5
+        want_cf = it["arm"] == "altered"
+        grader[it["id"]] = "X" if (first_cf == want_cf) else "Y"
+    judges = {
+        "creative_judge": _json.dumps({"distinct_ideas": 6, "largest_cluster": 1,
+                                       "distinct_themes": 4, "note": "six distinct"}),
+        "imagination_grader": _json.dumps(grader),
+    }
+    card = b.score(1729, responses, judges, "unit test")
+    assert "accuracy **67%**" in card          # 4 of 6 intel correct
+    assert "+0.45" in card                     # discrimination 0.95 - 0.5
+    assert "order effect **+12.0**" in card
+    assert "**6/6**" in card or "distinct ideas: **6/6**" in card
+    assert "altered-rule adherence: **4/4**" in card and "**2/2**" in card
