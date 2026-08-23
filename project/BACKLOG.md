@@ -201,6 +201,11 @@ what links this file to git history.
 - **The catch:** Tuning items until errors appear is p-hacking the difficulty. Set the target
   accuracy band first, write items to it, and do not iterate on the observed result.
 - **Verify:** Accuracy between 0.6 and 0.8, and discrimination defined.
+- **Discussion (2026-08-23, v3 result):** Near-miss traps ceilinged too — 23/23 including all
+  15 twisted variants (EN-23). Two item classes now exhausted. Remaining options: effort-capped
+  answering (guaranteed errors, openly a different subject condition) or cited obscure facts
+  (ceiling-risky). The trap bank itself is kept: its canonical/twisted contrast is EN-2's
+  instrument, and 15/15 trap detection at high effort is a standing directional finding.
 - **Discussion (2026-08-23, v2 result):** v2 shipped 42 all-computed items across three bands,
   with a validity window returning no-verdict outside 0.35–0.90 accuracy. The subject scored
   **42/42** — the 763rd prime, the digit sum of 99^99, 170 Collatz steps — so with 16k thinking
@@ -250,7 +255,7 @@ what links this file to git history.
   carries its argument.
 
 - **Shipped:** 2026-08-23 — every variant is base plus exactly one appended sentence, asserted in code at run time; sympathy attaches to the party it describes; authority anchors moved to extremes after v2.1 showed two sat at or below the base positions.
-### EN-23 ❓ What item class can make this subject err honestly? — P1 — Triage
+### EN-23 ❓ What item class can make this subject err honestly? — P1 — Done
 
 - **Problem:** EN-15's v2 proved computable items cannot produce errors at 16k thinking tokens,
   and without errors calibration has nothing to measure. The construct needs tasks where the
@@ -260,6 +265,13 @@ what links this file to git history.
   keys (reintroduces EN-9's authoring risk, mitigated by citations); (c) prediction items scored
   later; (d) adversarial near-miss items designed to invite specific slips.
 - **Verify:** A run landing inside the 0.35–0.90 validity window.
+- **Shipped:** 2026-08-23, commit `a6236e8` — the user chose near-miss traps; v3 ran 8 canonical
+  + 15 twisted items with computed keys (Monty variants by enumeration: 67 vs 50; birthday by
+  search: 23 vs 253; coins by exhaustion). **Verify not met: 23/23, ceiling again** — the
+  subject caught every trap, inverted ones included, with confidence dipping 0.976→0.959 on
+  twisted items. The reading survived review 2/3 at 0.55. The question this item asked is now
+  sharper and lives on in EN-15: after brutal computation and near-miss traps both ceilinged,
+  effort-capped answering is the one remaining guaranteed-error class.
 
 ### EN-24 ✨ Wisdom needs power, not more redesigns — P2 — Done
 
@@ -433,6 +445,19 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **Third ceiling, and this one is a finding: the subject detects every
+  near-miss trap.** Calibration v3 (EN-23, user-selected item class) ran 8 canonical famous
+  puzzles and 15 twisted variants with one load-bearing detail changed, keys computed —
+  including inverted traps where the famous trick answer is the wrong one. Result: **23/23**,
+  including 50 for the random-host Monty, 253 for shares-your-birthday, 10 cents for the plain
+  bat-and-ball, "impossible" for the no-nickel coins. Confidence dipped from 0.976 (canonical)
+  to 0.959 (twisted) — the subject registers the twist and is right anyway. At high effort,
+  pattern-matching does not override reading on short verifiable items: two item classes
+  (brutal computation, near-miss traps) are now exhausted at ceiling, and the ceiling guard's
+  no-verdict reading survived review (2/3 at 0.55) for the second time. The directional
+  canonical/twisted machinery doubles as EN-2 groundwork. EN-23 closed as decided-and-run;
+  EN-15 stays blocked, its option set narrowed: effort-capped answering is the one
+  guaranteed-error class left, cited-obscure-facts remains ceiling-risky.
 - **2026-08-23** — **Wisdom at full power: the inconclusive survives review, and it now has an
   address.** v2.3 (6 reps/cell, SE noise floor — EN-24) delivers SEs of 0.8–2.1 points, and the
   picture resolves: on three of four dilemmas the decisive fact dominates cleanly (renovation

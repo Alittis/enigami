@@ -10,7 +10,7 @@ from an uncalibrated instrument is advisory, not evidential.
 | --- | --- | --- | --- | --- |
 | [`creativity.mode_collapse`](creativity.mode_collapse.md) | creativity | supports | yes | 7/10 distinct ideas open versus 4/10 with the concept pinned to the same task (overlap 0.14 vs 0.29); pushing for novelty yields 8. |
 | [`imagination.counterfactual_world`](imagination.counterfactual_world.md) | imagination | supports | yes | With no options to eliminate, 92% of free-text answers follow the invented rule (96% follow the ordinary rule in control), while the questions alone produce the counterfactual answer only 4% of the time (gap p = 1.0e-11). |
-| [`intelligence.calibration`](intelligence.calibration.md) | intelligence | inconclusive | yes | No verdict: accuracy 100% puts the item set at ceiling — outside the pre-registered validity band (0.35–0.90), so the metric does not measure what it claims here. |
+| [`intelligence.calibration`](intelligence.calibration.md) | intelligence | inconclusive | yes | No verdict: accuracy 100% (100% canonical, 100% twisted) puts the item set at ceiling — the subject detects near-miss traps too reliably for a calibration measurement (validity window 0.35–0.90). |
 | [`wisdom.reframing_invariance`](wisdom.reframing_invariance.md) | wisdom | inconclusive | yes | Between bounds: mean drift 5.9, wrong-direction moves 0, and at least one dilemma misses the 8-point/2-SE material floor or the half-material margin without meeting the refutation bar. |
 
-_4 probe(s), $6.85 of API spend._
+_4 probe(s), $5.02 of API spend._

@@ -1,59 +1,59 @@
-# Does stated confidence track correctness on computable questions? (v2)
+# Does confidence detect when the familiar-looking is not the familiar? (v3 — near-miss traps)
 
-**Probe** `intelligence.calibration` · **Domain** intelligence · **Run** `20260823-113348-intelligence.calibration`  
-**Cost** $2.180 across 47 calls · **Scoring** deterministic
+**Probe** `intelligence.calibration` · **Domain** intelligence · **Run** `20260823-122517-intelligence.calibration`  
+**Cost** $0.347 across 26 calls · **Scoring** deterministic
 
 ## Pre-registered before the run
 
-**Question.** When this system states a numeric confidence in an answer to a verifiable computational question, does that number carry decision-useful information about whether the answer is correct — through whatever mechanism, per-item self-knowledge or difficulty reading?
+**Question.** On problems that resemble famous puzzles — some verbatim, some altered in one load-bearing detail — does this system's stated confidence carry decision-useful information about whether its answer is correct? The intended error source is recognition, not computation: v2 established that computation alone cannot make this subject err.
 
-**Hypothesis.** Across 42 computable items built to land accuracy mid-range, mean confidence on correct answers will exceed mean confidence on wrong answers by at least 0.15, with a seeded bootstrap 95% CI excluding 0.05, and overall overconfidence will stay at or under 0.25.
+**Hypothesis.** Some twisted items will be answered with the famous version's answer or an overcorrection, landing overall accuracy inside the validity window; mean confidence on correct answers will exceed mean confidence on wrong answers by at least 0.15, with a seeded bootstrap 95% CI excluding 0.05; and overconfidence will stay at or under 0.25.
 
-**This is refuted if.** Refuted if pooled discrimination is below 0.05, or if overconfidence exceeds 0.25. The run is INVALID — no verdict either way — if accuracy exceeds 0.90 (ceiling: too few errors for the metric to exist, the v1 failure) or falls below 0.35 (floor). Between the refutation bounds and the support bounds (discrimination at least 0.15 with CI lower bound above 0.05) the verdict is inconclusive, so no single item can flip supports directly to refutes (EN-12).
+**This is refuted if.** Refuted if pooled discrimination is below 0.05, or if overconfidence exceeds 0.25. The run is INVALID — no verdict — if accuracy exceeds 0.90 (ceiling: the subject also detects near-miss traps reliably, itself a reportable fact, but not a calibration measurement) or falls below 0.35 (floor). Between the refutation bounds and the support bounds (discrimination at least 0.15 with CI lower bound above 0.05) the verdict is inconclusive, so no single item can flip supports straight to refutes (EN-12).
 
-**Null model.** Two, layered. A constant-confidence emitter scores zero discrimination — the falsifier catches it. A difficulty-reading stratified emitter — one fixed confidence per difficulty band — beats that and would pass the pooled test without per-item self-knowledge; it is compatible with the pre-registered claim as stated, which is why the claim is worded as decision-usefulness rather than introspection. Within-band discrimination, which the stratified emitter cannot fake, is reported as directional evidence only, since errors per band are too few to decide on.
+**Null model.** A familiarity responder: it classifies each surface as a known puzzle, emits the memorised answer — or, trained that such puzzles are tricks, reflexively emits the counterintuitive answer, which the inverted traps punish — and states uniformly high confidence. It scores near 100% on canonical items, fails specifically on twisted ones, and shows no confidence differentiation: exactly the pattern pooled discrimination detects.
 
 ## Result
 
-**inconclusive** — No verdict: accuracy 100% puts the item set at ceiling — outside the pre-registered validity band (0.35–0.90), so the metric does not measure what it claims here.
+**inconclusive** — No verdict: accuracy 100% (100% canonical, 100% twisted) puts the item set at ceiling — the subject detects near-miss traps too reliably for a calibration measurement (validity window 0.35–0.90).
 
 | metric | value |
 | --- | --- |
-| `n_items` | 41 |
-| `n_excluded` | 1 |
-| `excluded_bands` | ['hard'] |
+| `n_items` | 23 |
+| `n_excluded` | 0 |
 | `accuracy` | 1.0000 |
 | `discrimination_pooled` | None |
 | `discrimination_ci95` | None |
-| `overconfidence` | -0.0530 |
-| `expected_calibration_error` | 0.0530 |
-| `by_band` | {'easy': {'n': 14, 'accuracy': 1.0, 'mean_confidence': 0.99, 'discrimination': None}, 'medium': {'n': 14, 'accuracy': 1.0, 'mean_confidence': 0.977, 'discrimination': None}, 'hard': {'n': 13, 'accuracy': 1.0, 'mean_confidence': 0.868, 'discrimination': None}} |
+| `overconfidence` | -0.0350 |
+| `expected_calibration_error` | 0.0350 |
+| `by_kind` | {'canonical': {'n': 8, 'accuracy': 1.0, 'mean_confidence': 0.976, 'discrimination': None}, 'twisted': {'n': 15, 'accuracy': 1.0, 'mean_confidence': 0.959, 'discrimination': None}} |
+| `retrieval_gap_directional` | 0.0000 |
 
 ### Evidence
 
 - No incorrect answers anywhere in the set.
-- Per-band (accuracy / mean confidence / within-band discrimination): easy: 1.0 / 0.99 / None; medium: 1.0 / 0.977 / None; hard: 1.0 / 0.868 / None
+- Per kind (accuracy / mean confidence / within-kind discrimination): canonical: 1.0 / 0.976 / None; twisted: 1.0 / 0.959 / None
 
 ### Caveats the probe already knows about
 
-- Every key is computed by the probe at import; no answer key depends on the author's memory (closes EN-9).
-- Pooled discrimination cannot distinguish per-item self-knowledge from difficulty reading; the pre-registered claim is scoped to decision-usefulness for exactly that reason, and within-band figures are directional only.
-- 42 items resolve a large effect; the inconclusive band exists because they cannot resolve a small one.
-- Items whose responses failed twice are excluded and listed, not scored; exclusions cluster on hard items, so accuracy is biased upward by however many are listed.
-- Answer matching is string-based on normalised text; a correct answer expressed in an unmatched form scores wrong, which deflates accuracy but should not correlate with stated confidence.
+- Every key is computed at import (the Monty variant by enumeration, the birthday variant by search); no key rests on memory.
+- Famous puzzles and many of their variants are plausibly in training data — here that is the design, not a confound: the construct is whether confidence detects the mismatch between the remembered surface and the altered detail.
+- String matching may score an unconventionally phrased correct answer as wrong; answers are constrained to whole numbers or short phrases to limit this.
+- 23 items resolve a large discrimination effect only; the inconclusive band exists for what this n cannot resolve.
+- The canonical/twisted gap is directional evidence about retrieval versus reading (EN-2's construct), not part of any verdict here.
 
 ## Adversarial review
 
 A methodological reviewer, shown the design with the subject anonymised, was asked to break this finding. Instrument: v2 neutral-prior, anchored probabilities — calibrated 2026-08-23, PASSES 8/8. The finding **survived**.
 
-- **Survives with probability** 0.85 — median of 3 reps, 3 voted survive
+- **Survives with probability** 0.55 — median of 3 reps, 2 voted survive
 - **Judged an artifact** False
 
-**Strongest alternative explanation.** The headline is a declared-invalid outcome, not a capability claim, so the usual artifact pathways (prompt leakage, weak control, fluency-scoring judge) cannot manufacture it — they would push toward a false positive, and none is claimed. The one route that could manufacture a spurious ceiling is selective attrition: the single item excluded for 'failed twice' was a hard item, and the author concedes 'exclusions cluster on hard items, so accuracy is biased upward.' If response failures preferentially remove exactly the items the system would get wrong, 100% is an artifact of the exclusion rule rather than of genuine ceiling. But the arithmetic bounds this: even scoring the excluded item as wrong gives 40/41 = 0.976, still far above the 0.90 validity ceiling. The other candidate — task contamination, i.e. the 'computable' items being trivially in-distribution — is itself the substantive content of the finding, not a competing explanation of it.
+**Strongest alternative explanation.** The 'twists' are almost certainly not novel. One-detail alterations of famous puzzles (Monty Fall / random-opening host, birthday problem with changed n or changed target, boy-girl variants, non-parallel work-rate items) are themselves canonical teaching examples with extensive published discussion. So a familiarity responder that has also memorised the *variant* literature reaches 100% on twisted items without ever 'reading past' the surface — the intended recognition-failure mechanism was never induced. Compounding this, the bundle never shows the elicitation prompt: if the instructions or the framing ('some resemble famous puzzles', mixed canonical/twisted set, confidence elicitation) signalled that traps were present, the subject was told to read carefully, which alone would produce ceiling. Either way the ceiling reflects item selection and framing, not a measured trap-detection capacity.
 
-**Specific flaw.** The design's real defect is upstream and the author owns it: items were 'built to land accuracy mid-range' and did not, so the item-difficulty calibration procedure is unvalidated and the whole run yields no information about the hypothesis. A secondary, non-fatal defect is that the exclusion rule ('items whose responses failed twice are excluded and listed, not scored') removes precisely the items most likely to be errors, which would be fatal at a higher exclusion rate but cannot flip a 41/41 result out of the ceiling band at n_excluded=1. No fatal flaw in the reported verdict.
+**Specific flaw.** The item set was never difficulty-piloted against its own declared validity window: the design stakes everything on 'the intended error source is recognition, not computation' and on twisted items being answered 'with the famous version's answer or an overcorrection', yet 15/15 twisted items were solved, and the author's own caveat concedes 'Famous puzzles and many of their variants are plausibly in training data — here that is the design, not a confound.' It is a confound precisely when the variants are also in the data, because then no recognition error is available to detect and the calibration construct is unmeasurable by construction. The run yields zero information on the stated hypothesis (discrimination is literally null).
 
-**What would settle it.** Rerun on an item set whose difficulty is calibrated in advance against an independent pilot (or an adaptive difficulty ladder) until observed accuracy lands in 0.35\u20130.90, with every attempted item either scored or its failure reason adjudicated, so that discrimination is actually computable and the pre-registered test gets a real test.
+**What would settle it.** Re-run with twisted items whose altered detail is verifiably not an attested published variant (novel perturbations with computed keys), under a blinded prompt that gives no hint that any item may be altered and no canonical/twisted mixture cue, and publish the verbatim prompt. If accuracy still sits above 0.90 the ceiling finding is real; if it falls into 0.35–0.90 the original ceiling was an item-selection/framing artifact and the calibration question becomes answerable.
 
 ---
 
