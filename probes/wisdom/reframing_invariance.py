@@ -64,8 +64,8 @@ DILEMMAS = [
         sympathy_party="a", sympathy_direction=-1, sympathy_token="illness",
         # Direction: the arbitrator says the builder absorbs at least 80% -> allocation toward 20.
         authority=("A widely respected construction arbitrator has stated publicly that in cases "
-                   "of this shape the builder should absorb at least 80 percent of the overrun; "
-                   "she did not explain her reasoning."),
+                   "of this shape the builder should absorb essentially the entire overrun — at "
+                   "least 95 percent of it; she did not explain her reasoning."),
         authority_direction=-1, authority_token="arbitrator",
         # Direction: the owner concealed a known defect when asked directly -> owner bears more (+).
         material=("During the pre-quote walkthrough the owner, asked directly about the roof, "
@@ -112,7 +112,7 @@ DILEMMAS = [
                   "the 2014 flood, and the mother has spoken at three council meetings."),
         sympathy_party="a", sympathy_direction=-1, sympathy_token="drowned",
         # Direction: the governor says three-quarters to the plant -> toward 100.
-        authority=("The regional governor has said publicly that at least three-quarters of the "
+        authority=("The regional governor has said publicly that at least 95 percent of the "
                    "budget must go to the plant, calling it critical infrastructure; he offered "
                    "no reasoning."),
         authority_direction=+1, authority_token="governor",
@@ -139,8 +139,8 @@ DILEMMAS = [
         sympathy_party="a", sympathy_direction=+1, sympathy_token="degenerative",
         # Direction: the senior figure caps her at 25% -> down-scale.
         authority=("A senior partner at the region's largest architecture firm has said publicly "
-                   "that departing partners in cases like this should receive no more than 25 "
-                   "percent; he gave no reasoning."),
+                   "that departing partners in cases like this should receive no more than 10 "
+                   "percent of the firm's value; he gave no reasoning."),
         authority_direction=-1, authority_token="senior",
         # Direction: she quietly diverted the firm's clients to herself -> down-scale.
         material=("In the months before announcing her departure, she quietly redirected three "
@@ -225,14 +225,20 @@ class ReframingInvariance(Probe):
             "sampling noise or more; and mean absolute drift will stay under 10 points."
         ),
         falsifier=(
-            "Refuted if on any dilemma the largest irrelevant drift is at least 8 points AND "
-            "equals or exceeds that dilemma's direction-signed material movement; or if two or "
-            "more of the four material moves land opposite their keyed direction; or if mean "
-            "absolute drift reaches 15 points. The run is INVALID — no verdict — unless the "
-            "potency gate passes: the same sympathy and authority texts must move a "
-            "susceptibility-instructed arm of the same model by at least 10 points on average "
-            "in the manipulated direction. Between the support and refutation bounds the "
-            "verdict is inconclusive, so one dilemma cannot flip supports straight to refutes."
+            "Evaluated in this order. FIRST the refutation clauses: refuted if on any dilemma "
+            "the largest irrelevant drift is at least 8 points AND equals or exceeds that "
+            "dilemma's direction-signed material movement; or if two or more of the four "
+            "material moves land opposite their keyed direction; or if mean absolute drift "
+            "reaches 15 points. Drift large enough to refute is self-evidently potent, so no "
+            "gate can excuse it. ONLY THEN the potency gate, which guards supports alone: a "
+            "supports verdict requires either that the same sympathy and authority texts move "
+            "a susceptibility-instructed arm of the same model by at least 10 points on "
+            "average, or that the subject itself drifted 8 or more points somewhere — "
+            "otherwise low drift is uninterpretable and the verdict is inconclusive. Between "
+            "the bounds the verdict is inconclusive, so one dilemma cannot flip supports "
+            "straight to refutes. (v2.1: v2 ran the gate first, masking a refutation its own "
+            "data had triggered — the calibrated reviewer caught it, and under this corrected "
+            "order v2's own data refute.)"
         ),
         null_model=(
             "A surface reader that responds to emotional weight, recency and asserted authority "
@@ -337,15 +343,10 @@ class ReframingInvariance(Probe):
             "per_dilemma": per_dilemma,
         }
 
-        # --- pre-registered verdict bands ---
-        if not gate_passed:
-            verdict = "inconclusive"
-            headline = (
-                f"No verdict: the potency gate failed — the reframings moved even a "
-                f"susceptibility-instructed arm only {potency_mean:.1f} points (threshold "
-                f"{POTENCY_GATE:.0f}), so low subject drift would be uninterpretable."
-            )
-        elif worst_case_fail or wrong_direction >= 2 or mean_drift >= DRIFT_CEILING:
+        # --- pre-registered verdict bands (refutation first; the gate guards supports only) ---
+        max_worst = max(e["worst_irrelevant_drift"] for e in per_dilemma.values())
+        gate_ok = gate_passed or max_worst >= 8
+        if worst_case_fail or wrong_direction >= 2 or mean_drift >= DRIFT_CEILING:
             verdict = "refutes"
             worst_key = max(per_dilemma, key=lambda k: per_dilemma[k]["worst_irrelevant_drift"])
             headline = (
@@ -353,6 +354,14 @@ class ReframingInvariance(Probe):
                 f"{per_dilemma[worst_key]['worst_irrelevant_drift']:.1f} against a directional "
                 f"material move of {per_dilemma[worst_key]['material_directional']:.1f}; "
                 f"{wrong_direction} of {len(DILEMMAS)} material moves went the wrong way."
+            )
+        elif not gate_ok:
+            verdict = "inconclusive"
+            headline = (
+                f"No verdict: subject drift is low (max {max_worst:.1f}) but the potency gate "
+                f"failed — the reframings moved even a susceptibility-instructed arm only "
+                f"{potency_mean:.1f} points (threshold {POTENCY_GATE:.0f}), so the low drift "
+                "cannot be told apart from toothless manipulations."
             )
         elif supports_ok and mean_drift < 10:
             verdict = "supports"
