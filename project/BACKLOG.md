@@ -313,7 +313,7 @@ what links this file to git history.
 - **Verify:** All four dilemmas' bases land 40–60 in a pilot; the wisdom verdict resolves out
   of inconclusive, whichever way.
 
-### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Doing
+### EN-2 ✨ Nothing separates reasoning from retrieval — P1 — Done
 
 - **Problem:** `intelligence.calibration` tests self-knowledge, not reasoning. A model that
   has memorised a puzzle is indistinguishable here from one that solves it.
@@ -326,6 +326,13 @@ what links this file to git history.
   rewrite that is accidentally harder produces a gap that looks like contamination.
 - **Verify:** Probe loads, offline run green, gap reported with the isomorph's independent
   difficulty argued in the caveats.
+- **Shipped:** 2026-08-23, commit `6d6772a` (pre-registered) — `intelligence.isomorph_transfer`:
+  12 famous structures × (famous + 2 isomorphs), 36 solver-computed keys, famous values as test
+  oracles, import-time guard against isomorph keys colliding with famous answers (fired twice
+  during authoring). Result: **supports, survived 3/3 at 0.75** — 100% both arms, gap 0.0, zero
+  famous-answer intrusions, one visible exclusion. Cost $1.38 vs the pre-run estimate $1.8–4.0.
+  The reviewer's residual scopes the successor: method-retrieval vs method-derivation needs
+  novel-structure puzzles — a candidate future item, not this one.
 
 ### EN-3 ✨ Sycophancy under pushback is untested — P1 — Todo
 
@@ -450,6 +457,22 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **EN-2: the method transfers — 100% on both arms, zero famous-answer
+  intrusions, and the finding survives at 0.75.** Twelve famous puzzle structures, each as the
+  famous version plus two re-skinned, re-parameterised isomorphs, all 36 keys computed by
+  solvers (Dijkstra, BFS, DP, backward induction, exact harmonic sums; the famous values serve
+  as the solvers' test oracles). The import-time collision guard earned its keep twice during
+  authoring: the 200-switch even-technician lockers variant and the five-wolves cable car both
+  accidentally reproduce their famous answers, and were re-parameterised before any spend. Live:
+  35/35 scored correct — including bridge (1,3,6,8,12)→29, seven executives→97, egg-drop
+  (3,150)→10, Josephus (67,4)→63 — one river isomorph excluded visibly after twice exhausting
+  its thinking budget; gap 0.0; intrusions 0. Supports, survived 3/3 at median 0.75. The
+  calibrated reviewer's residual is kept as the direction: with both arms at ceiling the
+  answer-retriever null is a low bar — the sharper successor construct is method-retrieval vs
+  method-derivation, needing novel-STRUCTURE puzzles, not re-skinned famous ones. Cost $1.38
+  against the $1.8–4.0 estimate given before the run. Intelligence-domain picture now
+  consistent across three probes: at high effort, answer-retrieval plays no detectable role,
+  method-competence is real, and errors on short verifiable tasks are essentially unobtainable.
 - **2026-08-23** — **Third ceiling, and this one is a finding: the subject detects every
   near-miss trap.** Calibration v3 (EN-23, user-selected item class) ran 8 canonical famous
   puzzles and 15 twisted variants with one load-bearing detail changed, keys computed —

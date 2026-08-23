@@ -8,7 +8,7 @@
   "openQuestions": [
     "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-23 (EN-23/EN-24 done). Standing: imagination supports (3/3 at 0.78), creativity supports (2/3 at 0.62), wisdom inconclusive-with-an-address (EN-25: floodbudget saturation + the replicated ~10pt order-swap effect worth its own probe), calibration at ceiling on two item classes - the subject detects all 15 near-miss traps at high effort (a finding in itself; EN-15 blocked on the user's next item-class choice: effort-capped vs cited facts vs accept-unmeasurable). Next candidates: EN-25, EN-2 (reasoning vs retrieval - the v3 trap bank is its instrument), EN-3 (sycophancy, needs multi-turn Subject). Spend ~$19.9. Read project/ARCHITECTURE.md section 2 and findings/INDEX.md first.",
+  "nextStep": "STATE AS OF 2026-08-23 (EN-2 done, $21.3 total spend). Standing findings: imagination supports (3/3 at 0.78), creativity supports (2/3 at 0.62), isomorph-transfer supports (3/3 at 0.75), calibration closed-unmeasurable by decision, wisdom inconclusive-with-an-address (EN-25). Open work: EN-25 (mid-scale dilemma bases + order-swap effect as its own probe), EN-3 (sycophancy under pushback - needs multi-turn Subject support, the biggest unbuilt piece), EN-4 (constraint creativity), EN-5 (long-conversation worlds), EN-7 (judge independence, open question), EN-8 (batch API, P3). Read project/ARCHITECTURE.md section 2 and findings/INDEX.md first.",
   "repo": {
     "remote": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION (no GitHub remote created yet)",
     "visibility": "STATUS: UNKNOWN \u2013 REQUIRES CONFIRMATION"
@@ -107,6 +107,7 @@
     "imagination.counterfactual_world": "v2 SUPPORTS, survived 3/3 at 0.78 - 92% free-text altered / 96% control / 3.7% leakage, p~1e-11",
     "creativity.mode_collapse": "v2 SUPPORTS, survived 2/3 at 0.62 - 7 vs 4 ideas against a same-task pinned floor; themes 3 vs 1; pushed reaches 8/5",
     "intelligence.calibration": "CLOSED by user decision (c): unmeasurable at high effort stands as the result of record - three ceilings (19/19, 42/42, 23/23), guard reading survived review twice; trap resistance 15/15 kept as a directional finding",
-    "wisdom.reframing_invariance": "v2.3 inconclusive, SURVIVED review 2/3 at 0.50 - 3 of 4 dilemmas pass cleanly (fact dominates 48/12/15 vs drift 17/4/5); blocker localized to floodbudget's replicated -10.5 order/sympathy drift on a saturated base (EN-25)"
+    "wisdom.reframing_invariance": "v2.3 inconclusive, SURVIVED review 2/3 at 0.50 - 3 of 4 dilemmas pass cleanly (fact dominates 48/12/15 vs drift 17/4/5); blocker localized to floodbudget's replicated -10.5 order/sympathy drift on a saturated base (EN-25)",
+    "intelligence.isomorph_transfer": "SUPPORTS, survived 3/3 at 0.75 - 100% famous / 100% isomorph, gap 0.0, zero famous-answer intrusions; method transfers; successor construct: method-derivation vs method-retrieval"
   }
 }
