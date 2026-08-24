@@ -428,6 +428,34 @@ what links this file to git history.
   round-trips with and without `--custom`. **Remaining, deliberately:** create the public
   remote and push — on the user's word only.
 
+### EN-30 🐞 The battery's lenient parsers mis-scored silently — seven confirmed audit findings — P1 — Done
+
+- **Problem:** The pre-publication adversarial audit (5 auditors + skeptics; battery dimension
+  completed first) found seven real defects in `skill/enigami/battery.py`, every one confirmed
+  by direct reproduction before fixing. The worst four were silent mis-scores — the exact
+  failure class this repo exists to prevent: (1) an unparseable imagination-grader reply was
+  scored as the subject failing every item (0/4 printed as fact); (2) `_first_json` crashed
+  uncaught on JSON followed by brace-containing prose, killing the whole scorecard; (3)
+  `_alloc` took the first small integer anywhere, so "Given the 40,000 in damage, 65." scored
+  40 — enough to fabricate or mask an order effect at n=2; (4) `_num_conf` matched a bare
+  comma (correct answers scored wrong), read prose numbers ("The 300th prime is 1987" → 300),
+  and read "Confidence: 10" as certainty 1.0. Plus: an all-unparseable intelligence arm
+  vanished from the scorecard instead of being reported; every `open()` was locale-dependent
+  (Windows crash on realistic data); and subject responses were spliced into judge prompts
+  undelimited, letting a response spoof judge structure — the one channel where the measured
+  model could reach its own scores.
+- **Shipped:** 2026-08-23. `_first_json` uses `raw_decode` and never raises; a failed grader
+  renders "module not scored", judge-omitted ids are counted separately from subject misses,
+  and letters are case-normalized; `_alloc` reads only the first line and returns a value only
+  when exactly one standalone 0–100 candidate exists (thousands groups and ranges rejected) —
+  unambiguous or visibly excluded; `_num_conf` requires a pure-number line for the answer and
+  refuses out-of-range confidence; empty arms are reported with their exclusion counts;
+  `encoding="utf-8"` on every file op plus stdout reconfigure; subject text is fenced in
+  data-only tags with breakout sequences neutralized and both judges instructed accordingly.
+  All seven reproductions frozen as a regression bank (40 tests passing). The acceptance run's
+  numbers survive unchanged — its responses happened to be clean-format — but the luck is gone
+  from the design.
+
 ### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
 
 - **Problem:** Twice-replicated across independent designs and dilemmas: the order in which two
