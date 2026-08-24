@@ -489,6 +489,22 @@ what links this file to git history.
   refuses).
 - **Verify:** 40 tests pass; `git grep` finds no work-domain string and no absolute local path
   anywhere in history; a simulated fresh clone leaves `findings/` untouched.
+- **Post-fix verification (fresh clone):** cloned the repo to a scratch directory and worked
+  through the documented path as a stranger: `uv sync --extra dev` → 40 tests pass → `enigami
+  doctor` degrades gracefully with no key → `enigami report` leaves the committed findings
+  untouched (the blocker, now verified fixed) → `enigami run --offline` works and writes no
+  findings → `battery.py items` round-trips → `git grep` finds no work-domain string and no
+  local path. One further defect surfaced only in that clone and is fixed: two tests executed
+  real (offline) runs through `config.TRANSCRIPTS`, so `pytest` deposited fake runs — including
+  a `wisdom.trivial` probe that never existed — into the user's own checkout, where `doctor`
+  then counted them as recorded runs. Both now redirect to `tmp_path`; verified the transcript
+  count is unchanged across a full test run.
+- **History scrub:** both strings removed from every commit reachable from `main` (34 commits),
+  filter-branch backup refs deleted, reflog expired and the object store repacked, so the
+  pre-rewrite objects are gone rather than merely unreferenced. Verified afterwards: one author
+  identity across all history, zero credential patterns in all 196 historical blobs (the only
+  matches are the setup script's own `sk-ant-` prefix check), and `alittis@icloud.com` as the
+  sole email string anywhere in the repository's history.
 
 ### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
 

@@ -12,7 +12,7 @@ import json
 import pytest
 from pydantic import BaseModel, Field
 
-from enigami import report
+from enigami import config, report
 from enigami.client import ProbeError, Subject, strict_schema
 from enigami.probe import Finding, Prereg, Probe, discover, select
 from enigami.refute import anonymise
@@ -180,7 +180,7 @@ def test_select_resolves_ids_domains_and_all():
 
 # --- a failed review must not destroy a finding that cost real money ------
 
-def test_refutation_failure_preserves_the_finding(monkeypatch):
+def test_refutation_failure_preserves_the_finding(monkeypatch, tmp_path):
     """Regression: refutation used to share a try-block with the probe, so a 400 on the
     review call discarded a completed 24-call run."""
     from enigami import refute, runner
@@ -199,6 +199,8 @@ def test_refutation_failure_preserves_the_finding(monkeypatch):
         raise ProbeError("review call exploded")
 
     monkeypatch.setattr(refute, "challenge", boom)
+    # never write test runs into the user's checkout (a fresh clone must stay pristine)
+    monkeypatch.setattr(config, "TRANSCRIPTS", tmp_path)
     result = runner.Run(Trivial(), offline=True).execute()
 
     assert result.finding is not None
@@ -264,13 +266,14 @@ def test_survives_is_the_single_decision_rule():
     assert not survives(Refutation(is_likely_artifact=False, survives_probability=0.49, **base))
 
 
-def test_offline_calibration_writes_no_report_and_no_result_json():
+def test_offline_calibration_writes_no_report_and_no_result_json(monkeypatch, tmp_path):
     from pathlib import Path
 
     from enigami import config, reviewer_control as rc
 
     report_path = config.FINDINGS / "REVIEWER_CALIBRATION.md"
     existed_before = report_path.exists()
+    monkeypatch.setattr(config, "TRANSCRIPTS", tmp_path)   # keep the checkout pristine
     res = rc.run_calibration(reps=1, offline=True)
     assert res["offline"] is True
     assert res["calls"] == 8

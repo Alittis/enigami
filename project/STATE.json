@@ -8,12 +8,13 @@
   "openQuestions": [
     "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-23 (publication pass done, EN-29). The repo is publish-ready: MIT license, single public author identity across all history, skill de-localized and model-scoped, EN-28 re-scoped, --custom private items supported, hygiene sweep clean. The remote deliberately does not exist yet - create it and push only when the user says go. Open work: EN-26 (order-swap probe, in-session), EN-3/EN-4/EN-5 (new probes), EN-7, EN-8. No metered-API runs without an explicit ask. Read project/BACKLOG.md EN-29 and skill/enigami/SKILL.md first.",
+  "nextStep": "STATE AS OF 2026-08-23 (audited, publish-ready). A five-dimension adversarial audit with per-dimension skeptics found 38 issues; 36 confirmed and all fixed (EN-30 battery parsers, EN-31 everything else), 2 correctly refuted as stale. History carries one author identity, no work-domain string, no local paths, no credentials. Fresh-clone acceptance passed: sync, 40 tests, graceful no-key doctor, non-clobbering report, offline run, battery round-trip. The public remote still does not exist \u2014 create and push only on the user's word. Open work: EN-26 (order-swap probe, in-session), EN-3/EN-4/EN-5, EN-7, EN-8. Read project/BACKLOG.md EN-31 and skill/enigami/SKILL.md first.",
   "repo": {
     "remote": "none yet, deliberately - public GitHub release decided 2026-08-23; create and push only on the user's word",
     "visibility": "public (decided)",
     "license": "MIT",
-    "commitAuthor": "Alexis Zrimec <alittis@icloud.com> (history rewritten 2026-08-23, pre-publication)"
+    "commitAuthor": "Alexis Zrimec <alittis@icloud.com> (history rewritten 2026-08-23, pre-publication)",
+    "auditedAt": "2026-08-23 \u2014 5-dimension adversarial audit + skeptics; 36 confirmed findings fixed (EN-30, EN-31); history scrubbed of work-domain and local-path strings; fresh-clone acceptance passed"
   },
   "stack": {
     "runtime": "python >=3.10 via uv (.venv), anthropic 1.0.0, pydantic 2.13.4",
