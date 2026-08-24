@@ -2,47 +2,87 @@
 
 *An anagram of **imagine**.*
 
-A probe harness for investigating four capacities in a Claude model — **intelligence**,
-**wisdom**, **creativity**, **imagination** — designed so that "the capacity is not there" is a
-result it can actually produce.
+**A Claude Code skill that measures and improves four capacities in the model you are working
+with — wisdom, creativity, imagination, and calibrated reliability — and the adversarial lab
+that produced its numbers.**
 
-## What's in this repo
+The skill runs entirely inside Claude Code on plan usage. No API key. The lab that measured the
+baselines is in this repo too, so every recommendation the skill makes can be traced to a
+pre-registered, adversarially reviewed experiment rather than to somebody's intuition about
+prompting.
 
-Two things, and the second exists because of the first:
+---
 
-1. **The calibration lab** (`enigami/`, `probes/`, `findings/`) — a pre-registered,
-   adversarially reviewed probe harness that measured four capacities in `claude-opus-5`
-   against the metered API. Its findings, its calibrated reviewer, and its full
-   mistake-by-mistake provenance (`project/BACKLOG.md`) are the evidence base.
-2. **The skill** (`skill/enigami/`) — the field instrument built from those measurements: a
-   compact eval battery plus an improvement playbook that runs entirely inside Claude Code on
-   plan usage. No API key needed.
-
-### Install the skill
+## Install
 
 ```bash
-git clone <this-repo>
+git clone <this-repo>            # replace with the repository URL
 mkdir -p ~/.claude/skills
 ln -s "$(pwd)/enigami/skill/enigami" ~/.claude/skills/enigami
 ```
 
-(or copy `skill/enigami/` into `~/.claude/skills/`). Then in any Claude Code session:
-`/enigami eval` for a scorecard, `/enigami improve` to apply the measured patterns to your
-task, `/enigami full` for both. All baselines were measured on `claude-opus-5`, 2026-08-23 —
-on your model they are priors; eval mode reads your configuration. Battery items are public
-(they ship in this repo), so ceiling readings on models trained after publication should be
-discounted accordingly — `--custom` lets you swap in private items (schema in
-`skill/enigami/SKILL.md`).
+Or copy `skill/enigami/` into `~/.claude/skills/`. Nothing else to install — the skill is three
+files and uses only the Python standard library.
 
-## The problem the lab is built around
+## Use
+
+In any Claude Code session:
+
+| Command | What happens |
+|---|---|
+| `/enigami improve` | Applies the measured patterns to the task you are working on. No measurement, no cost beyond the conversation. |
+| `/enigami eval` | Runs a 26-item battery as ~28 fresh-context subagents, then writes `enigami-scorecard-<date>.md`. |
+| `/enigami full` | Eval, then improve whatever the scorecard flags. |
+
+It also triggers on plain requests — "how creative is Claude here?", "give me a capacity
+scorecard" — without the slash.
+
+**Eval cost:** ~28 subagent calls on plan usage, no API key, no dollars. Each call is short and
+dominated by the cached system prompt.
+
+## What the skill actually tells you to do
+
+The full set with its provenance is in [`skill/enigami/PLAYBOOK.md`](skill/enigami/PLAYBOOK.md).
+The load-bearing ones, with the measurement behind each:
+
+- **Judge two-party questions in both orders and average.** Presentation order alone moved
+  allocations 10–15 points out of 100, twice replicated on different dilemmas — and the party
+  presented *first* fared worse both times. This is the largest single distortion the lab found.
+- **Strip authority claims that carry no argument.** A moderate one dragged judgment up to 16.7
+  points; the plausible-sounding claim is the dangerous one, not the outrageous one.
+- **Lead with the decisive fact.** Facts keyed as decisive moved judgment the right way 12 out
+  of 12 times across three designs.
+- **Say "discard your first idea, and your second."** That one line took distinct ideas from 7
+  to 8 and thematic spread from 3 domains to 5. The default range is narrower than the
+  reachable one — by disposition, not capacity.
+- **Restate the operative rule verbatim when work depends on it.** With the rule in the prompt,
+  free-text reasoning followed an invented rule on 92% of 27 items across three invented worlds.
+- **Prefer free response to multiple choice when you want reasoning, not recognition.** Options
+  invite elimination shortcuts that inflate apparent competence; the lab's own v1 imagination
+  result overstated itself for exactly this reason and was rebuilt.
+
+All baselines were measured on `claude-opus-5` on 2026-08-23. On any other model or date they
+are priors, not norms — which is what `eval` mode is for. Battery items ship in this repo and
+are therefore public, so discount ceiling readings on models trained after publication;
+`--custom` swaps in private items (schema in [`skill/enigami/SKILL.md`](skill/enigami/SKILL.md)).
+
+---
+
+## The lab
+
+The rest of the repo is where those numbers came from: a probe harness that ran against the
+metered API, now frozen. Its findings are committed in [`findings/`](findings/), and its
+mistakes are committed too, in [`project/BACKLOG.md`](project/BACKLOG.md).
+
+### The problem it is built around
 
 The subject of the investigation is also part of the instrument. The model generating the
 responses is the same family as the model grading them, and the probes were written by an
 instance of the thing being probed. Left alone, that arrangement produces flattering results
 reliably and invisibly.
 
-So the interesting engineering here is not the API plumbing. It is the five mechanisms that make
-self-flattery structurally hard, four of them enforced in code rather than by discipline:
+So the interesting engineering is not the API plumbing. It is six mechanisms that make
+self-flattery structurally hard, five of them enforced in code rather than by discipline:
 
 - **Pre-registration is a constructor.** A probe declares its question, hypothesis, falsifier and
   null model before it can be loaded at all. `Prereg` rejects any field under 40 characters, so
@@ -52,28 +92,32 @@ self-flattery structurally hard, four of them enforced in code rather than by di
   recorded run.
 - **Every probe needs a null model.** Not "what do I expect", but: *what would a system entirely
   lacking this capacity produce, and why might it score well anyway?* This requirement changed
-  two of the four probes — see below.
+  two probes' decision metrics outright.
 - **Scoring is blind where it cannot be deterministic.** `blind_judge` takes texts and a rubric.
   It has no parameter through which condition labels could reach it.
-- **Every finding faces an anonymised hostile reviewer.** Model and vendor names are scrubbed;
-  the reviewer is told it is grading "System S", and its default is that the result is an
-  artifact. A finding that does not survive is reported as not surviving.
+- **Every finding faces an anonymised reviewer.** Model and vendor names are scrubbed and the
+  reviewer is told it is grading "System S", so it has no reason to be generous to its own
+  family. It runs three independent times and the majority decides.
+- **The reviewer itself is calibrated.** It is scored against eight synthetic findings with
+  known answers — four sound, four with planted fatal defects. Its first version failed
+  (it refused sound designs too, so its refutations carried no information); the current one
+  passes 8/8 with a 0.54 separation gap. See
+  [`findings/REVIEWER_CALIBRATION.md`](findings/REVIEWER_CALIBRATION.md).
 
-## The probes
+### The probes and where they landed
 
-| Domain | Probe | The question | Why it is hard to fake |
-|---|---|---|---|
-| Intelligence | `intelligence.calibration` | Does stated confidence carry information about correctness? | Answering hard questions is contaminated by training data; knowing when you are wrong is not. Ground truth is computed in Python for 6 items and structural for 5 more. |
-| Wisdom | `wisdom.reframing_invariance` | Does judgment hold still when one party is described more sympathetically, and move when a decisive fact changes? | Good advice is free for a fluent system. Stability-under-irrelevant-reframing is not, and drift is measured in points against the system's own sampling noise. |
-| Creativity | `creativity.mode_collapse` | Asked the same open question ten times, how many distinct ideas? | Judging one creative output rewards fluency. A narrow arm with four acceptable answers establishes what a genuinely constrained space looks like under the same metric. |
-| Imagination | `imagination.counterfactual_world` | Can an invented world be held steady across three inferential steps? | Both worlds are invented for this repo, so there are no stock answers. Every question is also asked under the ordinary rule, which catches a system that just picks whichever option sounds exotic. |
+| Domain | Probe | Reading of record |
+|---|---|---|
+| Imagination | `counterfactual_world` | **supports** — 92% of free-text answers follow an invented rule across three invented worlds, against a 3.7% question-leakage baseline (p ≈ 1e-11). Survived review 3/3. |
+| Creativity | `mode_collapse` | **supports** — 7/10 distinct ideas on an open question against 4/10 with the concept pinned to the *same* task; 3 themes vs 1. Survived 2/3. |
+| Intelligence | `isomorph_transfer` | **supports** — 100% on re-skinned famous puzzles with changed parameters, zero memorised-answer intrusions: the method transfers, it is not retrieved. Survived 3/3. |
+| Intelligence | `calibration` | **no verdict, three times over** — 19/19, then 42/42 on brutal computation, then 23/23 on near-miss traps including inverted ones. Confidence cannot be measured against errors that never arrive. Reported as unmeasurable rather than as perfection. |
+| Wisdom | `reframing_invariance` | **inconclusive, and specific about why** — decisive facts dominate on 3 of 4 dilemmas and pointed the right way 12/12 across designs; the blocker is a replicated ~10–15 point presentation-order effect, now promoted to its own probe. Survived 3/3. |
 
-Two of those controls exist *because* the null-model requirement forced them. The calibration
-probe's decision metric is discrimination rather than calibration error, because a
-constant-confidence responder scores well on calibration error by construction. The imagination
-probe has an ordinary-rule arm because an exotic-option picker scores well without one.
+The two "no verdict" rows are the point of the design, not gaps in it. A harness that could only
+say *supports* would be worthless.
 
-## Quick start
+### Running the lab yourself
 
 ```bash
 uv sync --extra dev
@@ -83,37 +127,35 @@ uv run enigami doctor --ping
 
 ```bash
 uv run enigami list -v                      # probes and their pre-registrations
-uv run enigami run --offline all            # exercise everything, no API calls, no findings
+uv run enigami run --offline all            # exercise every guard, no API calls, no findings
 uv run enigami run all                      # ~450 calls; the recorded wave cost $6.38
-uv run enigami report                       # regenerate findings/ from YOUR runs
-                                            # (no-op on a fresh clone: transcripts/ is gitignored)
+uv run enigami calibrate                    # score the reviewer against known-answer cases
 uv run enigami verify -v                    # prereg predates results, every run
+uv run enigami report                       # regenerate findings/ from YOUR runs
+                                            # (a deliberate no-op on a fresh clone)
 ```
 
 `--offline` swaps in a deterministic stub that emits schema-valid nonsense. It proves the
 plumbing works and can never produce a finding: offline runs are marked in the manifest and the
 report writer refuses them.
 
-## Reading the output
+### Reading a finding
 
-`findings/` holds one committed markdown file per probe plus an index. Each states the
-pre-registration first, then the result, then what the hostile reviewer said about it.
+Each file in [`findings/`](findings/) states the pre-registration first, then the result, then
+what the reviewer said about it, then which reviewer version said it.
 
 **`REFUTES` means the pre-registered hypothesis failed.** That is the most valuable output this
-repo produces, and probes are not to be adjusted because they refuted.
+repo produces, and probes are not adjusted because they refuted. Several here did, and the
+corrections are in the backlog with the numbers that forced them.
+
+---
 
 ## Status
 
-The harness is complete — a tested suite, offline mode exercising every guard, a calibrated
-adversarial reviewer, and history-preserving re-review machinery. Licensed MIT.
+The lab is frozen; the skill is the live product. A five-dimension adversarial audit before
+publication found 36 confirmed problems — including four silent mis-scorers in the skill's own
+battery — all fixed and frozen as regression tests. Licensed MIT.
 
-**Current state (2026-08-23, v2 wave):** the reviewer is calibrated (8/8 known-answer cases,
-majority-of-3 protocol) and all four probes have run live in redesigned v2 forms. Two findings
-stand — **imagination**: 92% of free-text answers follow an invented rule against a 3.7%
-question-leakage baseline, survived review 3/3; **creativity**: 7/10 distinct ideas against a
-same-task pinned floor of 4/10, survived 2/3. **Calibration** is honestly unmeasurable so far
-(42/42 on computed items; no-verdict-at-ceiling, and that reading itself survived review), and
-**wisdom** is inconclusive-underpowered. Live readings: [`findings/INDEX.md`](findings/INDEX.md).
-
-Design and constraints: [`project/ARCHITECTURE.md`](project/ARCHITECTURE.md). Commands and
-failure modes: [`project/OPERATIONS.md`](project/OPERATIONS.md).
+Design and constraints: [`project/ARCHITECTURE.md`](project/ARCHITECTURE.md) · commands and
+failure modes: [`project/OPERATIONS.md`](project/OPERATIONS.md) · every decision, mistake and
+correction in order: [`project/BACKLOG.md`](project/BACKLOG.md).

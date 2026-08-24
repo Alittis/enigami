@@ -506,6 +506,35 @@ what links this file to git history.
   matches are the setup script's own `sk-ant-` prefix check), and `alittis@icloud.com` as the
   sole email string anywhere in the repository's history.
 
+### EN-32 🔧 README was lab-first and described the v1 repo — P2 — Done
+
+- **Problem:** The public README led with the calibration lab and put the installable skill
+  second, which is backwards for the audience that will actually arrive: most visitors want the
+  usable thing, not the methodology. Reading it in full for the restructure also surfaced
+  staleness the audit's docs dimension had not caught, because it flagged counts rather than
+  content: the probe table described the **v1** designs of all four probes (calibration as
+  6-computed-plus-5-structural items rather than near-miss traps; imagination as multiple choice
+  over two worlds rather than free text over three with a leakage arm; creativity's floor as a
+  different question rather than the same task with the concept pinned), omitted
+  `intelligence.isomorph_transfer` entirely, and — worst — still described the adversarial
+  reviewer as defaulting to "the result is an artifact", a disposition **retired in EN-21**
+  precisely because it failed calibration.
+- **Shipped:** 2026-08-23 — rewritten skill-first: install, the three modes with their real
+  plan-usage cost, and the load-bearing playbook patterns each with its measurement, all above
+  the fold; the lab follows as provenance. Every probe row replaced with its reading of record
+  from `findings/INDEX.md`, all five probes present, and the two no-verdict rows framed as the
+  design working rather than as gaps. Reviewer description corrected to the calibrated
+  neutral-prior, majority-of-3 instrument, with the sixth mechanism (calibrating the reviewer)
+  added so the count matches `ARCHITECTURE.md`. `git clone <this-repo>` carries an explicit
+  "replace with the repository URL" note until the remote exists.
+- **Also decided:** no `skill/enigami/README.md`. It would duplicate the root README's install
+  and usage sections with nothing to prevent the two drifting apart, and `SKILL.md` already
+  carries the operating detail.
+- **Verify:** All seven internal links resolve; the imagination (92% / 3.7%), creativity (7 vs
+  4 ideas, 3 vs 1 themes) and isomorph (100/100, gap 0, zero intrusions) figures re-derived from
+  the recorded runs; battery still 26 items and standard-library-only; no work-domain string or
+  local path.
+
 ### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
 
 - **Problem:** Twice-replicated across independent designs and dilemmas: the order in which two
