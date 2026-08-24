@@ -14,13 +14,13 @@ The only external dependency is `api.anthropic.com`.
 Requires Python 3.10+ and `uv`.
 
 ```bash
-cd ~/Developer/enigami
+cd <your clone of this repo>
 uv sync --extra dev
 ```
 
 This creates `.venv/` and pins `anthropic>=1,<2` (1.0.0 at time of writing) and `pydantic>=2.9`.
-The Mac's global `anthropic` is 0.45.2, which is too old for `output_config`; always run through
-`uv run`, never the global interpreter.
+Any system-wide `anthropic` older than 1.x lacks `output_config` and will fail; always run
+through `uv run`, never a global interpreter.
 
 ## Credentials
 
@@ -45,13 +45,16 @@ how many probes load. `--ping` adds one cheap live call (a few thousandths of a 
 
 ## Rollback
 
-Nothing is deployed, so there is nothing to roll back. Findings are regenerated from recorded
-transcripts with `uv run enigami report`; a bad findings file is fixed by rerunning that, and a
-bad run is superseded by a newer run of the same probe.
+Nothing is deployed, so there is nothing to roll back. Findings are regenerated from the
+transcripts in your own checkout with `uv run enigami report`; a bad findings file is fixed by
+rerunning that, and a bad run is superseded by a newer run of the same probe. On a fresh clone
+`transcripts/` is empty (it is gitignored), so `report` is a deliberate no-op there rather than
+an overwrite of the committed findings.
 
 ## Risk profile
 
-- **Spend.** A full run is roughly 114 API calls, a few dollars at Opus 5 rates. There is no
+- **Spend.** A full run of all five probes is roughly 450 API calls; the recorded
+  2026-08-23 wave cost $6.38 at Opus 5 rates. There is no
   hard cap in the harness; `enigami list` prints estimates before you commit to a run.
 - **Key exposure.** One secret, in one gitignored file, mode 600. `transcripts/` is gitignored
   and never contains the key.

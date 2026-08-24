@@ -87,6 +87,11 @@ def cmd_run(args) -> int:
 
 def cmd_report(args) -> int:
     written, skipped = report.regenerate()
+    if (written, skipped) == (0, 0):
+        print("No recorded runs under transcripts/ — findings/ left untouched.\n"
+              "(transcripts/ is gitignored, so a fresh clone has none: the committed "
+              "findings/ are this repo's recorded results. Run a probe to produce your own.)")
+        return 0
     print(f"Wrote {written} finding(s); skipped {skipped} offline run(s).")
     print(f"Index: {(config.FINDINGS / 'INDEX.md').relative_to(config.REPO_ROOT)}")
     return 0

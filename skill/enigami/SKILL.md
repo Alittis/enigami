@@ -41,7 +41,11 @@ items, judge prompts and scoring — never invent items or grade judgment calls 
      effort and say so in the scorecard's session label. Leave unset otherwise.
    - Run in parallel; collect each agent's final text.
 3. Write `{item_id: response_text}` to a temp `responses.json`. A response that fails to
-   parse is reported as excluded on the scorecard — never re-scored by hand.
+   parse is reported as excluded on the scorecard — never re-scored by hand. If a subagent
+   dies or returns nothing, respawn it once; if it fails again, omit its key entirely rather
+   than writing an empty string, and say so when you present the scorecard. An omitted
+   creativity or imagination item still counts against that module's total, so a silent drop
+   would read as a subject failure.
 4. `python3 battery.py judgeprompts --seed <N> -R responses.json` — returns two BLIND judge
    prompts (creativity idea-count, imagination grading with seeded X/Y scrambling). Spawn one
    fresh subagent per judge prompt, verbatim. Do NOT grade these yourself: you know the

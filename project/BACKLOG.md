@@ -456,6 +456,40 @@ what links this file to git history.
   numbers survive unchanged — its responses happened to be clean-format — but the luck is gone
   from the design.
 
+### EN-31 🔧 Full pre-publication audit: 36 confirmed findings fixed — P1 — Done
+
+- **Problem:** Publishing publicly means strangers inherit every defect. A five-dimension
+  adversarial audit (battery code, skill docs, harness code, doc truthfulness, residual
+  hygiene), each dimension followed by a skeptic that tried to refute its own finder, produced
+  38 findings: 36 confirmed, 2 refuted as stale (they described pre-publication-pass code).
+- **Blockers, all fixed:** the four battery parser defects (EN-30); `project/BACKLOG.md`'s own
+  hygiene claim named the author's work email domain — the exact string the EN-29 history
+  rewrite existed to keep out of public history, and it self-violated the sentence it was in;
+  `uv run enigami report`, documented in the README quick start, wiped the committed
+  `findings/INDEX.md` on a fresh clone (transcripts/ is gitignored, so it regenerated from
+  nothing); three docs gave three different full-run call counts with the README understating
+  by ~4x (114 vs 305 vs the harness's own 446); the README described four probes and two
+  standing findings when the repo ships five and three.
+- **Advisories, all fixed:** thread-unsafe `events.jsonl` writes under `ThreadPoolExecutor`;
+  `REPO_ROOT` from `__file__` writing into site-packages on a non-editable install (now
+  `ENIGAMI_HOME`-overridable); `anonymise()` scrubbing the ordinary English words *opus*,
+  *sonnet*, *haiku*, *fable* out of probe bundles (narrowed to vendor names and model-id
+  forms); the setup script's gitignore guard giving unfollowable advice outside a checkout;
+  `--seed` not actually reproducing the imagination blinding (builtin `hash()` of strings is
+  `PYTHONHASHSEED`-randomized — now `random.Random(str)`, verified stable across processes);
+  five PLAYBOOK claims that overstated or misreported what was measured, each re-derived from
+  the recorded run; `ARCHITECTURE.md` misstating which probes are judge-scored, which hid the
+  same-family-judge caveat on the flagship finding; stale counts; install and rollback text
+  that only worked on the author's machine; the skill install one-liner failing when
+  `~/.claude/skills` does not exist; `.gitignore` missing the skill's own run artifacts; the
+  committed example scorecard still teaching the low-effort premise its own result falsified;
+  and literal `\uXXXX` escapes across the committed findings (a real `report.py` rendering
+  bug, now decoded — with the one genuinely model-corrupted sentence annotated rather than
+  rewritten, because editing a reviewer's words to read better is the liberty this repo
+  refuses).
+- **Verify:** 40 tests pass; `git grep` finds no work-domain string and no absolute local path
+  anywhere in history; a simulated fresh clone leaves `findings/` untouched.
+
 ### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
 
 - **Problem:** Twice-replicated across independent designs and dilemmas: the order in which two
@@ -598,6 +632,21 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-23** — **Pre-publication audit: 36 confirmed findings, and the most embarrassing one
+  was in the hygiene claim itself.** Five auditors plus five skeptics over battery code, skill
+  docs, harness code, doc truthfulness and residual hygiene; 38 findings, 36 confirmed, 2
+  correctly refuted as describing already-fixed code. The blockers were exactly the kind a
+  maintainer cannot see in their own repo: the sentence in EN-29 claiming that no work-domain string remained in tracked
+  files" contained the string it claimed to have removed, defeating the 30-commit rewrite it was
+  documenting; the README's own quick start told strangers to run a command that wipes the
+  committed findings on a fresh clone; and three docs disagreed about run cost with the README
+  understating by 4x. The battery's four parser defects (EN-30) were the worst in kind — silent
+  mis-scores in the tool whose entire purpose is refusing to mis-score. Also notable: two
+  findings the skeptics killed for being stale, which is the calibrated-reviewer discipline
+  working on the audit itself, and one finding I would never have written — `anonymise()` was
+  scrubbing the words "opus", "sonnet", "haiku" and "fable" out of probe material, so any future
+  probe about poetry would have been silently corrupted. History scrubbed of the work domain and
+  the local username path in the same pre-push window.
 - **2026-08-23** — **Publication pass done; the remote deliberately still does not exist.**
   Decisions: public repo, MIT (Claude's call), commits authored as alittis@icloud.com — all 30
   rewritten before any push could make the work address permanent, with the backlog's commit

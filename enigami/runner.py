@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import platform
+import threading
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -77,13 +78,16 @@ class Run:
             fh.flush()
             os.fsync(fh.fileno())          # prereg is durable before any call goes out
         time.sleep(0.01)                    # guarantee a distinct mtime from the first event
-        self._events = open(self.dir / "events.jsonl", "a")
+        self._events = open(self.dir / "events.jsonl", "a", encoding="utf-8")
+        self._log_lock = threading.Lock()   # probes log from ThreadPoolExecutor workers
 
     def log(self, event: str, data: dict | None = None, **kw) -> None:
         # Context passes a dict positionally; the runner passes keywords. Accept both.
         record = {"t": _now(), "event": event, **(data or {}), **kw}
-        self._events.write(json.dumps(record, default=str) + "\n")
-        self._events.flush()
+        line = json.dumps(record, default=str) + "\n"
+        with self._log_lock:   # TextIOWrapper is not thread-safe; probes log concurrently
+            self._events.write(line)
+            self._events.flush()
 
     # -- execution --------------------------------------------------------
     def execute(self) -> RunResult:
@@ -219,7 +223,7 @@ def rereview(targets: list[str] | None = None, *, offline: bool = False,
     out: list[dict] = []
     for probe_id in sorted(runs):
         path, data = runs[probe_id]
-        with open(path.parent / "events.jsonl", "a") as events:
+        with open(path.parent / "events.jsonl", "a", encoding="utf-8") as events:
             def log(event: str, d: dict | None = None, **kw) -> None:
                 events.write(json.dumps({"t": _now(), "event": event, **(d or {}), **kw},
                                         default=str) + "\n")

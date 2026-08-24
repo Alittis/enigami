@@ -10,7 +10,9 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+#: Where transcripts/ and findings/ live. Defaults to the repo checkout; set ENIGAMI_HOME
+#: when the package is installed non-editably, so runs are never written into site-packages.
+REPO_ROOT = Path(os.environ.get("ENIGAMI_HOME") or Path(__file__).resolve().parent.parent)
 TRANSCRIPTS = REPO_ROOT / "transcripts"
 FINDINGS = REPO_ROOT / "findings"
 PROBES = REPO_ROOT / "probes"

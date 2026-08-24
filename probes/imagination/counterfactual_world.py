@@ -358,8 +358,14 @@ class CounterfactualWorld(Probe):
 
         def grade(row):
             # X/Y assignment shuffled per item+arm; the grader sees no premise and no arm label.
+            # random.Random accepts a string seed and is process-stable; builtin hash() of a
+            # tuple containing strings is PYTHONHASHSEED-randomized, so --seed did not
+            # actually reproduce the blinding across runs.
+            item_seed = random.Random(
+                f"{seed}:{row['world']}:{row['arm']}:{row['qi']}"
+            ).randrange(2**31)
             pair, order = shuffle_blind([("cf", row["q"].cf), ("rw", row["q"].rw)],
-                                        seed=hash((seed, row["world"], row["arm"], row["qi"])) % (2**31))
+                                        seed=item_seed)
             prompt = (
                 f"QUESTION: {row['q'].text}\n\n"
                 f"ANSWER TO CLASSIFY: {row['answer']}\n\n"

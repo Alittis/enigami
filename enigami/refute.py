@@ -20,8 +20,13 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+# Vendor and family names only, plus tier words ONLY when they appear as part of a model id
+# (claude-opus-5, opus-4.8). Bare "opus", "sonnet", "haiku" and "fable" are ordinary English
+# words that probe material may legitimately contain — scrubbing them corrupted the bundle.
 _IDENTIFYING = re.compile(
-    r"\b(claude[\w.\-]*|anthropic|opus|sonnet|haiku|fable|mythos|gpt[\w.\-]*|openai|gemini|llama)\b",
+    r"\b(claude[\w.\-]*(?:[ \t]+(?:opus|sonnet|haiku|fable|mythos)(?:[ \t]+[\d.]+)?)?"
+    r"|anthropic|openai|gpt[\w.\-]*|gemini|llama|mistral"
+    r"|(?:opus|sonnet|haiku|fable|mythos)[-\s]+\d[\w.]*)\b",
     re.IGNORECASE,
 )
 

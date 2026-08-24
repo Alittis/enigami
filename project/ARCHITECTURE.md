@@ -17,7 +17,7 @@ generates the responses is the same family as the model that judges them, and th
 writing the probes is an instance of the thing being probed. Left alone, that arrangement
 produces flattering results reliably and invisibly.
 
-Five mechanisms push against it. Four are enforced in code.
+Six mechanisms push against it. Five are enforced in code.
 
 | Mechanism | Where it lives | What it prevents |
 |---|---|---|
@@ -29,8 +29,12 @@ Five mechanisms push against it. Four are enforced in code.
 | Reviewer calibration | `enigami/reviewer_control.py` — 8 synthetic findings with known answers, decision rule fsynced before the first call | A refuter that refutes (or passes) everything, whose verdicts would carry no information |
 
 Deterministic scoring is preferred wherever ground truth can be computed rather than judged.
-Three of the four shipped probes score deterministically; only `creativity.mode_collapse`
-needs a judge, because "how many distinct ideas are these" has no closed form.
+Three of the five shipped probes score deterministically (`intelligence.calibration`,
+`intelligence.isomorph_transfer`, `wisdom.reframing_invariance`). Two need a judge:
+`creativity.mode_collapse`, because "how many distinct ideas are these" has no closed form,
+and `imagination.counterfactual_world` v2, whose free-text answers are mapped onto consequence
+statements by a blind grader. Both therefore carry the same-family-judge caveat of section 4 —
+including the imagination finding, which is the repo's strongest standing result.
 
 ## 3. Control conditions
 
@@ -68,7 +72,7 @@ enigami/            harness
 probes/<domain>/    one module per probe, exporting PROBE
 transcripts/        raw runs, gitignored (manifest, events, calls, result)
 findings/           committed markdown, one file per probe plus INDEX.md
-tests/              21 tests over the guards and the metrics
+tests/              regression suite over the guards, the metrics and the skill battery
 ```
 
 A probe module is discovered by path and must export a module-level `PROBE`. Discovery is
@@ -93,8 +97,8 @@ Verified against the `claude-api` skill and `anthropic` 1.0.0 on 2026-08-23.
 
 ## 7. Cost
 
-Roughly 305 API calls for a full v2 run (imagination's free-text arms plus blind grading account for half), mostly short. At Opus 5 rates ($5/$25 per MTok) the
-expected cost is a few dollars. `enigami list` prints per-probe call estimates; every run
+Roughly 450 API calls for a full run of all five probes (`est_calls` sums to 446; imagination's free-text arms plus blind grading account for a third), mostly short. At Opus 5 rates ($5/$25 per MTok) the
+recorded cost of the 2026-08-23 wave was $6.38. `enigami list` prints per-probe call estimates; every run
 records actual spend in `result.json`. Batch API (50% cheaper) is not used — tracked as `EN-8`.
 
 ## 8. Deliberately not built

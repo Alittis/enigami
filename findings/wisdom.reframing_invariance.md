@@ -55,7 +55,7 @@ A methodological reviewer, shown the design with the subject anonymised, was ask
 
 **Specific flaw.** The potency check that guards the whole irrelevant-drift side failed: "'mean_directional_move': 3.7, 'threshold': 10.0, 'passed': false", with the sympathy texts moving even a susceptibility-instructed arm by 1.7, -0.8, 4.7 points and being cited as decisive in only "4 of 24 sympathy-condition answers". The sympathy stimulus is effectively a null manipulation, yet it still contributes two of the four terms in the reported "mean_abs_drift_irrelevant": 5.04. That headline mean is deflated by stimuli that provably move nobody. To the design's credit, the pre-registered ordering keeps this from being laundered into a supports verdict, and the run is reported inconclusive.
 
-**What would settle it.** Re-run with sympathy and authority texts re-piloted until the susceptibility-instructed arm moves \u226510 points on average and the inserted detail is cited as decisive at a rate comparable to the authority token (23/24), plus enough reps (\u226515/cell) to put a real confidence interval on the collision order-swap delta (14.8) against half its material effect (10.5); that single comparison is what currently decides the verdict, and at n=6 it is not resolvable.
+**What would settle it.** Re-run with sympathy and authority texts re-piloted until the susceptibility-instructed arm moves ≥10 points on average and the inserted detail is cited as decisive at a rate comparable to the authority token (23/24), plus enough reps (≥15/cell) to put a real confidence interval on the collision order-swap delta (14.8) against half its material effect (10.5); that single comparison is what currently decides the verdict, and at n=6 it is not resolvable.
 
 ---
 

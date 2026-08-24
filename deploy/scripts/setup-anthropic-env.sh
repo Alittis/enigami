@@ -7,7 +7,15 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ENV_FILE="$REPO_ROOT/.env"
 cd "$REPO_ROOT"
 
-# Refuse to write anywhere git would track.
+# Refuse to write anywhere git would track. Distinguish "not ignored" from "not a repo":
+# the advice differs, and the old message was unfollowable outside a checkout.
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "REFUSING: $REPO_ROOT is not a git checkout, so this script cannot verify that" >&2
+  echo "  $ENV_FILE would stay out of version control." >&2
+  echo "  Either run this inside a clone of the repo, or set ANTHROPIC_API_KEY in your" >&2
+  echo "  shell environment instead (the harness reads it from there too)." >&2
+  exit 1
+fi
 if ! git check-ignore -q "$ENV_FILE" 2>/dev/null; then
   echo "REFUSING: $ENV_FILE is not gitignored. Add '.env' to .gitignore first." >&2
   exit 1

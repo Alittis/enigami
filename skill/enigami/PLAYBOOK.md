@@ -14,22 +14,28 @@ and workflow changes; cite the numbers when explaining why.
    presented first fared worse). For any two-party judgment, run both orders in fresh
    contexts; average, and flag a spread ≥ 8 points on the 0–100 scale as order-driven.
 2. **Strip or flag unargued authority.** A moderate authority assertion dragged judgment up
-   to 16.7 points while being cited in under half the rationales; an extreme one (90%+) was
-   named 23/24 times and resisted (max 7.5). Remove authority claims that carry no argument
+   to 16.7 points while being named in 14 of 24 rationales; an extreme one (90%+) was named
+   23/24 and resisted (max 7.5 points). Influence and disclosure moved together here — the
+   pattern to fear is the moderate, plausible-sounding claim, not the outrageous one. Remove authority claims that carry no argument
    from prompts, or explicitly instruct: "evaluate every cited opinion by its stated
    reasoning only."
 3. **Lead with decisive facts.** Facts keyed as decisive moved judgment in the right
    direction 12 out of 12 times across three designs (+48/+21/+15 point effects). Put the
    load-bearing fact in the prompt plainly; do not bury it in narrative.
-4. **Don't bother with sympathy framing — and don't fear it.** Hardship details moved
-   judgments near zero (max 6.7, cited 4/24) even when the model was instructed to weigh
-   them. Emotional framing is mostly inert on this subject; decide on facts.
+4. **Sympathy framing is weak here, with one caveat.** Hardship details moved judgments
+   little in the final design (max 6.7 points, named in 4 of 24 rationales) and barely moved
+   even a subject instructed to weigh them (2.4 points). But an earlier design's sympathy
+   variant did move one dilemma 10-12 points, on a vignette whose scale was saturated — so
+   read this as "usually weak, not reliably inert", and keep hardship details out of prompts
+   where you want the facts to decide.
 
 ## Creativity — escaping the default groove
 
-1. **Sample independently, never sequentially.** Ten fresh-context samples of one open
-   question produced 6–7 distinct ideas; a continuing chat converges. Fan out subagents for
-   candidates; pick across them.
+1. **Sample independently in fresh contexts.** Ten fresh-context samples of one open
+   question produced 6-7 distinct ideas, against 4 when the concept was pinned. Fan out
+   subagents for candidates and pick across them. (Whether a single continuing chat converges
+   faster than independent calls was NOT measured here — it is the obvious next probe, not a
+   finding.)
 2. **Instruct: "discard your first idea, and your second."** That single line added ideas
    (7→8) and nearly doubled thematic spread (3→5 themes). The default range is narrower than
    the reachable one — by disposition, not capacity.
@@ -41,8 +47,10 @@ and workflow changes; cite the numbers when explaining why.
 ## Imagination — holding an invented rule
 
 1. **State the operative rule explicitly, and it holds.** With the rule in the prompt,
-   free-text consequence reasoning followed the invented rule 92–100% of the time across 27
-   items and three invented worlds, at three inference depths. If work depends on a
+   free-text consequence reasoning followed the invented rule on 92% of 27 items across three
+   invented worlds (96% under the ordinary-rule control). The aggregate hides real variation:
+   per world 78%/89%/100%, and by inference depth 100%/78%/100% — nine items per cell, so
+   treat the slices as directional. Adherence is high, not perfect. If work depends on a
    counterfactual, premise, or house rule — restate it verbatim in the prompt.
 2. **Prefer free response over multiple choice.** Options invite elimination shortcuts
    ("exclude the real-world answer when the premise is strange") that inflate apparent
@@ -53,9 +61,10 @@ and workflow changes; cite the numbers when explaining why.
 ## Intelligence — reliability and calibrated confidence
 
 1. **At default (high) effort, short verifiable work is ceiling-reliable (claude-opus-5).**
-   Measured: 42/42
-   on brutal computation, 23/23 on near-miss trick variants (including inverted traps), 35/35
-   on re-skinned famous puzzles with zero memorised-answer intrusions. Don't burn review
+   Measured: 42/42 on brutal computation; 23/23 on near-miss trick variants including
+   inverted traps; and on re-skinned famous puzzles, 12/12 canonical plus 23/23 isomorphs
+   with zero memorised-answer intrusions (one further item excluded as unscoreable, and
+   reported as such). Don't burn review
    effort re-checking arithmetic-class outputs produced at high effort.
 2. **At low effort, demand a confidence line and gate on it — but know the limit.** On
    weaker models, constrained effort produces the errors that make stated confidence

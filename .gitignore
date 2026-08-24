@@ -16,4 +16,11 @@ __pycache__/
 transcripts/*
 !transcripts/.gitkeep
 
+# Skill run artifacts. SKILL.md writes these into the working directory, which is often a
+# clone of this repo; the one committed example scorecard stays tracked (ignore rules never
+# apply to already-tracked files).
+enigami-scorecard-*.md
+responses.json
+judges.json
+
 .DS_Store

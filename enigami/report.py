@@ -8,12 +8,23 @@ worst thing this repo could contain.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from . import config
 from .runner import latest_results, verify_ordering
 
 _VERDICT_MARK = {"supports": "supports", "refutes": "REFUTES", "inconclusive": "inconclusive"}
+
+
+def _readable(text: str) -> str:
+    r"""Render literal \uXXXX sequences a model emitted as text into the characters they name.
+
+    Models sometimes write the escape rather than the character; copied verbatim into the
+    markdown it leaves the public record peppered with \u2014 where an em dash belongs.
+    Decoding is presentation only - the transcript remains the record.
+    """
+    return re.sub('\\\\u([0-9a-fA-F]{4})', lambda m: chr(int(m.group(1), 16)), text)
 
 
 def _fmt_metrics(metrics: dict) -> str:
@@ -63,16 +74,16 @@ def write_finding(result: dict) -> Path | None:
     lines += [
         "## Result",
         "",
-        f"**{_VERDICT_MARK.get(finding['verdict'], finding['verdict'])}** — {finding['headline']}",
+        f"**{_VERDICT_MARK.get(finding['verdict'], finding['verdict'])}** — {_readable(finding['headline'])}",
         "",
         _fmt_metrics(finding.get("metrics", {})),
         "",
     ]
     if finding.get("evidence"):
-        lines += ["### Evidence", ""] + [f"- {e}" for e in finding["evidence"]] + [""]
+        lines += ["### Evidence", ""] + [f"- {_readable(str(e))}" for e in finding["evidence"]] + [""]
     if finding.get("caveats"):
         lines += ["### Caveats the probe already knows about", ""] + \
-                 [f"- {c}" for c in finding["caveats"]] + [""]
+                 [f"- {_readable(str(c))}" for c in finding["caveats"]] + [""]
 
     if refutation:
         survived = result.get("survived_refutation")
@@ -90,13 +101,18 @@ def write_finding(result: dict) -> Path | None:
                if result.get("review_reps") else ""),
             f"- **Judged an artifact** {refutation['is_likely_artifact']}",
             "",
-            f"**Strongest alternative explanation.** {refutation['strongest_alternative_explanation']}",
+            f"**Strongest alternative explanation.** {_readable(refutation['strongest_alternative_explanation'])}",
             "",
-            f"**Specific flaw.** {refutation['specific_flaw']}",
+            f"**Specific flaw.** {_readable(refutation['specific_flaw'])}",
             "",
-            f"**What would settle it.** {refutation['what_would_settle_it']}",
+            f"**What would settle it.** {_readable(refutation['what_would_settle_it'])}",
             "",
         ]
+        if "for for" in _readable(refutation.get("strongest_alternative_explanation", "")):
+            lines += ["> _The reviewer's stored text contains a corrupted fragment ('for for / "
+                      "ot it'). It is reproduced verbatim rather than repaired: the transcript "
+                      "is the record, and editing a reviewer's words to read better is exactly "
+                      "the liberty this repo refuses to take._", ""]
         history = result.get("review_history") or []
         if history:
             prev = history[-1]
@@ -167,8 +183,15 @@ def write_index(results: list[dict]) -> Path:
 
 
 def regenerate() -> tuple[int, int]:
-    """Rewrite all findings from the newest run per probe. Returns (written, skipped_offline)."""
+    """Rewrite all findings from the newest run per probe. Returns (written, skipped_offline).
+
+    Refuses to touch findings/ when there are no recorded runs at all: on a fresh clone
+    `transcripts/` is gitignored and therefore empty, and regenerating from nothing would
+    overwrite the committed findings with an empty index.
+    """
     results = latest_results()
+    if not results:
+        return 0, 0
     written = skipped = 0
     for r in results:
         if write_finding(r) is None:

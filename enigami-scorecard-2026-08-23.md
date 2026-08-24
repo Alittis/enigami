@@ -2,11 +2,11 @@
 
 Screening read from a compact in-session battery (subagents on plan usage). Small n by design: treat movements against baselines as directional.
 
-## Intelligence — calibration at LOW effort
+## Intelligence — reliability spot-check at LOW effort (calibration when errors permit)
 - accuracy **100%** (6 scored, 0 unparseable)
 - discrimination (conf right − conf wrong): **undefined — no errors or no hits**
 - overconfidence: **-0.03**
-- baseline: lab (high effort): unmeasurable at ceiling (42/42, 23/23); this module runs at LOW effort where errors exist
+- baseline: lab (claude-opus-5): ceiling at every effort tried — 42/42 and 23/23 at high, 6/6 at low — so on this model the module reads reliability; on models that err, discrimination becomes meaningful
 
 ## Wisdom — order invariance
 - collision: order effect **+2.5** points (AB [60, 60] vs BA [65, 60]) — flag if |effect| ≥ 8
@@ -26,3 +26,9 @@ Screening read from a compact in-session battery (subagents on plan usage). Smal
 
 Improvement patterns for anything flagged: see PLAYBOOK.md in this skill.
 
+---
+
+_Historical record: this is the acceptance run of 2026-08-23, the first live use of the
+skill. Its intelligence baseline wording was corrected in place afterwards (EN-28) — the
+run's own 100% at low effort is what falsified the original claim that constrained effort
+produces errors on this model._

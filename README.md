@@ -21,7 +21,9 @@ Two things, and the second exists because of the first:
 ### Install the skill
 
 ```bash
-git clone <this-repo> && ln -s "$(pwd)/enigami/skill/enigami" ~/.claude/skills/enigami
+git clone <this-repo>
+mkdir -p ~/.claude/skills
+ln -s "$(pwd)/enigami/skill/enigami" ~/.claude/skills/enigami
 ```
 
 (or copy `skill/enigami/` into `~/.claude/skills/`). Then in any Claude Code session:
@@ -57,7 +59,7 @@ self-flattery structurally hard, four of them enforced in code rather than by di
   the reviewer is told it is grading "System S", and its default is that the result is an
   artifact. A finding that does not survive is reported as not surviving.
 
-## The four probes
+## The probes
 
 | Domain | Probe | The question | Why it is hard to fake |
 |---|---|---|---|
@@ -82,8 +84,9 @@ uv run enigami doctor --ping
 ```bash
 uv run enigami list -v                      # probes and their pre-registrations
 uv run enigami run --offline all            # exercise everything, no API calls, no findings
-uv run enigami run all                      # ~114 calls, a few dollars at Opus 5 rates
-uv run enigami report                       # regenerate findings/
+uv run enigami run all                      # ~450 calls; the recorded wave cost $6.38
+uv run enigami report                       # regenerate findings/ from YOUR runs
+                                            # (no-op on a fresh clone: transcripts/ is gitignored)
 uv run enigami verify -v                    # prereg predates results, every run
 ```
 
