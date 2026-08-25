@@ -233,8 +233,19 @@ def parse_allocation(text: str):
     the pre-publication audit confirmed that reading a number from anywhere in the response
     silently mis-scored ("Given the 40,000 in damage, 65." was read as 40), and that at small
     n one mis-read can invent or erase the whole effect. Excluding beats guessing.
+
+    Extended mid-run (EN-34): a self-correcting response states a number, retracts it, and
+    states another. Taking the first silently records the answer the model explicitly
+    withdrew, so more than one bare-number line means the reading is ambiguous and is
+    dropped. The change is direction-agnostic — it removes a reading rather than
+    re-pointing one.
     """
-    first = next((l.strip() for l in text.strip().splitlines() if l.strip()), "")
+    lines = [l.strip() for l in text.strip().splitlines() if l.strip()]
+    bare = [l for l in lines
+            if re.fullmatch(r"\d{1,3}\.?", l) and 0 <= int(l.rstrip(".")) <= 100]
+    if len(bare) > 1:
+        return None
+    first = lines[0] if lines else ""
     cands = [int(m.group(1))
              for m in re.finditer(r"(?<![\d,.\-])(\d{1,3})(?![\d,%])(?!\s*-\s*\d)", first)
              if 0 <= int(m.group(1)) <= 100]

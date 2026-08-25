@@ -9,10 +9,24 @@ and workflow changes; cite the numbers when explaining why.
 
 ## Wisdom — judgment under irrelevant pressure
 
-1. **Judge in both orders, then average.** Presentation order alone moved allocations 10–15
-   points (collision +14.8 at ~7 SE; floodbudget −10.5 at ~5 SE; direction: the party
-   presented first fared worse). For any two-party judgment, run both orders in fresh
-   contexts; average, and flag a spread ≥ 8 points on the 0–100 scale as order-driven.
+1. **Judge in both orders, then average — but know how big the effect actually is where you
+   are.** This is the pattern that got tested hardest, and the test cut it down. Under bare-API
+   conditions, presentation order moved allocations 10–15 points (collision +14.8 at ~7 SE;
+   floodbudget −10.5 at ~5 SE; the party presented first fared worse). A dedicated 48-reading
+   probe run **in-session — the deployment this skill actually runs in** — refuted that
+   magnitude: mean effect **+0.08 points**, 95% CI −3.4 to +3.6, against a 6.4-point noise
+   floor. On the same `collision` vignette the in-session reading was +2.3, not +14.8. Setting
+   aside one bimodal vignette, seven give **+1.74 points (CI +0.31 to +3.18)** — the direction
+   holds, the magnitude was out by roughly a factor of ten.
+
+   So: still ask in both orders when the stakes justify two calls, because a ~2-point lean in
+   a consistent direction is real and free to remove. But do not expect it to change an answer,
+   and do not budget a decision around a 10-point swing unless you are calling the bare API.
+   Flag a spread ≥ 8 points on the 0–100 scale as worth investigating — in-session that now
+   indicates an unstable *vignette* (one item here returned 15 and 65 on identical prompts)
+   more often than an order effect. Why the two deployments differ is **not established**:
+   the comparison is confounded with time, model snapshot, system prompt and tooling. See
+   `findings/order.presentation_order.md`.
 2. **Strip or flag unargued authority.** A moderate authority assertion dragged judgment up
    to 16.7 points while being named in 14 of 24 rationales; an extreme one (90%+) was named
    23/24 and resisted (max 7.5 points). Influence and disclosure moved together here — the

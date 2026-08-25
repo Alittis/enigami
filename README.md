@@ -18,15 +18,19 @@ prompting.
 Claude has a few specific, measurable blind spots. This skill knows what they are, fixes them in
 your prompts, and can show you which ones apply to your own setup.
 
-Here is one, with real stakes. Suppose you ask Claude how two neighbours should split a €40,000
-flood-repair bill. Ask it twice, changing nothing but **which neighbour you describe first**, and
-the answer moves by 10–15 points out of 100 — roughly **€5,000 of pure arbitrariness**. The
-neighbour introduced first tends to be judged more harshly. You would never catch this from a
-single reply, because each reply is careful, well-argued and sounds entirely reasonable.
+Here is one, and it comes with a correction that shows how the repo works. Ask Claude how two
+neighbours should split a €40,000 flood-repair bill, then ask again changing nothing but **which
+neighbour you describe first**. Measured against the bare API, the answer moved 10–15 points out
+of 100 — about **€5,000 of pure arbitrariness**, invisible from any single reply because each
+reply is careful and well-argued.
 
-So the skill tells you: ask in both orders, average, and treat a wide gap as a warning. That is
-the whole shape of the thing — small prompt changes, each one attached to a number that was
-measured rather than guessed.
+Then a probe built specifically to measure that effect, run 48 times inside Claude Code — the
+place this skill actually runs — **refuted it**: mean effect 0.08 points, and about 1.7 points
+once one unstable vignette is set aside. The direction was right; the size was out by roughly a
+factor of ten, in that setting. So the advice survives in weaker form (ask in both orders when
+two calls are cheap; expect a nudge, not a swing) and the headline number is now scoped to where
+it was measured. That is the shape of the thing: small prompt changes, each attached to a number
+that was measured rather than guessed — and re-measured until it stopped flattering us.
 
 A few more of the same kind:
 
@@ -90,9 +94,12 @@ dominated by the cached system prompt.
 The full set with its provenance is in [`skill/enigami/PLAYBOOK.md`](skill/enigami/PLAYBOOK.md).
 The load-bearing ones, with the measurement behind each:
 
-- **Judge two-party questions in both orders and average.** Presentation order alone moved
-  allocations 10–15 points out of 100, twice replicated on different dilemmas — and the party
-  presented *first* fared worse both times. This is the largest single distortion the lab found.
+- **Judge two-party questions in both orders and average.** Under the bare API, presentation
+  order alone moved allocations 10–15 points out of 100, with the party presented *first* faring
+  worse. A dedicated 48-reading probe run in-session refuted that magnitude (mean +0.08 points,
+  CI −3.4 to +3.6; ~+1.7 excluding one bimodal vignette), so the effect is real in direction and
+  roughly ten times smaller here than the earlier figure. Why the deployments differ is not
+  established.
 - **Strip authority claims that carry no argument.** A moderate one dragged judgment up to 16.7
   points; the plausible-sounding claim is the dangerous one, not the outrageous one.
 - **Lead with the decisive fact.** Facts keyed as decisive moved judgment the right way 12 out

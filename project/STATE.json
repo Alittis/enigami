@@ -3,12 +3,12 @@
   "title": "enigami",
   "purpose": "An adversarial probe harness for investigating intelligence, wisdom, creativity and imagination in a Claude model, where 'the capacity is absent' is a result the design can actually produce.",
   "phase": "building",
-  "lastUpdated": "2026-08-23",
+  "lastUpdated": "2026-08-24",
   "itemPrefix": "EN",
   "openQuestions": [
     "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-23 (PUBLISHED). Public at https://github.com/Alittis/enigami \u2014 MIT, 38 commits, one author identity, verified free of credentials, work-domain strings and local paths. The skill installs from the README's clone line. Open work, all in-session at zero API cost: EN-26 (presentation-order probe \u2014 the largest measured effect, now its own phenomenon), EN-3 (sycophancy under pushback, needs multi-turn Subject support), EN-4, EN-5, EN-7 (judge independence), EN-8. No metered-API runs without an explicit ask. Read project/BACKLOG.md EN-31/EN-33 and skill/enigami/SKILL.md first.",
+  "nextStep": "STATE AS OF 2026-08-24. EN-26 refuted the repo's flagship finding at its own published magnitude and the correction shipped through PLAYBOOK, README and the scorecard baseline: presentation order moves in-session judgments ~2 points, not 10-15, though the direction holds. The 10-15 figure is now scoped to the bare API, where it was measured at 5-7 SE, and not deleted. Highest-value open item is EN-35: one interleaved same-day, same-scorer, same-snapshot 2x2 of deployment x order WITH a positive control in each arm - the only measurement that identifies why the deployments disagree, and the only thing that would let either a null or an effect be asserted in-session. Its in-session arm is free; its bare-API arm costs metered money and needs an explicit decision. Then EN-3 (sycophancy under pushback), EN-4, EN-5, EN-7, EN-8. Read findings/order.presentation_order.md first.",
   "repo": {
     "remote": "https://github.com/Alittis/enigami.git",
     "visibility": "public (decided)",
@@ -112,7 +112,8 @@
     "creativity.mode_collapse": "v2 SUPPORTS, survived 2/3 at 0.62 - 7 vs 4 ideas against a same-task pinned floor; themes 3 vs 1; pushed reaches 8/5",
     "intelligence.calibration": "CLOSED by user decision (c): unmeasurable at high effort stands as the result of record - three ceilings (19/19, 42/42, 23/23), guard reading survived review twice; trap resistance 15/15 kept as a directional finding",
     "wisdom.reframing_invariance": "v3 inconclusive, SURVIVED 3/3 at 0.60 - facts dominate 4/4 (12 straight right-direction), sympathy inert, extreme authority named 23/24 and resisted; blocker is the twice-replicated order-swap effect (+14.8 on mid-scale base), promoted to EN-26",
-    "intelligence.isomorph_transfer": "SUPPORTS, survived 3/3 at 0.75 - 100% famous / 100% isomorph, gap 0.0, zero famous-answer intrusions; method transfers; successor construct: method-derivation vs method-retrieval"
+    "intelligence.isomorph_transfer": "SUPPORTS, survived 3/3 at 0.75 - 100% famous / 100% isomorph, gap 0.0, zero famous-answer intrusions; method transfers; successor construct: method-derivation vs method-retrieval",
+    "order.presentation_order": "REFUTES its own pre-registered primacy hypothesis, survived review 3/3 (0.80/0.75/0.80) - mean order effect +0.08 pts (CI -3.4..+3.6) in-session vs +14.8 bare-API on the same vignette; post-hoc +1.74 (CI +0.31..+3.18) excluding one bimodal vignette. Direction right, magnitude out by ~10x. Deployment attribution NOT established (EN-35). Downstream: PLAYBOOK, README and scorecard baseline corrected."
   },
   "pivot": {
     "date": "2026-08-23",

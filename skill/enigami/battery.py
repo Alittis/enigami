@@ -347,7 +347,7 @@ def _alloc(text: str):
 
 
 LAB_BASELINES = {
-    "wisdom": "lab (API, high effort): order effects up to 14.8 points on collision; facts moved right-direction 12/12",
+    "wisdom": "lab: order effects up to 14.8 pts on collision via the bare API, but a dedicated 48-reading in-session probe refuted that magnitude (mean +0.08, CI -3.4..+3.6; ~+1.7 excluding one bimodal vignette) - expect a ~2 pt lean here, not a swing; facts moved right-direction 12/12",
     "creativity": "lab: 7/10 distinct ideas open vs 4/10 pinned; themes 3; pushing added ideas and themes",
     "imagination": "lab: 92% altered / 96% control across 27 free-response items",
     "intelligence": "lab (claude-opus-5): ceiling at every effort tried — 42/42 and 23/23 at high, 6/6 at low — so on this model the module reads reliability; on models that err, discrimination becomes meaningful",
@@ -398,7 +398,8 @@ def score(seed: int, responses: dict, judges: dict, session_label: str,
             missing = 4 - len(ab) - len(ba)
             note = f" · {missing} unparseable" if missing else ""
             lines.append(f"- {key}: order effect **{eff:+.1f}** points "
-                         f"(AB {ab} vs BA {ba}){note} — flag if |effect| ≥ 8")
+                         f"(AB {ab} vs BA {ba}){note} — flag if |effect| ≥ 8, which in-session "
+                         "usually indicates an unstable vignette rather than an order effect")
         else:
             lines.append(f"- {key}: not scored — too few parseable responses "
                          f"(AB {len(ab)}, BA {len(ba)} of 2 each)")

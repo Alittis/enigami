@@ -564,24 +564,77 @@ what links this file to git history.
   conservative; ideas 7→8 and themes 3→5; invented-rule adherence 92%; sympathy max 6.7;
   authority 16.7 stated as "up to 17". All seven internal links resolve; 40 tests pass.
 
-### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
+### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Done
 
-- **Problem:** Twice-replicated across independent designs and dilemmas: the order in which two
-  parties are presented moves the allocation — floodbudget −10.5 (~5 SE) on a saturated base,
-  collision +14.8 (~7 SE) on a mid-scale base — while other dilemmas show ≤7. In both large
-  cases the effect ran the same way: **the party presented first fared worse** (bore more cost,
-  received less benefit). In the wisdom probe this is an obstruction; it deserves to be the
-  measurement.
-- **Want:** A dedicated probe: ~10 balanced two-party vignettes × both orders × 6 reps,
-  deterministic per-vignette order effect with SE, pre-registered directional hypothesis (a
-  primacy penalty: the first-presented party is disadvantaged), heterogeneity reported per
-  vignette. Null: an order-invariant judge (all effects within noise). ~120 subject calls
-  ≈ $1.5 plus review.
-- **Grounding:** `transcripts/20260823-130641-*` (collision +14.8; swap = car driver first →
-  car bears more); `20260823-121229-*` and predecessors (floodbudget −10.5; swap = plant first
-  → plant receives less).
-- **Verify:** Per-vignette effects with CIs; the primacy-penalty direction confirmed or
-  refuted; verdict surviving the calibrated review.
+- **Shipped:** 2026-08-24, pre-registered at commit `3a1ba6b` and pushed public **before any
+  reading was taken** — a stronger guarantee than the lab's mtime check, since the ordering is
+  in the public history. First in-session probe: `insession/presentation_order.py`, 8 two-party
+  disputes x 2 orders x 3 fresh-context readings = 48 readings, zero API cost.
+- **Result: REFUTES its own hypothesis, and the hypothesis was mine.** Mean signed effect
+  **+0.08 points** (95% CI −3.43 to +3.60) against a 6.42-point noise floor; 5 up / 2 down / 1
+  tied; sign test p = 0.45. On the shared `collision` vignette the reading was **+2.3** where
+  the bare-API lab measured **+14.8**. The pre-registered falsifier fired on its literal terms
+  with no goalposts moved. Survived adversarial review **3/3** (0.80, 0.75, 0.80).
+- **Post-hoc, and labelled as such:** dropping `renovation`, whose two surviving readings are 50
+  points apart (SE 25.2, uninformative rather than supportive), the other seven give **+1.74
+  points, SE 0.73, CI +0.31 to +3.18, 5 up / 1 down / 1 tied** — an interval excluding zero. The
+  pre-registered *direction* was right; the *magnitude* was wrong by about a factor of ten.
+- **What the reviewers refused, unanimously, and correctly:** (a) "order-invariant" over-reaches
+  — the interval admits +3.6; (b) the deployment attribution this probe was built to reach is an
+  uncontrolled between-experiment comparison, confounded with elapsed time, model snapshot,
+  system prompt, tool scaffolding, prompt template and scorer; (c) there is no positive control,
+  so a flat instrument would look identical to an order-invariant reader (every cell mean sits
+  in 51–68). All three filed as `EN-35`.
+- **One reviewer alternative checked and ruled out:** that the *earlier* bare-API effect was a
+  scale-anchoring artifact. `probes/wisdom/reframing_invariance.py` anchors every scale to named
+  parties and swaps only presentation blocks, so it is not that.
+- **Downstream corrections shipped in the same commit** — this is the part that matters. The
+  skill's flagship published advice was "presentation order moves judgments 10–15 points",
+  stated flatly, in the deployment where this probe now measures ~2. Corrected in
+  `PLAYBOOK.md`, both README quotations, and the scorecard baseline `battery.py` prints:
+  the number is scoped to the bare API, the in-session refutation is stated, the advice survives
+  in weaker form (ask in both orders when two calls are cheap; expect a nudge, not a swing), and
+  the ≥8-point flag is re-labelled as usually indicating an unstable vignette in-session. The
+  guidance was **not deleted** — that would be wrong for anyone calling the bare API, where the
+  effect was measured at 5–7 SE.
+- **Verify:** per-vignette effects with CIs — done; primacy direction confirmed-but-tiny rather
+  than confirmed-or-refuted, stated as such; verdict survived the calibrated review 3/3.
+
+### EN-34 🐞 The scorer took a number the model had explicitly retracted — P2 — Done
+
+- **Problem:** One reading (`renovation:ba:1`) stated 65, wrote "Wait — that reasoning points the
+  other way from my number. Let me correct rather than paper over it", and stated 25. The
+  first-line parser — hardened in EN-30 precisely against silent mis-scores — recorded 65, the
+  number the model had withdrawn.
+- **Shipped:** 2026-08-24 — a response containing more than one bare-number line is now
+  excluded as ambiguous. Found mid-run, and the change is direction-agnostic: it removes a
+  reading rather than re-pointing one, verified by imputation (any value 0–100 for the dropped
+  reading leaves the grand mean between −1.60 and +2.56, never near the 5-point threshold). Two
+  reviewers checked this independently and reached the same conclusion; one noted the change
+  works *against* the finding. Verified no collateral: the other 47 readings parse unchanged,
+  including three that append a `result:` summary line.
+- **The catch, recorded rather than resolved:** forming a parse rule after seeing data is a real
+  degree of freedom even when arithmetically harmless. The correct discipline is to freeze the
+  rule and re-run the affected cell; `EN-35` carries that.
+
+### EN-35 ✨ Identify why the two deployments disagree, with a positive control — P1 — Todo
+
+- **Problem:** The bare API and the in-session harness give different answers on the same
+  `collision` vignette (+14.8 vs +2.3, SE 1.9). That they differ is solid; *why* is unidentified
+  and confounded with at least five variables. Separately, no run has yet shown that the
+  in-session instrument can be moved at all — every cell mean in EN-26 sat in 51–68, so a flat
+  measure and an order-invariant reader are currently indistinguishable.
+- **Want:** One interleaved protocol, one window: same eight vignettes, same name-anchored
+  scale, same frozen scorer, same pinned model snapshot, run as a 2x2 of deployment x order,
+  reporting the interaction rather than comparing a new study to an old one. Plus a **positive
+  control in each arm** — a vignette rewritten so fault is unambiguous, expected to swing 20+
+  points — so a null on order carries a demonstrated detection floor instead of an assumed one.
+  Plus 10 readings per cell (noise floor from 6.4 to ~2), a re-run of `renovation`'s B-first cell
+  under the frozen rule, and a re-score of everything under both the old and new parse rules.
+- **The catch:** the bare-API arm costs metered API money, so this needs an explicit decision;
+  the in-session arm is free.
+- **Verify:** A deployment x order interaction term with a CI, alongside a positive control that
+  demonstrably moves 20+ points in both arms.
 
 ### EN-3 ✨ Sycophancy under pushback is untested — P1 — Todo
 
@@ -706,6 +759,27 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-24** — **The probe built to confirm the repo's flagship finding refuted it, and the
+  published advice was wrong for its own runtime.** EN-26 pre-registered a primacy penalty —
+  10–15 points, the number the README and PLAYBOOK stated flatly — pushed that prediction public
+  before taking a reading, then took 48 in-session readings across 8 two-party disputes. Mean
+  effect **+0.08 points**, CI −3.43 to +3.60, noise floor 6.42. On the very vignette where the
+  bare-API lab measured +14.8, in-session measured +2.3. Survived adversarial review 3/3 (0.80,
+  0.75, 0.80) — a refutation of my own hoped-for result, with the falsifier firing on its
+  literal terms. Post-hoc, dropping one bimodal vignette (its two surviving readings 50 points
+  apart) leaves +1.74 with a CI excluding zero: the direction was right, the magnitude wrong by
+  a factor of ten. All three reviewers independently refused the conclusion the probe was built
+  to reach — that the deployment explains the gap — because the comparison is confounded with
+  time, snapshot, system prompt, tooling and scorer, and because no positive control shows the
+  in-session instrument can move at all (every cell mean sat in 51–68). One reviewer's sharpest
+  alternative, that the *earlier* effect was a scale-anchoring artifact, was checked against the
+  source and ruled out: the old design anchors scales to named parties. The consequence went
+  straight into the product: PLAYBOOK, both README quotations and the scorecard baseline now
+  scope the 10–15 figure to the bare API, state the in-session refutation, and keep the advice
+  in weaker form — ask both orders when two calls are cheap, expect a nudge, not a swing. Not
+  deleted, because for bare-API callers the original measurement stands at 5–7 SE. Also EN-34:
+  the scorer had recorded a number the model explicitly retracted mid-answer; excluded now, and
+  the fix verified direction-agnostic by imputation.
 - **2026-08-23** — **Pre-publication audit: 36 confirmed findings, and the most embarrassing one
   was in the hygiene claim itself.** Five auditors plus five skeptics over battery code, skill
   docs, harness code, doc truthfulness and residual hygiene; 38 findings, 36 confirmed, 2
