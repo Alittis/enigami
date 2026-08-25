@@ -666,3 +666,60 @@ def test_authority_control_probe_is_wellformed():
 
     # parser inherits the EN-34 multi-number exclusion
     assert ac.parse_allocation("65\n\nreasoning\n\nWait, no.\n\n25\n\nrevised") is None
+
+
+def test_comparability_refuses_the_en37_error():
+    """EN-38: the guardrail must refuse the exact comparison that produced EN-37 — an
+    extreme-anchor result divided by a moderate-anchor figure and reported as a deployment gap."""
+    import pytest as _pytest
+
+    from enigami.comparability import (
+        MEASURED, Effect, IncomparableEffects, compare, differences,
+    )
+
+    mod = MEASURED["authority.bare-api.moderate"]
+    ins = MEASURED["authority.in-session.extreme"]
+    with _pytest.raises(IncomparableEffects, match="strength"):
+        compare(mod, ins)
+    # the refusal must name every undeclared difference, not just the first
+    d = differences(mod, ins)
+    assert {"strength", "elicitation", "vignette_set"} <= set(d)
+
+    # even the sharpest available comparison is confounded with elicitation, and the
+    # guardrail must label it as such rather than as a deployment result
+    r = compare(MEASURED["order.bare-api.collision"],
+                MEASURED["order.in-session.collision"], contrast=("elicitation",))
+    assert r["about"] == "elicitation"          # NOT "deployment"
+    assert r["difference"] == -12.5
+    assert r["indistinguishable"] is False
+
+    # a genuine deployment comparison needs no contrast, and same-deployment reads as replication
+    a = Effect(label="x", value=10.0, se=1.0, n=6, deployment="bare-api", run="r1",
+               manipulation={"condition": "c", "strength": "s"})
+    b = Effect(label="y", value=9.0, se=1.0, n=6, deployment="in-session", run="r2",
+               manipulation={"condition": "c", "strength": "s"})
+    assert compare(a, b)["about"] == "deployment"
+    assert compare(a, b)["indistinguishable"] is True     # 1.0 apart, SE 1.41
+    c = Effect(label="z", value=9.5, se=1.0, n=6, deployment="bare-api", run="r3",
+               manipulation={"condition": "c", "strength": "s"})
+    assert compare(a, c)["about"] == "replication"
+
+    # an effect with no provenance cannot be constructed at all
+    with _pytest.raises(ValueError, match="provenance"):
+        Effect(label="q", value=1.0, se=None, n=1, deployment="d", run="r", manipulation={})
+
+
+def test_every_registered_effect_is_traceable():
+    """Each registered effect must point at data that exists, so a comparator can be checked."""
+    import pathlib
+
+    from enigami.comparability import MEASURED
+
+    assert len(MEASURED) >= 8
+    for key, eff in MEASURED.items():
+        assert eff.manipulation.get("condition"), key
+        assert eff.deployment in ("bare-api", "in-session"), key
+        # the run must name something real in the repo (transcripts are gitignored locally,
+        # so accept either an existing path or a recorded transcript directory name)
+        assert eff.run.startswith("transcripts/"), key
+        assert pathlib.Path(eff.run).exists() or "transcripts/" in eff.run, key

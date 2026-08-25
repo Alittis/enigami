@@ -29,8 +29,11 @@ place this skill actually runs — **refuted it**: mean effect 0.08 points, and 
 once one unstable vignette is set aside. The direction was right; the size was out by roughly a
 factor of ten, in that setting. So the advice survives in weaker form (ask in both orders when
 two calls are cheap; expect a nudge, not a swing) and the headline number is now scoped to where
-it was measured. That is the shape of the thing: small prompt changes, each attached to a number
-that was measured rather than guessed — and re-measured until it stopped flattering us.
+it was measured. Why the two settings differ is still open — the comparison also varies how the
+answer is elicited, so that is as likely a cause as the setting itself, and the repo's own
+comparator refuses to call it settled. That is the shape of the thing: small prompt changes, each
+attached to a number that was measured rather than guessed — re-measured until it stopped
+flattering us, and re-measured again when the comparison itself turned out to be sloppy.
 
 A few more of the same kind:
 
@@ -98,10 +101,15 @@ The load-bearing ones, with the measurement behind each:
   order alone moved allocations 10–15 points out of 100, with the party presented *first* faring
   worse. A dedicated 48-reading probe run in-session refuted that magnitude (mean +0.08 points,
   CI −3.4 to +3.6; ~+1.7 excluding one bimodal vignette), so the effect is real in direction and
-  roughly ten times smaller here than the earlier figure. Why the deployments differ is not
-  established.
-- **Strip authority claims that carry no argument.** A moderate one dragged judgment up to 16.7
-  points; the plausible-sounding claim is the dangerous one, not the outrageous one.
+  roughly ten times smaller here than the earlier figure. What causes the difference is **not**
+  established: the sharpest comparison available also varies the elicitation format, so that is
+  as live a candidate as the deployment.
+- **Strip authority claims that carry no argument.** A *moderate* one dragged judgment up to
+  16.7 points while being named in under half the rationales — influence you cannot see. An
+  *extreme* one (90%+) barely moved anything and was named in 23 of 24 in-session rationales,
+  explicitly in order to be dismissed. The credible-sounding figure is the dangerous one. Unlike
+  the order effect, this pattern shows **no** deployment difference: +5.1 bare-API against +3.1
+  in-session on matched anchors.
 - **Lead with the decisive fact.** Facts keyed as decisive moved judgment the right way 12 out
   of 12 times across three designs.
 - **Say "discard your first idea, and your second."** That one line took distinct ideas from 7

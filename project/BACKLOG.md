@@ -685,18 +685,32 @@ what links this file to git history.
   finding, and was caught only by going back to the raw transcript to answer an unrelated
   question. Nothing in the harness compares manipulations for comparability — `EN-38`.
 
-### EN-38 ✨ Nothing checks that a cross-run comparison is like-for-like — P2 — Todo
+### EN-38 ✨ Nothing checks that a cross-run comparison is like-for-like — P2 — Done
 
-- **Problem:** EN-37 happened because a comparator was chosen by recall ("the authority effect
-  was 16.7") rather than by matching the manipulation. The harness enforces pre-registration,
-  blind scoring, calibrated review and verdict bands, and none of them look at whether two
-  numbers being divided describe the same intervention.
-- **Want:** Cross-run comparisons carry machine-checkable provenance — the manipulation's
-  parameters (anchor level, direction, vignette set, condition name) recorded alongside every
-  effect, and a comparator helper that refuses to divide two effects whose parameters differ,
-  or flags the mismatch in the output.
-- **Verify:** Attempting to compare the moderate-anchor and extreme-anchor authority effects
-  raises or prints a mismatch warning rather than a ratio.
+- **Shipped:** 2026-08-24 — `enigami/comparability.py`. An `Effect` cannot be constructed
+  without provenance describing what was manipulated (condition, strength, vignette set or
+  vignette, elicitation format), and `compare` refuses to divide two effects whose manipulation
+  parameters differ unless the caller names the differing key as the intended contrast — in
+  which case the result is labelled as a comparison *of that key*, so an anchor-level contrast
+  cannot be written up as a deployment finding. Every effect this repo has measured is now
+  registered in `MEASURED` with its transcript, so comparators are looked up rather than
+  recalled, which is the specific failure that produced EN-37. Two regression tests, the first
+  of which attempts the exact EN-37 comparison and asserts the refusal names all three
+  undeclared differences. 44 tests.
+- **It invalidated a claim on its first use, which is the point.** Asked for the "one real
+  deployment gap" — the order effect, 14.8 bare-API against ~2 in-session — the comparator
+  refused. Even the sharpest version, restricted to the single `collision` vignette measured in
+  both settings (+14.8 vs +2.3, difference 12.5, SE 2.83, distinguishable), still varies the
+  **elicitation format**: the bare-API arm used schema-enforced structured output, the
+  in-session arm free text. Declaring that as the contrast makes the comparison one *about
+  elicitation*, not about deployment. So the repository's last standing deployment claim is
+  also unearned: what exists is a real, well-measured 12.5-point **discrepancy** whose cause is
+  unidentified, with elicitation format as live a candidate as anything about the harness.
+- **Corrected accordingly:** PLAYBOOK's order pattern and both README passages now say the
+  cause is not established and name elicitation explicitly; STATE no longer calls it a
+  deployment gap. The advice is unchanged, because it never depended on the cause.
+- **Verify:** attempting the EN-37 comparison raises and names the mismatches — met, and
+  covered by test.
 
 ### EN-35 ✨ Identify why the two deployments disagree, with a positive control — P1 — Todo
 
@@ -840,6 +854,21 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-24** — **The comparability guardrail invalidated the repo's last deployment claim on
+  its first use.** EN-38 was built because EN-37 divided an extreme-anchor effect by a
+  moderate-anchor figure; `enigami/comparability.py` now makes an effect impossible to construct
+  without provenance and makes `compare` refuse mismatched manipulations, labelling any declared
+  contrast so an anchor-level result cannot be written up as a deployment one. Chosen over the
+  EN-36 confound sweep deliberately: EN-36 *is* a cross-run comparison exercise, so running it
+  first would have meant running the highest-risk probe with the known safeguard missing. That
+  ordering paid immediately. Asked to compare the order effect across deployments — the claim
+  that survived EN-37 and that I had described as "the only real deployment gap" — the comparator
+  refused. Even narrowed to the single `collision` vignette measured in both settings (+14.8 vs
+  +2.3, difference 12.5, SE 2.83), the two arms still differ in elicitation format: schema-enforced
+  structured output versus free text. So what the repo actually has is a well-measured 12.5-point
+  **discrepancy** of unidentified cause, with elicitation as live a candidate as deployment — not
+  a deployment finding. Two claims retracted in one day, both by the repo's own machinery, and the
+  second retraction came from a tool built in response to the first.
 - **2026-08-24** — **The metered API turns out to be unnecessary for most of EN-35, and finding
   that out exposed a false claim published hours earlier.** Asked whether the API was really
   needed, the honest answer was no: of the five confounds reviewers raised for the

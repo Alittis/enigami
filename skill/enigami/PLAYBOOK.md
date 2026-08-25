@@ -24,9 +24,12 @@ and workflow changes; cite the numbers when explaining why.
    and do not budget a decision around a 10-point swing unless you are calling the bare API.
    Flag a spread ≥ 8 points on the 0–100 scale as worth investigating — in-session that now
    indicates an unstable *vignette* (one item here returned 15 and 65 on identical prompts)
-   more often than an order effect. Why the two deployments differ is **not established**:
-   the comparison is confounded with time, model snapshot, system prompt and tooling. See
-   `findings/order.presentation_order.md`.
+   more often than an order effect. **What causes the difference is not established, and it may
+   not be the deployment at all.** The sharpest available comparison — the same collision
+   vignette, +14.8 against +2.3 — still differs in how the answer was elicited
+   (schema-enforced number versus free text), so elicitation format is as live a candidate as
+   deployment. The repo's comparator refuses to call it a deployment result for that reason.
+   See `findings/order.presentation_order.md`.
 2. **Strip or flag unargued authority — the plausible ones, not the outrageous ones.** A
    *moderate* unargued authority assertion dragged judgment up to 16.7 points while being named
    in only 14 of 24 rationales: influence without disclosure. An *extreme* one (90%+) barely
