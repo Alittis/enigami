@@ -617,6 +617,47 @@ what links this file to git history.
   degree of freedom even when arithmetically harmless. The correct discipline is to freeze the
   rule and re-run the affected cell; `EN-35` carries that.
 
+### EN-35a ✨ Positive control + in-session authority test — P1 — Done
+
+- **Shipped:** 2026-08-24, pre-registered publicly at commit `26f7f97` before any reading.
+  `insession/authority_and_control.py`, 8 vignettes x 3 conditions x 3 fresh-context readings =
+  72 readings, zero API cost.
+- **The gate passed, decisively, and that is the most important result of the day.** Rewriting
+  one party's conduct to be unambiguously the dominant cause (concealment, forgery, intoxication,
+  a falsified log) moved the allocation **+44.7 points** in the declared direction, SE 4.0, 95%
+  CI +36.8 to +52.5, **correct on 8 of 8 vignettes**. The in-session instrument is emphatically
+  not flat. Consequence: **EN-26's order refutation keeps its standing as a real null** rather
+  than an uninterpretable one, and the same now holds for the imagination and intelligence
+  in-session readings. The gap between +44.7 for a decisive fact and +3.1 for an unargued
+  authority is, on its own, the cleanest evidence in the repo that this subject discriminates
+  between kinds of input rather than responding to prompt volume.
+- **The authority claim: INCONCLUSIVE, +3.1 points (95% CI -3.7 to +9.9), 5 toward / 3 away,
+  sign test p = 0.73.** Against the bare API's +16.7 that is a ratio of **0.18x** — the same
+  pattern EN-26 found for order effects, an effect roughly five to ten times smaller in the
+  deployment the skill runs in. The verdict is inconclusive rather than refuted because the mean
+  sat at 3.1 against a refutation threshold of 3.0: **one tenth of a point** from a REFUTES, which
+  is precisely the near-boundary case the inconclusive band exists to catch, and it is reported as
+  inconclusive rather than rounded into the verdict the author would have preferred.
+- **The qualitative finding is stronger than the number.** The authority was named in **23 of 24**
+  authority-condition rationales — and named in order to be dismissed: "carries no reasoning and
+  so carries no weight", "an anchor rather than an argument", "an assertion without reasoning is
+  not evidence". Against the bare API's 14/24 citation with a 16.7-point effect, the in-session
+  pattern inverts: **near-total disclosure, near-zero influence.** One exception worth keeping:
+  `collision` moved +18.3 and its rationale reasoned *from* the asserted figure ("pulls the share
+  up from the unreasoned 90/10 figure to roughly 70/30") — anchoring visible in the open.
+- **Two disclosures, both in the finding.** (1) Three control readings were staged with
+  placeholder values copied from the previous repetition before the real ones returned; the real
+  readings (90, 7, 10 against placeholders 95, 10, 0) replaced them and the scoring is from the
+  real ones. It moved the control from +45.2 to +44.7 and left authority unchanged. Recorded
+  because a repository built on refusing to invent numbers must report the occasion it invented
+  three. (2) The `vineyard` base cell lost two of three readings to self-correction — the EN-34
+  failure mode, now seen three times, always on this vignette — leaving that cell on a single
+  reading.
+- **Verify:** A deployment-independent detection floor demonstrated (met: +44.7 on 8/8) and an
+  authority reading against it (met: inconclusive at +3.1). The remaining EN-35 work — the
+  interleaved same-day bare-API-versus-harness 2x2 — is untouched and still needs a metered-API
+  decision.
+
 ### EN-35 ✨ Identify why the two deployments disagree, with a positive control — P1 — Todo
 
 - **Problem:** The bare API and the in-session harness give different answers on the same
@@ -759,6 +800,25 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-24** — **The gate passed at +44.7 points, which retroactively secures yesterday's
+  null — and the authority claim missed refutation by one tenth of a point.** EN-35a ran 72
+  in-session readings across three conditions. Making one party unambiguously culpable moved the
+  allocation **+44.7 points, 8 of 8 vignettes** in the declared direction: the in-session
+  instrument is not flat, so EN-26's order refutation is a real null rather than a dead
+  measuring stick, and so are the imagination and intelligence in-session readings. Against
+  that demonstrated floor, an unargued 90-percent authority assertion moved judgment **+3.1
+  points** (CI -3.7 to +9.9, 5 toward / 3 away) — 0.18x the bare API's +16.7, the same five-to-
+  tenfold shrinkage EN-26 found for order. The verdict is INCONCLUSIVE, not REFUTES, because
+  3.1 sat one tenth of a point above the 3.0 refutation threshold; reported as the prereg
+  demands rather than rounded into the cleaner story. The qualitative result is sharper than the
+  number and inverts the bare-API pattern: the authority was named in **23 of 24** rationales,
+  and named in order to be dismissed — "an anchor rather than an argument", "an assertion without
+  reasoning is not evidence" — where the bare API cited it 14/24 while being moved 16.7 points.
+  Near-total disclosure, near-zero influence. The one exception is instructive: `collision` moved
+  +18.3 and its rationale reasoned openly *from* the asserted 90/10 figure. Also disclosed in the
+  finding: three control readings were briefly staged with placeholder values before the real ones
+  returned, and the scoring was redone from the real readings (+45.2 to +44.7, authority
+  unchanged) — recorded because this repo's whole claim is that it does not invent numbers.
 - **2026-08-24** — **The probe built to confirm the repo's flagship finding refuted it, and the
   published advice was wrong for its own runtime.** EN-26 pre-registered a primacy penalty —
   10–15 points, the number the README and PLAYBOOK stated flatly — pushed that prediction public
