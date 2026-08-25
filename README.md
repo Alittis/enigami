@@ -61,7 +61,7 @@ Most prompting advice is folklore: someone's habit, repeated. Three things separ
 ## Install
 
 ```bash
-git clone <this-repo>            # replace with the repository URL
+git clone https://github.com/Alittis/enigami.git
 mkdir -p ~/.claude/skills
 ln -s "$(pwd)/enigami/skill/enigami" ~/.claude/skills/enigami
 ```
