@@ -8,7 +8,7 @@
   "openQuestions": [
     "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-24. The in-session instrument is proven movable (+44.7 pts for a decisive fact, 8/8), which retroactively secures EN-26's order null and the other in-session readings. Two playbook claims are now measured in-session and both shrink by 5-10x versus the bare API: order 10-15 -> ~2, authority 16.7 -> ~3. Working hypothesis worth testing: the in-session subject discounts rhetorical/positional pressure while tracking decisive facts harder. Untested playbook claims remaining in-session: facts-forward (partly evidenced now by the +44.7 control), sympathy-inert, creativity discard-first-idea. Open: EN-35 interleaved bare-API-vs-harness 2x2 (needs a metered-API decision), EN-3 sycophancy (needs multi-turn), EN-4, EN-5, EN-7, EN-8. Read findings/order.authority_and_control.md first.",
+  "nextStep": "STATE AS OF 2026-08-24. No metered API needed: the scorer confound is ruled out for free, and prompt template / instruction density / effort are in-session variables; only the system prompt and model snapshot would need the API, and neither matters for a product that runs in-session. Standing: the in-session instrument moves +44.7 pts for a decisive fact (8/8), so in-session nulls are real. The ONLY measured deployment gap is the order effect (14.8 bare-API vs 2.3 in-session); authority shows no gap once anchors are matched (EN-37). Next: EN-36 in-session confound sweep (free) to test whether the order gap is caused by prompt template, instruction density or effort; EN-38 comparator provenance guardrail; then EN-3 sycophancy, EN-4, EN-5. Read findings/order.authority_and_control.md including its dated correction.",
   "repo": {
     "remote": "https://github.com/Alittis/enigami.git",
     "visibility": "public (decided)",
@@ -114,7 +114,7 @@
     "wisdom.reframing_invariance": "v3 inconclusive, SURVIVED 3/3 at 0.60 - facts dominate 4/4 (12 straight right-direction), sympathy inert, extreme authority named 23/24 and resisted; blocker is the twice-replicated order-swap effect (+14.8 on mid-scale base), promoted to EN-26",
     "intelligence.isomorph_transfer": "SUPPORTS, survived 3/3 at 0.75 - 100% famous / 100% isomorph, gap 0.0, zero famous-answer intrusions; method transfers; successor construct: method-derivation vs method-retrieval",
     "order.presentation_order": "REFUTES its own pre-registered primacy hypothesis, survived review 3/3 (0.80/0.75/0.80) - mean order effect +0.08 pts (CI -3.4..+3.6) in-session vs +14.8 bare-API on the same vignette; post-hoc +1.74 (CI +0.31..+3.18) excluding one bimodal vignette. Direction right, magnitude out by ~10x. Deployment attribution NOT established (EN-35). Downstream: PLAYBOOK, README and scorecard baseline corrected.",
-    "order.authority_and_control": "GATE PASSED +44.7 pts on 8/8 (instrument is not flat - this secures EN-26's null and the other in-session readings). Authority INCONCLUSIVE at +3.1 (CI -3.7..+9.9), 0.18x the bare-API 16.7; named in 23/24 rationales and dismissed in them. Missed REFUTES by 0.1 pt."
+    "order.authority_and_control": "GATE PASSED +44.7 pts on 8/8 (instrument not flat; secures EN-26's null). Authority INCONCLUSIVE at +3.1 vs bare-API +5.1 on MATCHED extreme anchors - indistinguishable, NO deployment gap (EN-37 corrected an earlier invalid comparison against a moderate-anchor +16.7). Authority named in 23/24 rationales and dismissed in them."
   },
   "pivot": {
     "date": "2026-08-23",

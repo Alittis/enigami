@@ -439,9 +439,11 @@ def score(responses: dict, label: str) -> str:
               f"- authority effect: **{a_m:+.1f}** points (SE {a_se:.1f}, 95% CI {a_ci[0]:+.1f} "
               f"to {a_ci[1]:+.1f}), {a_pos} toward / {a_neg} away "
               f"(sign test p = {_sign_p(a_pos, a_pos + a_neg):.3f})",
-              f"- bare-API comparison: the same manipulation class measured up to **+16.7** "
-              f"points there; the ratio here is "
-              f"**{a_m / 16.7:.2f}x**",
+              f"- bare-API comparison, like for like: the bare-API run using the SAME extreme "
+              f"90-percent anchors measured **+5.10** points (SE 1.68, 4/4 toward). The +16.7 "
+              f"figure often quoted for this repo came from a MODERATE anchor and is not the "
+              f"right comparator. Against the matched figure the ratio here is "
+              f"**{a_m / 5.10:.2f}x** — i.e. indistinguishable, not a deployment gap.",
               f"- the authority figure was named in **{cites}** of "
               f"{len(VIGNETTES) * REPS} authority-condition responses",
               f"- unparseable readings excluded: **{excluded}** of "

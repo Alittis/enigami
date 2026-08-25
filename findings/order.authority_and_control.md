@@ -29,7 +29,7 @@ The positive control — one party's conduct rewritten to be unambiguously the d
 
 - positive control: **+44.7** points (SE 4.0), correct direction 8/8 — gate threshold was 15 points and 6 of 8
 - authority effect: **+3.1** points (SE 3.5, 95% CI -3.7 to +9.9), 5 toward / 3 away (sign test p = 0.727)
-- bare-API comparison: the same manipulation class measured up to **+16.7** points there; the ratio here is **0.18x**
+- bare-API comparison, like for like: the bare-API run using the SAME extreme 90-percent anchors measured **+5.10** points (SE 1.68, 4/4 toward). The +16.7 figure often quoted for this repo came from a MODERATE anchor and is not the right comparator. Against the matched figure the ratio here is **0.60x** — i.e. indistinguishable, not a deployment gap.
 - the authority figure was named in **23** of 24 authority-condition responses
 - unparseable readings excluded: **2** of 72
 
@@ -63,3 +63,18 @@ whose entire claim is that it refuses to invent numbers has to report the time i
 stated a number, noticed it contradicted their own reasoning, and stated the opposite — the same
 failure mode that produced `EN-34`, now seen three times and always on this vignette pair. The
 cell rests on a single reading, which is why `vineyard`'s row shows `[60]`.
+
+**Correction, 2026-08-24, made hours after this finding was first written.** The first version of
+this finding compared its +3.1 result against +16.7 and reported a "0.18x" ratio, presenting it
+as evidence that authority influence shrinks between deployments the way the order effect does.
+That comparison was invalid. The +16.7 figure came from a bare-API run using a **moderate**
+authority anchor; this probe deliberately used **extreme** 90-percent anchors, having recorded
+earlier that extreme anchors are resisted while moderate ones move judgment more. Compared like
+for like — extreme anchors against extreme anchors — the bare-API run measured **+5.10 points
+(SE 1.68, 4 of 4 toward)** against this run's **+3.1 (SE 3.5, 5 of 8 toward)**. Those are
+indistinguishable. **There is no evidence here of a deployment difference in authority
+influence, and the earlier claim of a "same 5-10x shrinkage as the order effect" was an artifact
+of comparing two different manipulations.** The order-effect discrepancy (14.8 bare-API versus
+2.3 in-session, same vignette, same manipulation) stands as the only deployment gap this
+repository has actually measured. Found by re-reading the bare-API transcript while answering a
+question about whether metered-API work was still necessary.

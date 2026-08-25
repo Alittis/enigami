@@ -658,6 +658,46 @@ what links this file to git history.
   interleaved same-day bare-API-versus-harness 2x2 — is untouched and still needs a metered-API
   decision.
 
+### EN-37 🐞 A published comparison mixed two different manipulations — P1 — Done
+
+- **Problem:** EN-35a reported its +3.1-point authority effect against "+16.7 bare-API" and
+  called the ratio 0.18x, presenting it as a second instance of the deployment shrinkage EN-26
+  found for order effects. The comparison was invalid. The +16.7 came from a bare-API run using a
+  **moderate** authority anchor; EN-35a deliberately used **extreme** 90-percent anchors,
+  because the repo had already recorded that extreme anchors are resisted while moderate ones
+  move judgment more. Comparing like for like, the bare-API run with the same extreme anchors
+  measured **+5.10 points (SE 1.68, 4/4 toward)** against in-session **+3.1 (SE 3.5, 5/8
+  toward)** — indistinguishable.
+- **Consequence, stated plainly:** there is no evidence of a deployment difference in authority
+  influence, and the "two independent claims, same 5-10x shrinkage" pattern reported hours
+  earlier does not exist. **The order effect (14.8 bare-API vs 2.3 in-session, same vignette,
+  same manipulation) remains the only deployment gap this repository has measured.**
+- **Shipped:** 2026-08-24 — the probe's own comparator line now cites the matched-anchor figure
+  and states there is no gap; the finding carries a dated correction naming the error; PLAYBOOK's
+  authority pattern is rewritten so the danger is identified as the *credible* unargued claim
+  (16.7 pts, disclosed in under half the rationales) rather than the extreme one, and explicitly
+  notes no deployment difference; the scorecard baseline the skill prints is rebuilt around the
+  +45-point fact effect instead.
+- **How it was caught:** while answering the user's question "do you really need the metered
+  API?", re-reading the bare-API transcript to see which confounds could be tested for free. The
+  same reading that ruled out the scorer confound exposed the error. The lesson is uncomfortable
+  and worth keeping: the error survived a pre-registered design, a passing gate, and a written
+  finding, and was caught only by going back to the raw transcript to answer an unrelated
+  question. Nothing in the harness compares manipulations for comparability — `EN-38`.
+
+### EN-38 ✨ Nothing checks that a cross-run comparison is like-for-like — P2 — Todo
+
+- **Problem:** EN-37 happened because a comparator was chosen by recall ("the authority effect
+  was 16.7") rather than by matching the manipulation. The harness enforces pre-registration,
+  blind scoring, calibrated review and verdict bands, and none of them look at whether two
+  numbers being divided describe the same intervention.
+- **Want:** Cross-run comparisons carry machine-checkable provenance — the manipulation's
+  parameters (anchor level, direction, vignette set, condition name) recorded alongside every
+  effect, and a comparator helper that refuses to divide two effects whose parameters differ,
+  or flags the mismatch in the output.
+- **Verify:** Attempting to compare the moderate-anchor and extreme-anchor authority effects
+  raises or prints a mismatch warning rather than a ratio.
+
 ### EN-35 ✨ Identify why the two deployments disagree, with a positive control — P1 — Todo
 
 - **Problem:** The bare API and the in-session harness give different answers on the same
@@ -800,6 +840,23 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-24** — **The metered API turns out to be unnecessary for most of EN-35, and finding
+  that out exposed a false claim published hours earlier.** Asked whether the API was really
+  needed, the honest answer was no: of the five confounds reviewers raised for the
+  deployment gap, the scorer is ruled out for free (the bare-API arm used schema-enforced
+  structured output and had no text parser at all, while the in-session parser dropped 1 of 48
+  and 2 of 72 readings — far too few to manufacture a 12-point gap), and prompt template,
+  instruction density and effort are all in-session variables. Only the system prompt itself and
+  the model snapshot need the API, and for the product neither matters: the skill runs
+  in-session, so the in-session number is the number. But the same transcript re-reading showed
+  that EN-35a's headline comparison was invalid: its +3.1 extreme-anchor result had been divided
+  by +16.7, a **moderate**-anchor figure. Matched extreme-to-extreme, the bare API gives +5.1
+  (SE 1.68) against in-session +3.1 (SE 3.5) — indistinguishable. So the "two claims, same
+  5-10x deployment shrinkage" pattern does not exist, and the order effect remains the only
+  measured deployment gap. Corrected in the probe, the finding, PLAYBOOK and the scorecard
+  baseline (EN-37); the missing guardrail is filed as EN-38. Sobering detail: the error passed
+  a pre-registration, a passing gate and a written finding, and was caught only by returning to
+  the raw transcript for an unrelated reason.
 - **2026-08-24** — **The gate passed at +44.7 points, which retroactively secures yesterday's
   null — and the authority claim missed refutation by one tenth of a point.** EN-35a ran 72
   in-session readings across three conditions. Making one party unambiguously culpable moved the

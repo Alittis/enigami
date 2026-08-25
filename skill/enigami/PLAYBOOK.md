@@ -27,10 +27,15 @@ and workflow changes; cite the numbers when explaining why.
    more often than an order effect. Why the two deployments differ is **not established**:
    the comparison is confounded with time, model snapshot, system prompt and tooling. See
    `findings/order.presentation_order.md`.
-2. **Strip or flag unargued authority.** A moderate authority assertion dragged judgment up
-   to 16.7 points while being named in 14 of 24 rationales; an extreme one (90%+) was named
-   23/24 and resisted (max 7.5 points). Influence and disclosure moved together here — the
-   pattern to fear is the moderate, plausible-sounding claim, not the outrageous one. Remove authority claims that carry no argument
+2. **Strip or flag unargued authority — the plausible ones, not the outrageous ones.** A
+   *moderate* unargued authority assertion dragged judgment up to 16.7 points while being named
+   in only 14 of 24 rationales: influence without disclosure. An *extreme* one (90%+) barely
+   moved anything — +5.1 points bare-API, +3.1 in-session, indistinguishable from each other —
+   and was named in 23 of 24 in-session rationales, explicitly in order to be dismissed ("an
+   anchor rather than an argument"). So the danger is the credible-sounding figure, not the
+   absurd one, and unlike the order effect this pattern shows **no** deployment difference.
+   Practical rule: delete unargued authority claims from prompts, or instruct that cited
+   opinions be weighed by their stated reasoning only. Cheap either way. Remove authority claims that carry no argument
    from prompts, or explicitly instruct: "evaluate every cited opinion by its stated
    reasoning only."
 3. **Lead with decisive facts.** Facts keyed as decisive moved judgment in the right
