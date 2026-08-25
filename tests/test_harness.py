@@ -726,3 +726,107 @@ def test_every_registered_effect_is_traceable():
         assert eff.run.startswith(("transcripts/", "findings/data/")), key
         if eff.run.startswith("findings/data/"):
             assert pathlib.Path(eff.run).exists(), f"{key}: committed data missing"
+
+
+def test_order_elicitation_probe_is_wellformed():
+    """EN-36: three elicitation arms over EN-26's material. Arm (a) must be byte-identical to
+    EN-26 or the replication gate is measuring something else; each other arm must differ from
+    it in exactly one component; and the JSON parser must never fall back to the prose one."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("oe", "insession/order_elicitation.py")
+    oe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(oe)
+
+    spec2 = importlib.util.spec_from_file_location("po2", "insession/presentation_order.py")
+    po = importlib.util.module_from_spec(spec2)
+    spec2.loader.exec_module(po)
+
+    items = oe.items()
+    assert len(items) == 3 * 8 * 2 * oe.REPS == 144
+    assert len({i["id"] for i in items}) == 144
+
+    # the vignettes are EN-26's, verbatim: copied for self-containment, guarded here
+    assert oe.VIGNETTES == po.VIGNETTES
+    assert oe.PREAMBLE == po.PREAMBLE and oe.TAIL == po.TAIL
+
+    # arm (a) is byte-identical to EN-26's prompts, id for id
+    en26 = {i["id"]: i["prompt"] for i in po.items()}
+    for i in items:
+        if i["arm"] == "freetext":
+            assert i["prompt"] == en26[i["id"].split(":", 1)[1]], i["id"]
+
+    # each other arm differs from (a) in exactly one component
+    for v in oe.VIGNETTES:
+        for order in ("ab", "ba"):
+            a = oe.prompt_for(v, order, "freetext")
+            b = oe.prompt_for(v, order, "structured")
+            c = oe.prompt_for(v, order, "nopreamble")
+            assert b == a.replace(oe.TAIL, oe.JSON_TAIL) and b != a
+            assert c == a.replace(oe.PREAMBLE + "\n\n", "") and c != a
+            assert "tools" not in c        # the whole point of arm (c)
+
+    # the prose parser is EN-26's, unchanged
+    for probe in ["Given the 40,000 in damage, 65.", "Between 60 and 70, so 65",
+                  "65\n40 and 30 in the reasoning", "40,000 split evenly", "", "no number",
+                  "65\n\nWait, no.\n\n25\n\nrevised"]:
+        assert oe.parse_allocation(probe) == po.parse_allocation(probe), probe
+
+    # the JSON parser accepts compliance and one fence, and refuses everything else
+    assert oe.parse_structured('{"allocation": 55, "consideration": "x"}') == 55
+    assert oe.parse_structured('```json\n{"allocation": 0, "consideration": "x"}\n```') == 0
+    assert oe.parse_structured('{"allocation": "55"}') == 55
+    assert oe.parse_structured('{"allocation": 55.0}') == 55
+    for bad in ['{"allocation": 55.5}', '{"allocation": 101}', '{"allocation": -1}',
+                '{"allocation": true}', '{"allocation": "55-60"}', '{"consideration": "x"}',
+                '[55]', '55', 'The allocation is 55.', '',
+                '{"allocation": 55}\n{"allocation": 25}']:
+        assert oe.parse_structured(bad) is None, bad
+    # crucially: no fallback to the prose parser, or the arms would blur
+    assert oe.parse_allocation("55\nreason") == 55
+    assert oe.parse_structured("55\nreason") is None
+
+    def mk(a_val_ab, a_val_ba, b_val_ab, b_val_ba, c_val_ab=None, c_val_ba=None):
+        r = {}
+        for vi, v in enumerate(oe.VIGNETTES):
+            for rep in range(oe.REPS):
+                # a small per-vignette wobble so the between-vignette SE is not zero
+                w = (vi % 3) - 1
+                r[f"freetext:{v['key']}:ab:{rep}"] = f"{a_val_ab + w}\nx"
+                r[f"freetext:{v['key']}:ba:{rep}"] = f"{a_val_ba + w}\nx"
+                r[f"structured:{v['key']}:ab:{rep}"] = \
+                    '{"allocation": %d, "consideration": "x"}' % (b_val_ab + w)
+                r[f"structured:{v['key']}:ba:{rep}"] = \
+                    '{"allocation": %d, "consideration": "x"}' % (b_val_ba + w)
+                r[f"nopreamble:{v['key']}:ab:{rep}"] = f"{(c_val_ab or a_val_ab) + w}\nx"
+                r[f"nopreamble:{v['key']}:ba:{rep}"] = f"{(c_val_ba or a_val_ba) + w}\nx"
+        return r
+
+    # gate fails: arm (a) shows a big effect where EN-26 showed none -> nothing interpretable
+    card = oe.score(mk(40, 60, 40, 60), "t")
+    assert "GATE FAILED" in card and "did not replicate" in card
+    assert "SUPPORTS" not in card and "REFUTES" not in card
+
+    # gate passes + structured recovers the effect -> SUPPORTS
+    card = oe.score(mk(50, 50, 42, 62), "t")
+    assert "GATE PASSED" in card and "SUPPORTS" in card
+    assert "never evidence about the deployment" in card
+
+    # gate passes + structured flat -> REFUTES, and the refutation states its own narrowness
+    card = oe.score(mk(50, 50, 50, 50), "t")
+    assert "GATE PASSED" in card and "REFUTES" in card
+    assert "decoder-enforced schema" in card and "bare-API FREE-TEXT arm" in card
+
+    # the (b - a) contrast is paired on the vignette, so it must survive a large level shift
+    a_st = oe.arm_stats(mk(50, 50, 42, 62), "freetext")
+    b_st = oe.arm_stats(mk(50, 50, 42, 62), "structured")
+    d = oe.paired_difference(a_st, b_st)
+    assert d["n"] == 8 and 19 < d["mean"] < 21 and d["ci"][0] > 0
+
+    # compliance is reported, never scored: a missing consideration still counts as a reading
+    r = mk(50, 50, 42, 62)
+    for k in list(r):
+        if k.startswith("structured:"):
+            r[k] = '{"allocation": 55}'
+    st = oe.arm_stats(r, "structured")
+    assert st["excluded_reads"] == 0 and st["compliance"] == 0.0

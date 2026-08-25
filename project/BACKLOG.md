@@ -712,7 +712,7 @@ what links this file to git history.
 - **Verify:** attempting the EN-37 comparison raises and names the mismatches — met, and
   covered by test.
 
-### EN-36 ✨ Is the order discrepancy about deployment, or about how the answer is elicited? — P1 — Todo
+### EN-36 ✨ Is the order discrepancy about deployment, or about how the answer is elicited? — P1 — Doing
 
 - **Problem:** The repo has one large, well-measured discrepancy left: presentation order moved
   the `collision` allocation **+14.8 (SE 2.1)** in the bare-API run and **+2.3 (SE 1.9)**
@@ -748,6 +748,24 @@ what links this file to git history.
 - **Verify:** every new effect registered in `MEASURED` with `elicitation` recorded, and the
   arm-(b)-versus-bare-API comparison passing `compare()` with **no** undeclared contrast — which
   is only possible if elicitation now matches. That is the whole point of the design.
+- **Discussion, 2026-08-25 (written with the pre-registration, before any reading):** the
+  acceptance test above is **not achievable, and asserting it would be the EN-37 mistake in a
+  new costume.** Arm (b) can only ask for a JSON object in prose; a subagent has no
+  `output_config`, so the decoder is unconstrained, while the bare-API effect came from a
+  schema-enforced decode via `Subject.parse`. Recording both as the same `elicitation` value to
+  make `compare()` pass would be declaring two different manipulations identical for the
+  convenience of a comparison — exactly what `comparability.py` exists to stop. So arm (b) is
+  registered as `elicitation: "structured-json-prompted"`, the comparison against
+  `order.bare-api.collision` is expected to be **refused** without
+  `contrast=("elicitation",)`, and the refusal is reported rather than engineered away. The
+  consequence is pre-registered as an asymmetry in what the arms can conclude: a positive result
+  in (b) settles the question (asking is enough, so deployment is exonerated), while a null in
+  (b) rules out prompted structuring only and leaves decoder-enforced structuring untested in
+  this deployment. In that case the cheapest next step is not EN-35's 2x2 but a bare-API
+  **free-text** arm on these same eight vignettes, which isolates deployment using only what the
+  API can already do. Replaces the acceptance test with: arm (a) reproduces EN-26 (a gate that
+  can fail the run), every effect registered with its `elicitation` recorded, and the paired
+  (b − a) contrast reported with its interval.
 
 ### EN-35 ✨ Identify why the two deployments disagree, with a positive control — P1 — Todo
 
