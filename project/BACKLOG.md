@@ -535,6 +535,35 @@ what links this file to git history.
   the recorded runs; battery still 26 items and standard-library-only; no work-domain string or
   local path.
 
+### EN-33 🔧 README had the findings but not the translation — P2 — Done
+
+- **Problem:** The skill-first restructure (EN-32) fixed the order of the public README but not
+  its register. A grep confirmed the gap: zero worked examples, zero concrete stakes, no
+  plain-language reason to trust it over prompting folklore — while the page used `p ≈ 1e-11`,
+  "leakage baseline", "separation gap", "fsynced" and "mtimes". The facts were ~70% present and
+  the translation entirely absent, so a visitor skimming for ten seconds could not extract what
+  the skill would do for them. The honest caveats had the mirror problem: all present, but
+  scattered across five places, so no reader ever met them as a summary.
+- **Shipped:** 2026-08-23 — two sections added, no technical detail removed. **"Why you'd want
+  this"** opens with the flagship finding rendered as stakes: on a 40,000 two-party dispute,
+  changing only which party is described first moves the answer 10–15 points, about 5,000 of
+  pure arbitrariness, invisible from any single reply because each reply is well argued. Then
+  the same treatment for the unargued-authority effect, the discard-your-first-idea line, and
+  verbatim rule restatement — plus a "why trust this over the usual prompting tips" trio:
+  predictions locked before the run, an anonymised reviewer that killed flattering results, and
+  two probes published as no-verdict. **"Honest limits"** consolidates the caveats: one model on
+  one day, screening not study, order effects solid while wisdom overall is promising-not-proven,
+  reliability as "we couldn't make it fail", public items and contamination, and the
+  judge-is-a-Claude-model caveat.
+- **Self-audit caught one imprecision before commit:** the draft claimed "two of the four
+  capacities came back no verdict", but intelligence holds both a no-verdict probe
+  (`calibration`) and a supporting one (`isomorph_transfer`), so the capacity is not wholly
+  unmeasured. Corrected to "two of the five probes", which is exactly what the record shows.
+- **Verify:** Every number in the new sections re-derived from the recorded runs — the collision
+  order effect is 14.8 points, i.e. 5,920 of 40,000, so "10–15 points / roughly 5,000" is
+  conservative; ideas 7→8 and themes 3→5; invented-rule adherence 92%; sympathy max 6.7;
+  authority 16.7 stated as "up to 17". All seven internal links resolve; 40 tests pass.
+
 ### EN-26 ✨ Presentation order moves judgment — measure it as the phenomenon — P2 — Todo
 
 - **Problem:** Twice-replicated across independent designs and dilemmas: the order in which two

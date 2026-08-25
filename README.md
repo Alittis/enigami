@@ -13,6 +13,51 @@ prompting.
 
 ---
 
+## Why you'd want this
+
+Claude has a few specific, measurable blind spots. This skill knows what they are, fixes them in
+your prompts, and can show you which ones apply to your own setup.
+
+Here is one, with real stakes. Suppose you ask Claude how two neighbours should split a €40,000
+flood-repair bill. Ask it twice, changing nothing but **which neighbour you describe first**, and
+the answer moves by 10–15 points out of 100 — roughly **€5,000 of pure arbitrariness**. The
+neighbour introduced first tends to be judged more harshly. You would never catch this from a
+single reply, because each reply is careful, well-argued and sounds entirely reasonable.
+
+So the skill tells you: ask in both orders, average, and treat a wide gap as a warning. That is
+the whole shape of the thing — small prompt changes, each one attached to a number that was
+measured rather than guessed.
+
+A few more of the same kind:
+
+- An expert opinion in your prompt that carries **no reasoning** ("the assessor thinks it's her
+  fault") shifted judgment by up to 17 points — and Claude often didn't cite it when explaining
+  itself. Influence you can't see. Cut those lines, or ask for them to be weighed by their
+  reasoning alone.
+- **"Discard your first idea, and your second"** — one sentence — took a creative test from 7
+  distinct ideas to 8, and from 3 thematic directions to 5. Claude's default output is narrower
+  than what it can actually reach.
+- If your work depends on an unusual rule — a house style, a client's constraint, a fictional
+  world — **restate it word for word in the prompt**. With the rule present, Claude followed an
+  invented rule on 92% of questions, several reasoning steps downstream.
+- A sympathetic backstory about one party barely moved anything. Neither worth adding nor worth
+  fearing.
+
+### Why trust this over the usual prompting tips
+
+Most prompting advice is folklore: someone's habit, repeated. Three things separate this:
+
+1. **Every prediction was written down and locked before the test ran**, so nothing could be
+   quietly adjusted after seeing the result.
+2. **Every finding was attacked by a reviewer that didn't know it was grading Claude** — model
+   and vendor names scrubbed, three independent passes, majority decides. It killed several
+   results outright, including flattering ones.
+3. **Two of the five probes came back "no verdict"** and are published that way. A tool
+   willing to say *we couldn't measure this* is a tool you can believe when it does claim
+   something.
+
+---
+
 ## Install
 
 ```bash
@@ -147,6 +192,30 @@ what the reviewer said about it, then which reviewer version said it.
 **`REFUTES` means the pre-registered hypothesis failed.** That is the most valuable output this
 repo produces, and probes are not adjusted because they refuted. Several here did, and the
 corrections are in the backlog with the numbers that forced them.
+
+---
+
+## Honest limits
+
+Collected in one place rather than scattered, because they matter as much as the findings:
+
+- **The numbers come from one model on one day** — Claude Opus 5, 23 August 2026. On any other
+  model or date treat them as starting assumptions, not facts about your setup. That is exactly
+  what `/enigami eval` is for.
+- **The eval is a screening check, not a study.** 26 items, small samples per measurement. It
+  will show you a large effect and will miss a small one, and the scorecard says so on its face.
+- **Order effects are the solid finding.** The wisdom result overall is promising rather than
+  proven: decisive facts dominated on 3 of 4 dilemmas, but the fourth is blocked by the very
+  order effect above, so the probe reports *inconclusive* and names the reason.
+- **On reliability, the honest answer is "we couldn't make it fail."** Three separate attempts —
+  brutal arithmetic, near-miss trick questions, re-skinned famous puzzles — all came back at
+  100%. Good news about the model; it also means the confidence-calibration measurement has no
+  errors to work with at full effort, so that module reads reliability rather than calibration.
+- **The battery items are public**, sitting in this repo. Models trained after publication may
+  have seen them, so discount ceiling results accordingly; `--custom` lets you supply private
+  items instead.
+- **The judge is a Claude model too.** It grades blind — no condition labels, no provenance — but
+  it is not an independent instrument, and every judged finding carries that caveat.
 
 ---
 
