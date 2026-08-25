@@ -23,13 +23,19 @@ and workflow changes; cite the numbers when explaining why.
    a consistent direction is real and free to remove. But do not expect it to change an answer,
    and do not budget a decision around a 10-point swing unless you are calling the bare API.
    Flag a spread ≥ 8 points on the 0–100 scale as worth investigating — in-session that now
-   indicates an unstable *vignette* (one item here returned 15 and 65 on identical prompts)
-   more often than an order effect. **What causes the difference is not established, and it may
-   not be the deployment at all.** The sharpest available comparison — the same collision
-   vignette, +14.8 against +2.3 — still differs in how the answer was elicited
-   (schema-enforced number versus free text), so elicitation format is as live a candidate as
-   deployment. The repo's comparator refuses to call it a deployment result for that reason.
-   See `findings/order.presentation_order.md`.
+   indicates an unstable *reading* more often than an order effect, and see item 5 below for
+   why. **What causes the difference is still not established, but one candidate is now
+   eliminated.** A 144-reading follow-up (EN-36) varied only the elicitation format in one
+   deployment. Asking for a strict JSON number instead of a number in prose did not recover the
+   bare-API figure — it landed at −1.7 on `collision`, 16.5 points on the *far* side of +14.8.
+   So prompt-instructed structuring is not the explanation. Deployment and the lab's
+   decoder-enforced schema both remain open.
+
+   **Treat the in-session +0.08 as provisional.** The same run re-took EN-26's 48 readings with
+   byte-identical prompts and did not reproduce them (−7.67, CI −25 to +10): six readings
+   collapsed to the scale floor where EN-26 had none. The direction advice above stands; the
+   precision behind it does not survive a session change. See
+   `findings/order.presentation_order.md` and `findings/order.elicitation_format.md`.
 2. **Strip or flag unargued authority — the plausible ones, not the outrageous ones.** A
    *moderate* unargued authority assertion dragged judgment up to 16.7 points while being named
    in only 14 of 24 rationales: influence without disclosure. An *extreme* one (90%+) barely
@@ -99,3 +105,13 @@ and workflow changes; cite the numbers when explaining why.
 4. **Confidence style note.** On trick-adjacent items the subject shaved confidence (0.976 →
    0.959) while staying correct — the number moves in the right direction; treat small dips
    as a signal to look twice.
+5. **Ask for a number inside a JSON object, not as "the number on the first line".** The
+   strongest measured effect in this repository on the *reliability* of an elicited judgment.
+   Same subject, same eight questions, same hour, 48 readings each: prose elicitation produced
+   a within-cell noise floor of **13.59** points on a 0–100 scale and **6 of 48** readings
+   collapsed to the scale floor; `{"allocation": <int>, "consideration": "..."}` produced a
+   noise floor of **2.13**, **0 of 48** floor collapses, and 100% format compliance. Both
+   formats ask for the number before the reasoning; only the prose one sometimes emits a number
+   its own following sentence then argues against — twice the response said so itself ("the
+   number above is the answer the format forces rather than the one the facts support"). If a
+   numeric judgment matters, ask for it as a JSON field. `findings/order.elicitation_format.md`.

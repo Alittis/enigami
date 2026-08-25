@@ -29,11 +29,22 @@ place this skill actually runs — **refuted it**: mean effect 0.08 points, and 
 once one unstable vignette is set aside. The direction was right; the size was out by roughly a
 factor of ten, in that setting. So the advice survives in weaker form (ask in both orders when
 two calls are cheap; expect a nudge, not a swing) and the headline number is now scoped to where
-it was measured. Why the two settings differ is still open — the comparison also varies how the
-answer is elicited, so that is as likely a cause as the setting itself, and the repo's own
-comparator refuses to call it settled. That is the shape of the thing: small prompt changes, each
-attached to a number that was measured rather than guessed — re-measured until it stopped
-flattering us, and re-measured again when the comparison itself turned out to be sloppy.
+it was measured. Why the two settings differ is still open, but one suspect has been cleared and
+a worse problem found in its place. A 144-reading follow-up varied only *how the answer was
+asked for*: a strict JSON number instead of a number in prose. It did not recover the big
+figure — it landed on the far side of it. What it did find was that the same 48 readings, taken
+again with byte-identical prompts, **would not reproduce**: six of them collapsed to the bottom
+of the scale, where the first run had none, and twice the reply said so in its own words — "the
+number above is the answer the format forces rather than the one the facts support." Ask for the
+number inside a JSON object and that never happened once, with a noise floor six times tighter.
+
+So the honest state is: the order advice survives in direction, the in-session precision behind
+it does not survive a change of session, and the most useful thing the follow-up produced was a
+finding nobody set out to look for — *how* you ask for a number changes how reliably you get the
+one the reasoning supports. That is the shape of the thing: small prompt changes, each attached
+to a number that was measured rather than guessed — re-measured until it stopped flattering us,
+re-measured again when the comparison turned out to be sloppy, and re-measured a third time when
+the instrument itself turned out to be the story.
 
 A few more of the same kind:
 
@@ -102,14 +113,20 @@ The load-bearing ones, with the measurement behind each:
   worse. A dedicated 48-reading probe run in-session refuted that magnitude (mean +0.08 points,
   CI −3.4 to +3.6; ~+1.7 excluding one bimodal vignette), so the effect is real in direction and
   roughly ten times smaller here than the earlier figure. What causes the difference is **not**
-  established: the sharpest comparison available also varies the elicitation format, so that is
-  as live a candidate as the deployment.
+  established, but elicitation format has now been tested and eliminated: asking for a strict
+  JSON number moved the `collision` reading to −1.7, further from +14.8 rather than closer. That
+  same run also failed to reproduce the +0.08 with byte-identical prompts, so treat the
+  in-session precision as provisional.
 - **Strip authority claims that carry no argument.** A *moderate* one dragged judgment up to
   16.7 points while being named in under half the rationales — influence you cannot see. An
   *extreme* one (90%+) barely moved anything and was named in 23 of 24 in-session rationales,
   explicitly in order to be dismissed. The credible-sounding figure is the dangerous one. Unlike
   the order effect, this pattern shows **no** deployment difference: +5.1 bare-API against +3.1
   in-session on matched anchors.
+- **Ask for a number inside a JSON object, not as "the number on the first line".** 48 readings
+  each, same subject and hour: prose elicitation had a 13.6-point noise floor on a 0–100 scale
+  and 6 of 48 readings collapsed to the scale floor; JSON had a 2.1-point noise floor, zero
+  collapses, and 100% format compliance.
 - **Lead with the decisive fact.** Facts keyed as decisive moved judgment the right way 12 out
   of 12 times across three designs.
 - **Say "discard your first idea, and your second."** That one line took distinct ideas from 7

@@ -1,5 +1,16 @@
 # EN-36 — handoff (2026-08-25)
 
+> **RETIRED 2026-08-25 — EXECUTED, DO NOT RE-RUN.** EN-36 is done. The readings were taken
+> (144, all free), the run came back **VOID** on its own pre-registered replication gate, and
+> the result is in [`findings/order.elicitation_format.md`](../findings/order.elicitation_format.md).
+> The short version: the free-text arm, byte-identical to EN-26, did not reproduce it, because
+> 8 of 96 prose readings collapsed to the scale floor; prompt-instructed JSON produced none and
+> a six-times-tighter noise floor, and put `collision` at −1.67 against the bare API's +14.8, so
+> elicitation format is **eliminated** as the explanation — in the wrong direction. Read
+> `project/STATE.json` → `nextStep` for what to do now (EN-39 first, and it must be written and
+> pushed before it is run on anything). The table below is kept as the record of what was
+> predicted; two of its expectations were wrong and the finding says which.
+
 Written at the end of a long session. Everything is committed and pushed; nothing is
 half-applied. **Read this, then `STATE.json` `nextStep`.** The item is `BACKLOG.md` → `EN-36`,
 history in the progress log entries dated 2026-08-23/24/25 — this file is what you need to *act*.

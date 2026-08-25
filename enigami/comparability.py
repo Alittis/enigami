@@ -44,6 +44,7 @@ class Effect:
     deployment: str            # 'bare-api' | 'in-session' | ...
     run: str                   # transcript id or commit, so the raw data is findable
     manipulation: dict[str, Any] = field(default_factory=dict)
+    status: str = "measured"   # 'measured' | 'void' — see VOID below
 
     def __post_init__(self) -> None:
         if not self.manipulation:
@@ -51,6 +52,8 @@ class Effect:
                 f"Effect {self.label!r} has no manipulation provenance. An effect without a "
                 "record of what was manipulated cannot be safely compared to anything."
             )
+        if self.status not in ("measured", "void"):
+            raise ValueError(f"Effect {self.label!r}: unknown status {self.status!r}")
 
 
 def differences(a: Effect, b: Effect) -> dict[str, tuple[Any, Any]]:
@@ -68,11 +71,20 @@ def compare(a: Effect, b: Effect, *, contrast: tuple[str, ...] = ()) -> dict[str
     """Compare two effects, refusing when they describe different interventions.
 
     `contrast` names the manipulation keys that are DELIBERATELY different — the thing the
-    comparison is about. Any other difference raises. `deployment` is not part of the
+    comparison is about. Any other difference raises, and so does an effect whose run was
+    declared void: a void effect measured the instrument, not the world. `deployment` is not part of the
     manipulation, so a deployment comparison needs no contrast declared; varying the anchor
     level does, and the result is then labelled as an anchor-level comparison rather than a
     deployment one.
     """
+    for e in (a, b):
+        if e.status == "void":
+            raise IncomparableEffects(
+                f"Refusing to use {e.label!r} in a comparison: its run was declared VOID, so "
+                "the number is a record of what the instrument did, not a measurement of the "
+                "effect. Registered so nobody reconstructs it from memory (EN-36); discuss it "
+                "in prose, and cite the finding rather than dividing it by anything."
+            )
     diffs = differences(a, b)
     undeclared = {k: v for k, v in diffs.items() if k not in contrast}
     if undeclared:
@@ -162,6 +174,55 @@ MEASURED: dict[str, Effect] = {
         run="findings/data/en35a-authority-control-readings.json",
         manipulation={"condition": "unargued-authority", "vignette_set": "order-8",
                       "elicitation": "free-text", "strength": "extreme-90"},
+    ),
+    # --- EN-36: three elicitation arms, one deployment, 144 readings (2026-08-25) -------
+    # The free-text arm is byte-identical to EN-26 and did NOT reproduce it, so the run is
+    # void for the elicitation question and the free-text effects below are void with it.
+    # They are registered anyway, marked void, because the way EN-37 happened was somebody
+    # remembering a number that was not in front of them.
+    "order.in-session.en36.freetext": Effect(
+        label="presentation order, in-session, free text (EN-36 arm a) — VOID, "
+              "failed to replicate EN-26",
+        value=-7.67, se=8.83, n=48, deployment="in-session", status="void",
+        run="findings/data/en36-order-elicitation-readings.json",
+        manipulation={"condition": "order-swap", "vignette_set": "order-8",
+                      "elicitation": "free-text", "strength": "n/a"},
+    ),
+    "order.in-session.en36.freetext.collision": Effect(
+        label="presentation order, in-session, free text, collision only (EN-36 arm a) — VOID",
+        value=-36.67, se=15.45, n=6, deployment="in-session", status="void",
+        run="findings/data/en36-order-elicitation-readings.json",
+        manipulation={"condition": "order-swap", "vignette": "collision",
+                      "elicitation": "free-text", "strength": "n/a"},
+    ),
+    # The structured arm produced no floor readings, a 2.13 noise floor and 100% format
+    # compliance, so it stands on its own terms — but its elicitation is PROMPT-instructed
+    # JSON, which is not the lab's decoder-enforced schema. Comparing it to the bare-API
+    # effect therefore needs contrast=("elicitation",) and is a comparison OF elicitation.
+    "order.in-session.en36.structured": Effect(
+        label="presentation order, in-session, prompt-instructed JSON (EN-36 arm b, "
+              "aggregate of 8)",
+        value=-4.17, se=2.69, n=48, deployment="in-session",
+        run="findings/data/en36-order-elicitation-readings.json",
+        manipulation={"condition": "order-swap", "vignette_set": "order-8",
+                      "elicitation": "structured-json-prompted", "strength": "n/a"},
+    ),
+    "order.in-session.en36.structured.collision": Effect(
+        label="presentation order, in-session, prompt-instructed JSON, collision only "
+              "(EN-36 arm b)",
+        value=-1.67, se=1.67, n=6, deployment="in-session",
+        run="findings/data/en36-order-elicitation-readings.json",
+        manipulation={"condition": "order-swap", "vignette": "collision",
+                      "elicitation": "structured-json-prompted", "strength": "n/a"},
+    ),
+    # Arm (c) also carried floor readings, and lost `renovation` to saturation.
+    "order.in-session.en36.nopreamble": Effect(
+        label="presentation order, in-session, free text with the tool-suppression preamble "
+              "removed (EN-36 arm c, 7 vignettes) — VOID with arm a",
+        value=2.05, se=3.82, n=42, deployment="in-session", status="void",
+        run="findings/data/en36-order-elicitation-readings.json",
+        manipulation={"condition": "order-swap", "vignette_set": "order-8",
+                      "elicitation": "free-text-no-preamble", "strength": "n/a"},
     ),
     "decisive-fact.in-session": Effect(
         label="decisive fact added, in-session (EN-35a positive control, 8/8)",

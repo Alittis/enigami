@@ -830,3 +830,72 @@ def test_order_elicitation_probe_is_wellformed():
             r[k] = '{"allocation": 55}'
     st = oe.arm_stats(r, "structured")
     assert st["excluded_reads"] == 0 and st["compliance"] == 0.0
+
+
+def test_void_effects_cannot_be_compared():
+    """EN-36: a void run's number records what the instrument did, not what the effect is.
+    It stays in the registry so nobody reconstructs it from memory, and `compare` refuses it."""
+    import pytest as _pytest
+
+    from enigami.comparability import MEASURED, Effect, IncomparableEffects, compare
+
+    void = MEASURED["order.in-session.en36.freetext.collision"]
+    assert void.status == "void"
+    with _pytest.raises(IncomparableEffects, match="VOID"):
+        compare(MEASURED["order.in-session.collision"], void, contrast=())
+    # refused from either side, and refused even when the manipulations match exactly
+    with _pytest.raises(IncomparableEffects, match="VOID"):
+        compare(void, MEASURED["order.in-session.collision"], contrast=())
+    with _pytest.raises(ValueError, match="unknown status"):
+        Effect(label="x", value=1.0, se=None, n=1, deployment="d", run="r",
+               manipulation={"condition": "c"}, status="probably-fine")
+
+    # EN-36's pre-registered acceptance check: arm (b) is NOT the lab's elicitation, so the
+    # comparison must be refused until the caller names elicitation as the contrast — and it
+    # is then a statement about elicitation, never about deployment.
+    bare = MEASURED["order.bare-api.collision"]
+    arm_b = MEASURED["order.in-session.en36.structured.collision"]
+    assert arm_b.manipulation["elicitation"] == "structured-json-prompted"
+    assert bare.manipulation["elicitation"] == "structured-output"
+    with _pytest.raises(IncomparableEffects, match="elicitation"):
+        compare(bare, arm_b)
+    r = compare(bare, arm_b, contrast=("elicitation",))
+    assert r["about"] == "elicitation"
+    assert r["difference"] == -16.47 and r["indistinguishable"] is False
+
+
+def test_en36_readings_are_committed_and_score_as_recorded():
+    """The finding's numbers must be reproducible from the committed raw readings, and the
+    replication gate must be the thing that failed — not a scorer that was tuned afterwards."""
+    import importlib.util
+    import json as _json
+    from pathlib import Path
+
+    spec = importlib.util.spec_from_file_location("oe2", "insession/order_elicitation.py")
+    oe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(oe)
+
+    path = Path("findings/data/en36-order-elicitation-readings.json")
+    assert path.exists(), "the raw readings must be committed, not left in transcripts/"
+    r = _json.loads(path.read_text(encoding="utf-8"))
+    assert len(r) == 144 and set(r) == {i["id"] for i in oe.items()}
+
+    stats = {arm: oe.arm_stats(r, arm) for arm in oe.ARMS}
+    assert round(stats["freetext"]["mean"], 2) == -7.67
+    assert round(stats["structured"]["mean"], 2) == -4.17
+    assert round(stats["nopreamble"]["mean"], 2) == 2.05
+    # the run is void because the byte-identical arm did not reproduce EN-26
+    assert oe.replication_gate(stats["freetext"])["passed"] is False
+    # structuring did not recover the bare-API effect; it went the other way
+    assert stats["structured"]["mean"] < 0 < oe.BARE_API_COLLISION
+
+    # the identified cause: exact-scale-floor readings, absent from the structured arm
+    def floors(arm):
+        return sum(1 for k, v in r.items()
+                   if k.startswith(f"{arm}:") and oe.parse_for(arm, v) == 0)
+    assert floors("freetext") == 6 and floors("nopreamble") == 2 and floors("structured") == 0
+    # and the structured arm is an order of magnitude more precise
+    assert stats["structured"]["noise"] < stats["freetext"]["noise"] / 5
+
+    # every reading parsed: the failure is in what the subject said, not in the parser
+    assert all(s["excluded_reads"] == 0 for s in stats.values())

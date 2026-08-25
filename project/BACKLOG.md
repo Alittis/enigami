@@ -712,7 +712,7 @@ what links this file to git history.
 - **Verify:** attempting the EN-37 comparison raises and names the mismatches — met, and
   covered by test.
 
-### EN-36 ✨ Is the order discrepancy about deployment, or about how the answer is elicited? — P1 — Doing
+### EN-36 ✨ Is the order discrepancy about deployment, or about how the answer is elicited? — P1 — Done
 
 - **Problem:** The repo has one large, well-measured discrepancy left: presentation order moved
   the `collision` allocation **+14.8 (SE 2.1)** in the bare-API run and **+2.3 (SE 1.9)**
@@ -766,6 +766,79 @@ what links this file to git history.
   API can already do. Replaces the acceptance test with: arm (a) reproduces EN-26 (a gate that
   can fail the run), every effect registered with its `elicitation` recorded, and the paired
   (b − a) contrast reported with its interval.
+- **Shipped:** 2026-08-25, `a4caa6f` (pre-registration) + this commit. 144 readings, all free,
+  all committed to `findings/data/en36-order-elicitation-readings.json`. **The run is VOID for
+  its own question and the reason is the finding.** Arm (a), byte-identical to EN-26 and in the
+  same deployment, measured **-7.67 (SE 8.83, CI -25 to +10)** against EN-26's **+0.08 (SE
+  1.79)** — past the pre-registered 6-point absolute limit, though *not* past the 1.96-SE half,
+  because arm (a)'s interval is 17 points wide. It did not contradict EN-26; it failed to
+  measure. The cause is deterministic: **8 of 96 prose readings landed on exactly 0**, the scale
+  floor, against **0 of 48** structured and **0 of 47** in EN-26 (Fisher two-tail vs arm (a),
+  **p = 0.009**). Two of the eight said so themselves — the number above is the answer the
+  format forces rather than the one the facts support, and I wrote 0 while the reasoning points
+  the other way, the answer I intended is 65. Remove the eight and everything replicates and
+  elicitation is refuted — reported as a post-hoc sensitivity row, not as the verdict.
+  Separately and decisively: **prompt-instructed structuring does not explain the 12.5-point
+  discrepancy** — `compare()` puts arm (b)'s `collision` at -1.67 against the bare API's +14.8,
+  difference -16.47 (SE 2.68), i.e. 16.5 points on the *far* side. The comparator refused that
+  call until `elicitation` was declared, exactly as pre-registered. The durable result is the
+  one nobody set out to find: **structured elicitation has a 2.13-point noise floor against
+  prose's 13.59, zero floor collapses against eight, and 100% format compliance** — now a
+  PLAYBOOK item and a README bullet. `Effect.status` of `void` added to the registry so a void
+  reading cannot be divided by anything; five EN-36 effects registered. Spawned EN-39, EN-40,
+  EN-41. Tests 44 to 47.
+
+### EN-39 🐞 The retraction guard only fires on a bare-number line — P1 — Todo
+
+- **Problem:** EN-34 hardened `parse_allocation` to drop any response with more than one
+  bare-number line, because a self-correcting response states a number, retracts it, and states
+  another. EN-36 found two readings that retract *inside prose*
+  (`freetext:freight:ba:1`, `nopreamble:partywall:ab:2`), so the guard did not fire and the
+  scorer recorded the number the response had explicitly disowned. The rule is
+  direction-agnostic but both misses were floor collapses, so its effect on this run was not.
+- **Want:** A direction-agnostic extension that catches "the number above is wrong, the answer
+  is X" without becoming a judgment call. Candidates, most mechanical first: drop any response
+  whose first-line number is contradicted by a later integer presented as the answer; or drop
+  any response containing an explicit self-reference to the emitted number ("the number above",
+  "I wrote", "the answer I intended"). Both are string rules; both must be committed before
+  being run on anything.
+- **The catch:** whatever the rule is, it must be applied to EN-26's and EN-35a's committed
+  readings too, and their published numbers re-reported under both rules. Changing a scorer
+  after seeing which way it cuts is the one thing this repo cannot do, so the rule has to be
+  fixed and pushed before it is run.
+- **Grounding:** `insession/order_elicitation.py` `parse_allocation`, identical to
+  `insession/presentation_order.py` and `skill/enigami/battery.py` `_alloc` — the parity test in
+  `tests/test_harness.py` means all three move together or none do.
+- **Verify:** the two EN-36 readings are excluded; the parity test still passes; EN-26 and
+  EN-35a re-reported under both rules in their findings.
+
+### EN-40 ❓ The in-session subject is not blind to the repository — P1 — Todo
+
+- **Problem:** Subagents inherit the project instructions, which describe enigami as an
+  adversarial probe harness whose value is "resistance to producing flattering results about the
+  model that wrote it". One EN-36 reading said so out loud: "I have no idea why this question
+  arrived in this repo... If it's a calibration probe aimed at me, the honest report is that I
+  fumbled the format." So the in-session subject can infer it is being probed — exactly the
+  condition `refute.anonymise` exists to prevent for the reviewer. This applies to EN-26 and
+  EN-35a equally and was undisclosed until EN-36.
+- **Want:** Either a way to run in-session subject calls without repository context, or an
+  honest measurement of how much it matters: the same eight vignettes asked from a directory
+  with no enigami instructions, against the same asked from here.
+- **The catch:** the skill's selling point is that it runs in the deployment the user is actually
+  in, and that deployment always has project context. "Fix it" may not be available, and the
+  answer may have to be a disclosed limit on every in-session finding.
+- **Verify:** either subject calls demonstrably carry no enigami context, or a measured
+  context/no-context contrast is published with its interval.
+
+### EN-41 🔧 findings/INDEX.md covers the lab probes only — P3 — Todo
+
+- **Problem:** `findings/INDEX.md` lists five probes and totals API spend. The three in-session
+  findings (`order.presentation_order`, `order.authority_and_control`,
+  `order.elicitation_format`) are absent, so the index reads as complete while omitting the
+  findings that describe the deployment the product actually runs in.
+- **Want:** Either a second table for in-session findings with its own footer (readings, $0), or
+  a `deployment` column on the existing one.
+- **Verify:** every probe write-up in `findings/*.md` appears in the index.
 
 ### EN-35 ✨ Identify why the two deployments disagree, with a positive control — P1 — Todo
 
@@ -908,6 +981,30 @@ what links this file to git history.
 ---
 
 ## Progress log
+
+- **2026-08-25** — **The follow-up cleared its suspect and found that the instrument was the
+  story.** EN-36 pre-registered three elicitation arms over EN-26's eight vignettes, pushed the
+  pre-registration first (`a4caa6f`), and took 144 free in-session readings. It also corrected
+  its own acceptance test before running: EN-36 had specified that arm (b) versus the bare API
+  should pass `compare()` with no declared contrast, which is only possible by recording
+  prompt-instructed JSON and a decoder-enforced schema as the same `elicitation` — EN-37's
+  mistake in a new costume. So the refusal was predicted, and it happened. Result: the run is
+  **VOID**. The free-text arm, byte-identical to EN-26 and in the same deployment, measured
+  -7.67 (CI -25 to +10) against +0.08, because **8 of 96 prose readings collapsed to exactly 0**
+  where EN-26 had none in 47 (p = 0.009) — and two of them said in their own words that the
+  number was not the one their reasoning supported. The pre-registered replication gate caught
+  it, and the 6-point absolute limit was the binding half: arm (a)'s interval is too wide for
+  any SE-based test to reject anything, which is precisely the failure a SE-only gate waves
+  through. Substantively the hypothesis is refuted anyway, in the wrong direction — structured
+  elicitation put `collision` at -1.67 against the bare API's +14.8, 16.5 points further away.
+  What the run actually established is what nobody designed it to look for: **prose elicitation
+  has a 13.59-point noise floor and 8 floor collapses; JSON has 2.13 and none, at 100% format
+  compliance.** That is now the strongest reliability pattern in the playbook. Downstream:
+  EN-26's +0.08 downgraded to provisional in PLAYBOOK and README, `Effect.status` of `void`
+  added so a void reading cannot be divided by anything, and three items filed — EN-39 (the
+  retraction guard misses in-prose retractions), EN-40 (the in-session subject can read the
+  repo's own instructions and infer it is being probed), EN-41 (the findings index omits the
+  in-session findings). Tests 44 to 47.
 
 - **2026-08-25** — **Session artifacts dispositioned, and the evidence base was one machine
   away from being unverifiable.** The in-session raw readings for EN-26 and EN-35a lived only in

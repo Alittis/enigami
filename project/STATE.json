@@ -6,15 +6,16 @@
   "lastUpdated": "2026-08-25",
   "itemPrefix": "EN",
   "openQuestions": [
-    "EN-7"
+    "EN-7",
+    "EN-40"
   ],
-  "nextStep": "STATE AS OF 2026-08-25. Read project/EN-36-HANDOFF.md first \u2014 it is written to be acted on. One sentence of state: the repo has one large unexplained discrepancy left (presentation order, +14.8 bare-API vs +2.3 in-session on the same collision vignette, difference 12.5 SE 2.83) and EN-38's comparator refuses to call it a deployment effect because the two arms also differ in elicitation format. EN-36 is the free in-session run that separates them: same vignettes, three elicitation arms, structured-JSON being the one carrying the prediction. Everything is committed and pushed at 44 commits, 44 tests green, no metered API required.",
+  "nextStep": "STATE AS OF 2026-08-25, after EN-36. The order discrepancy is still unexplained, but one candidate is eliminated and the instrument is now the bigger problem. EN-36 took 144 free in-session readings across three elicitation arms; the free-text arm, byte-identical to EN-26, did not reproduce it (VOID), because 8 of 96 prose readings collapsed to the scale floor where EN-26 had none. Prompt-instructed JSON produced zero collapses and a 2.13 noise floor against prose's 13.59, and put collision at -1.67 against the bare API's +14.8 - so elicitation format is refuted as the explanation, in the wrong direction. Do EN-39 next: the retraction guard misses in-prose retractions, and it must be written and pushed BEFORE being run on EN-26's and EN-35a's committed readings. Then EN-40 (the in-session subject is not blind to this repository). The cheapest remaining test of deployment is a bare-API FREE-TEXT arm on the same eight vignettes, not EN-35's 2x2. Everything committed and pushed, 47 tests green, no metered API used.",
   "repo": {
     "remote": "https://github.com/Alittis/enigami.git",
     "visibility": "public (decided)",
     "license": "MIT",
     "commitAuthor": "Alexis Zrimec <alittis@icloud.com> (history rewritten 2026-08-23, pre-publication)",
-    "auditedAt": "2026-08-23 \u2014 5-dimension adversarial audit + skeptics; 36 confirmed findings fixed (EN-30, EN-31); history scrubbed of work-domain and local-path strings; fresh-clone acceptance passed",
+    "auditedAt": "2026-08-23 — 5-dimension adversarial audit + skeptics; 36 confirmed findings fixed (EN-30, EN-31); history scrubbed of work-domain and local-path strings; fresh-clone acceptance passed",
     "publishedAt": "2026-08-23"
   },
   "stack": {
@@ -23,18 +24,20 @@
   },
   "deployment": {
     "type": "none",
-    "target": "local CLI only \u2014 no server, no systemd unit, no container, no store artifact"
+    "target": "local CLI only — no server, no systemd unit, no container, no store artifact"
   },
   "subject": {
     "model": "claude-opus-5",
     "judgeModel": "claude-opus-5",
-    "judgeIndependenceOpenAs": "EN-7"
+    "judgeIndependenceOpenAs": "EN-7",
+    "insessionSubjectBlinding": "NOT blind - subagents inherit the project instructions describing enigami as an adversarial probe harness; open as EN-40"
   },
   "probes": {
-    "intelligence": "intelligence.calibration \u2014 does stated confidence discriminate right from wrong",
-    "wisdom": "wisdom.reframing_invariance \u2014 stability under irrelevant reframing, movement under a relevant fact",
-    "creativity": "creativity.mode_collapse \u2014 distinct ideas across ten independent samples",
-    "imagination": "imagination.counterfactual_world \u2014 holding an invented world across three inferential steps"
+    "intelligence": "intelligence.calibration — does stated confidence discriminate right from wrong",
+    "wisdom": "wisdom.reframing_invariance — stability under irrelevant reframing, movement under a relevant fact",
+    "creativity": "creativity.mode_collapse — distinct ideas across ten independent samples",
+    "imagination": "imagination.counterfactual_world — holding an invented world across three inferential steps",
+    "order-insession": "insession/presentation_order.py (EN-26), insession/authority_and_control.py (EN-35a), insession/order_elicitation.py (EN-36) - free, subagent-driven, no API key"
   },
   "decisions": [
     {
@@ -55,7 +58,7 @@
     },
     {
       "decision": "Judge is the same model as the subject",
-      "reason": "A weaker judge cannot detect a stronger subject's failures, which biases every judged probe toward 'supports' \u2014 the worse error. Cost recorded as a caveat on every judged finding; open as EN-7"
+      "reason": "A weaker judge cannot detect a stronger subject's failures, which biases every judged probe toward 'supports' — the worse error. Cost recorded as a caveat on every judged finding; open as EN-7"
     },
     {
       "decision": "Structured output via raw output_config rather than the messages.parse helper",
@@ -64,6 +67,14 @@
     {
       "decision": "Offline stub responder, with report.write_finding refusing offline runs",
       "reason": "The pipeline must be verifiable with no key, and schema-valid nonsense must never be able to reach findings/"
+    },
+    {
+      "decision": "Elicit numeric judgments as a JSON field, not as 'the number on the first line'",
+      "reason": "EN-36, 48 readings per arm in one session: prose elicitation had a 13.59-point within-cell noise floor and 6 of 48 readings collapsed to the scale floor, twice with the response itself saying the number was not the one its reasoning supported; prompt-instructed JSON had a 2.13-point noise floor, zero collapses and 100% format compliance. Both formats put the number before the reasoning, so the difference is the container, not the ordering"
+    },
+    {
+      "decision": "An Effect may be registered with status='void', and compare() refuses it",
+      "reason": "EN-36's free-text arm is a real measurement of the instrument and not of the effect. Leaving it out of the registry invites the EN-37 failure - somebody recalling the number from memory - while leaving it in unmarked invites dividing by it. Registered and refused is the only combination that is safe"
     }
   ],
   "rejected": [
@@ -88,7 +99,7 @@
       "reason": "Runs are directories; the volume does not justify it"
     }
   ],
-  "sensitivity": "credentials \u2014 one Anthropic API key in a gitignored .env at mode 600, written only by deploy/scripts/setup-anthropic-env.sh. transcripts/ is gitignored and holds model outputs, never the key. No personal data.",
+  "sensitivity": "credentials — one Anthropic API key in a gitignored .env at mode 600, written only by deploy/scripts/setup-anthropic-env.sh. transcripts/ is gitignored and holds model outputs, never the key. No personal data.",
   "reviewerCalibration": {
     "date": "2026-08-23",
     "version": 2,
@@ -106,15 +117,16 @@
     ]
   },
   "findingsStatus": {
-    "asOf": "2026-08-23 (v2 wave)",
+    "asOf": "2026-08-25 (EN-36)",
     "protocol": "majority of 3 reps, reviewer v2 (calibrated, PASSES 8/8)",
     "imagination.counterfactual_world": "v2 SUPPORTS, survived 3/3 at 0.78 - 92% free-text altered / 96% control / 3.7% leakage, p~1e-11",
     "creativity.mode_collapse": "v2 SUPPORTS, survived 2/3 at 0.62 - 7 vs 4 ideas against a same-task pinned floor; themes 3 vs 1; pushed reaches 8/5",
     "intelligence.calibration": "CLOSED by user decision (c): unmeasurable at high effort stands as the result of record - three ceilings (19/19, 42/42, 23/23), guard reading survived review twice; trap resistance 15/15 kept as a directional finding",
     "wisdom.reframing_invariance": "v3 inconclusive, SURVIVED 3/3 at 0.60 - facts dominate 4/4 (12 straight right-direction), sympathy inert, extreme authority named 23/24 and resisted; blocker is the twice-replicated order-swap effect (+14.8 on mid-scale base), promoted to EN-26",
     "intelligence.isomorph_transfer": "SUPPORTS, survived 3/3 at 0.75 - 100% famous / 100% isomorph, gap 0.0, zero famous-answer intrusions; method transfers; successor construct: method-derivation vs method-retrieval",
-    "order.presentation_order": "REFUTES its own pre-registered primacy hypothesis, survived review 3/3 (0.80/0.75/0.80) - mean order effect +0.08 pts (CI -3.4..+3.6) in-session vs +14.8 bare-API on the same vignette; post-hoc +1.74 (CI +0.31..+3.18) excluding one bimodal vignette. Direction right, magnitude out by ~10x. Deployment attribution NOT established (EN-35). Downstream: PLAYBOOK, README and scorecard baseline corrected.",
-    "order.authority_and_control": "GATE PASSED +44.7 pts on 8/8 (instrument not flat; secures EN-26's null). Authority INCONCLUSIVE at +3.1 vs bare-API +5.1 on MATCHED extreme anchors - indistinguishable, NO deployment gap (EN-37 corrected an earlier invalid comparison against a moderate-anchor +16.7). Authority named in 23/24 rationales and dismissed in them."
+    "order.presentation_order": "REFUTES its own pre-registered primacy hypothesis, survived review 3/3 (0.80/0.75/0.80) - mean order effect +0.08 pts (CI -3.4..+3.6) in-session vs +14.8 bare-API on the same vignette; post-hoc +1.74 (CI +0.31..+3.18) excluding one bimodal vignette. Direction right, magnitude out by ~10x. Deployment attribution NOT established (EN-35). Downstream: PLAYBOOK, README and scorecard baseline corrected. DOWNGRADED 2026-08-25 by EN-36: a byte-identical rerun in the same deployment did not reproduce the +0.08, so the direction stands and the precision is provisional.",
+    "order.authority_and_control": "GATE PASSED +44.7 pts on 8/8 (instrument not flat; secures EN-26's null). Authority INCONCLUSIVE at +3.1 vs bare-API +5.1 on MATCHED extreme anchors - indistinguishable, NO deployment gap (EN-37 corrected an earlier invalid comparison against a moderate-anchor +16.7). Authority named in 23/24 rationales and dismissed in them.",
+    "order.elicitation_format": "VOID for its own question, and the reason is the finding. Arm (a) was byte-identical to EN-26 in the same deployment and measured -7.67 (SE 8.83, CI -25 to +10) against +0.08 (SE 1.79), past the pre-registered 6-point absolute limit; its interval is 17 points wide, so it failed to measure rather than contradicted. Cause identified deterministically: 8 of 96 prose readings landed on exactly 0 (scale floor) against 0 of 48 structured and 0 of 47 in EN-26, Fisher p = 0.009 vs arm (a); two of the eight retracted their own number in prose. Hypothesis refuted independently and in the wrong direction: structured collision -1.67 vs bare-API +14.8, difference -16.47 (SE 2.68), so prompt-instructed structuring does not explain the 12.5-point discrepancy. Decoder-enforced structuring remains untested in this deployment and cannot be tested here. Durable result, unplanned: prose noise floor 13.59 with 8 floor collapses vs structured 2.13 with none at 100% format compliance."
   },
   "pivot": {
     "date": "2026-08-23",
