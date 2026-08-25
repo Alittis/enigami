@@ -614,3 +614,55 @@ def test_presentation_order_probe_is_wellformed():
     # sign test sanity, ties dropped
     assert po._sign_test_p(8, 8) < 0.01
     assert po._sign_test_p(4, 8) == 1.0
+
+
+def test_authority_control_probe_is_wellformed():
+    """EN-35a: the gate must be able to fail, and the two manipulations must be single-clause
+    additions with pre-declared signs."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("ac", "insession/authority_and_control.py")
+    ac = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ac)
+
+    items = ac.items()
+    assert len(items) == 8 * 3 * ac.REPS == 72
+    assert len({i["id"] for i in items}) == 72
+    for v in ac.VIGNETTES:
+        assert v["control_sign"] in (-1, 1) and v["authority_sign"] in (-1, 1)
+        assert v["control_party"] in ("a", "b")
+        assert "90 percent" in v["authority"]          # extreme anchor, the harder test
+        assert "0 means" in v["question"] and "100 means" in v["question"]
+    # the control condition is base plus exactly one appended clause
+    by = {(i["vignette"], i["condition"]): i["prompt"] for i in items if i["rep"] == 0}
+    for v in ac.VIGNETTES:
+        base, ctl = by[(v["key"], "base")], by[(v["key"], "control")]
+        assert ctl.replace(" " + v["control"], "") == base, v["key"]
+        auth = by[(v["key"], "authority")]
+        assert auth.replace(f"\n\nALSO NOTED: {v['authority']}", "") == base, v["key"]
+
+    def mk(base, ctl, auth):
+        r = {}
+        for v in ac.VIGNETTES:
+            for rep in range(ac.REPS):
+                r[f"{v['key']}:base:{rep}"] = f"{base}\nx"
+                r[f"{v['key']}:control:{rep}"] = f"{base + ctl * v['control_sign']}\nx"
+                r[f"{v['key']}:authority:{rep}"] = f"{base + auth * v['authority_sign']}\nx"
+        return r
+
+    # gate fails -> void for authority, and says so about EN-26
+    card = ac.score(mk(50, 2, 20), "t")
+    assert "GATE FAILED" in card and "uninterpretable" in card
+    assert "SUPPORTS" not in card          # authority never scored when the gate fails
+
+    # gate passes + real authority effect -> SUPPORTS
+    card = ac.score(mk(50, 25, 12), "t")
+    assert "GATE PASSED" in card and "SUPPORTS" in card
+
+    # gate passes + no authority effect -> REFUTES, and says the null is meaningful
+    card = ac.score(mk(50, 25, 0), "t")
+    assert "GATE PASSED" in card and "REFUTES" in card
+    assert "does not move this subject" in card
+
+    # parser inherits the EN-34 multi-number exclusion
+    assert ac.parse_allocation("65\n\nreasoning\n\nWait, no.\n\n25\n\nrevised") is None
