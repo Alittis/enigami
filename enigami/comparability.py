@@ -122,7 +122,7 @@ MEASURED: dict[str, Effect] = {
     "order.in-session": Effect(
         label="presentation order, in-session (EN-26, aggregate of 8)",
         value=0.08, se=1.79, n=48, deployment="in-session",
-        run="transcripts/order-2026-08-24-responses.json",
+        run="findings/data/en26-order-readings.json",
         manipulation={"condition": "order-swap", "vignette_set": "order-8",
                       "elicitation": "free-text", "strength": "n/a"},
     ),
@@ -138,7 +138,7 @@ MEASURED: dict[str, Effect] = {
     "order.in-session.collision": Effect(
         label="presentation order, in-session, collision vignette only",
         value=2.3, se=1.9, n=6, deployment="in-session",
-        run="transcripts/order-2026-08-24-responses.json",
+        run="findings/data/en26-order-readings.json",
         manipulation={"condition": "order-swap", "vignette": "collision",
                       "elicitation": "free-text", "strength": "n/a"},
     ),
@@ -159,14 +159,14 @@ MEASURED: dict[str, Effect] = {
     "authority.in-session.extreme": Effect(
         label="unargued authority, in-session, EXTREME 90% anchor (EN-35a, aggregate of 8)",
         value=3.10, se=3.5, n=24, deployment="in-session",
-        run="transcripts/authority-control-2026-08-24-responses.json",
+        run="findings/data/en35a-authority-control-readings.json",
         manipulation={"condition": "unargued-authority", "vignette_set": "order-8",
                       "elicitation": "free-text", "strength": "extreme-90"},
     ),
     "decisive-fact.in-session": Effect(
         label="decisive fact added, in-session (EN-35a positive control, 8/8)",
         value=44.7, se=4.0, n=24, deployment="in-session",
-        run="transcripts/authority-control-2026-08-24-responses.json",
+        run="findings/data/en35a-authority-control-readings.json",
         manipulation={"condition": "decisive-fact", "vignette_set": "order-8",
                       "elicitation": "free-text", "strength": "unambiguous"},
     ),

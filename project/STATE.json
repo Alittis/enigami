@@ -3,12 +3,12 @@
   "title": "enigami",
   "purpose": "An adversarial probe harness for investigating intelligence, wisdom, creativity and imagination in a Claude model, where 'the capacity is absent' is a result the design can actually produce.",
   "phase": "building",
-  "lastUpdated": "2026-08-24",
+  "lastUpdated": "2026-08-25",
   "itemPrefix": "EN",
   "openQuestions": [
     "EN-7"
   ],
-  "nextStep": "STATE AS OF 2026-08-24. Two claims retracted today by the repo's own machinery: EN-37 (an extreme-anchor effect divided by a moderate-anchor figure, so authority shows NO measured cross-setting difference) and EN-38 (the comparability guardrail then refused the order-effect deployment claim too - even the collision-only comparison, +14.8 vs +2.3, still varies the elicitation format, so what exists is a 12.5-point discrepancy of unidentified cause). Standing and solid: the in-session instrument moves +44.7 pts for a decisive fact on 8/8 vignettes, so in-session nulls are real. No metered API needed for what remains. NEXT: EN-36, the in-session confound sweep - same order-swap vignettes varying elicitation format (structured vs free text), the do-not-use-tools instruction, and effort. If structured output recovers the 14.8, the discrepancy was never about deployment. ~72 readings, free, and now safe to run because EN-38's comparator will police its comparisons. Then EN-3 sycophancy (needs multi-turn), EN-4, EN-5, EN-7. Read enigami/comparability.py MEASURED first.",
+  "nextStep": "STATE AS OF 2026-08-25. Read project/EN-36-HANDOFF.md first \u2014 it is written to be acted on. One sentence of state: the repo has one large unexplained discrepancy left (presentation order, +14.8 bare-API vs +2.3 in-session on the same collision vignette, difference 12.5 SE 2.83) and EN-38's comparator refuses to call it a deployment effect because the two arms also differ in elicitation format. EN-36 is the free in-session run that separates them: same vignettes, three elicitation arms, structured-JSON being the one carrying the prediction. Everything is committed and pushed at 44 commits, 44 tests green, no metered API required.",
   "repo": {
     "remote": "https://github.com/Alittis/enigami.git",
     "visibility": "public (decided)",

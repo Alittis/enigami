@@ -721,5 +721,8 @@ def test_every_registered_effect_is_traceable():
         assert eff.deployment in ("bare-api", "in-session"), key
         # the run must name something real in the repo (transcripts are gitignored locally,
         # so accept either an existing path or a recorded transcript directory name)
-        assert eff.run.startswith("transcripts/"), key
-        assert pathlib.Path(eff.run).exists() or "transcripts/" in eff.run, key
+        # in-session readings are committed under findings/data/ so a clone can verify them;
+        # bare-API transcripts stay gitignored (5.2 MB, regenerable only with metered spend)
+        assert eff.run.startswith(("transcripts/", "findings/data/")), key
+        if eff.run.startswith("findings/data/"):
+            assert pathlib.Path(eff.run).exists(), f"{key}: committed data missing"

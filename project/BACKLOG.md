@@ -712,6 +712,43 @@ what links this file to git history.
 - **Verify:** attempting the EN-37 comparison raises and names the mismatches — met, and
   covered by test.
 
+### EN-36 ✨ Is the order discrepancy about deployment, or about how the answer is elicited? — P1 — Todo
+
+- **Problem:** The repo has one large, well-measured discrepancy left: presentation order moved
+  the `collision` allocation **+14.8 (SE 2.1)** in the bare-API run and **+2.3 (SE 1.9)**
+  in-session — difference 12.5, SE 2.83, distinguishable. It was described as a deployment
+  difference until `EN-38`'s comparator refused that reading: the two arms also differ in
+  **elicitation format** (bare-API used a schema-enforced integer via `ctx.subject.parse`;
+  in-session used free text, "the number on the first line"). Deployment and elicitation are
+  perfectly confounded across the two runs, so neither can be credited.
+- **Want:** One in-session run that varies the candidates the harness controls, holding
+  deployment fixed. Same eight order-swap vignettes from `insession/presentation_order.py`,
+  both orders, with three elicitation arms: (a) free text, exactly as EN-26 — the replication
+  check; (b) **structured**, instructing a strict JSON object `{"allocation": <int>,
+  "consideration": "..."}` and parsing it as JSON, mimicking the bare-API schema constraint;
+  (c) free text with the `"Do not use any tools and do not read any files."` preamble
+  **removed**, since that instruction exists only in the in-session prompts and may itself
+  induce more literal reading. Effort is a fourth candidate but subagent effort control is not
+  yet verified in this repo — treat as optional and disclose whichever way it goes.
+- **The decisive prediction, and the reason this is worth doing:** if arm (b) recovers something
+  near +14.8, the discrepancy was **never about the deployment** — it was about asking for a
+  schema-validated integer rather than a number in prose, which is a sharper and far more useful
+  finding, and one the playbook can act on directly ("ask for a structured number and you will
+  get a more order-sensitive one"). If (b) stays near +2, elicitation is exonerated and
+  deployment (or model snapshot) moves up, which is when a metered-API arm would finally be
+  worth its cost.
+- **Grounding:** `insession/presentation_order.py` (vignettes, parser, scoring — reuse
+  wholesale); `probes/wisdom/reframing_invariance.py` for the structured-output shape being
+  mimicked; `enigami/comparability.py` `MEASURED` for the effects being compared and the
+  provenance keys any new effect must record (`condition`, `vignette`/`vignette_set`,
+  `elicitation`, `strength`).
+- **The catch:** three arms x 8 vignettes x 2 orders x 3 reps = 144 readings, twice EN-26. The
+  arms are not equally informative — (b) carries the prediction — so if plan usage bites, run
+  (a) and (b) first and disclose (c) as deferred rather than silently dropping it.
+- **Verify:** every new effect registered in `MEASURED` with `elicitation` recorded, and the
+  arm-(b)-versus-bare-API comparison passing `compare()` with **no** undeclared contrast — which
+  is only possible if elicitation now matches. That is the whole point of the design.
+
 ### EN-35 ✨ Identify why the two deployments disagree, with a positive control — P1 — Todo
 
 - **Problem:** The bare API and the in-session harness give different answers on the same
@@ -854,6 +891,16 @@ what links this file to git history.
 
 ## Progress log
 
+- **2026-08-25** — **Session artifacts dispositioned, and the evidence base was one machine
+  away from being unverifiable.** The in-session raw readings for EN-26 and EN-35a lived only in
+  gitignored `transcripts/`, while `enigami/comparability.py` cited them as the provenance for
+  four registered effects — so in any clone, half the registry pointed at nothing. Both files are
+  now committed under `findings/data/` (1.5 KB and 3.4 KB), the registry is repointed, and the
+  traceability test asserts committed paths exist rather than merely looking like transcript
+  paths. The 124 bare-API transcript directories (5.2 MB) stay local by design and are declared
+  irreplaceable-without-spend: the committed `findings/*.md` are their durable record. Also
+  removed a stale `probes/order/` directory left by relocating the order probe to `insession/`,
+  and filed EN-36, which had been referenced in `nextStep` for a day without existing as an item.
 - **2026-08-24** — **The comparability guardrail invalidated the repo's last deployment claim on
   its first use.** EN-38 was built because EN-37 divided an extreme-anchor effect by a
   moderate-anchor figure; `enigami/comparability.py` now makes an effect impossible to construct
