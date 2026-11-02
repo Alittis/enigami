@@ -934,6 +934,16 @@ what links this file to git history.
 
 ## Done
 
+### EN-42 🔧 Retire enigami and archive the repo on GitHub — P3 — Done
+
+- **Problem:** No commit since 2026-08-25. The owner asked on 2026-11-02 to archive the GitHub
+  repo, as part of an account clean-up (CG-22 in `claude general`).
+- **Shipped:** 2026-11-02. `STATE.json` phase set to `retired`; the repo is archived on GitHub
+  (read-only; `gh repo unarchive Alittis/enigami` before any push). Open items stay as they are;
+  work would resume at EN-39, then EN-40 (`STATE.json` `nextStep`). The global `enigami` skill is a symlink from
+  `~/.claude/skills/enigami` to `skill/enigami` in this clone, so it keeps working only while the
+  clone stays at `~/Developer/enigami`.
+
 ### EN-20 🐞 Single-letter answer keys matched any answer containing that letter — P2 — Done
 
 - **Problem:** Correctness used substring match on normalised text, so key `"w"` (tungsten)

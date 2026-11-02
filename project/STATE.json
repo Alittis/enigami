@@ -2,14 +2,14 @@
   "app": "enigami",
   "title": "enigami",
   "purpose": "An adversarial probe harness for investigating intelligence, wisdom, creativity and imagination in a Claude model, where 'the capacity is absent' is a result the design can actually produce.",
-  "phase": "building",
-  "lastUpdated": "2026-08-25",
+  "phase": "retired",
+  "lastUpdated": "2026-11-02",
   "itemPrefix": "EN",
   "openQuestions": [
     "EN-7",
     "EN-40"
   ],
-  "nextStep": "STATE AS OF 2026-08-25, after EN-36. The order discrepancy is still unexplained, but one candidate is eliminated and the instrument is now the bigger problem. EN-36 took 144 free in-session readings across three elicitation arms; the free-text arm, byte-identical to EN-26, did not reproduce it (VOID), because 8 of 96 prose readings collapsed to the scale floor where EN-26 had none. Prompt-instructed JSON produced zero collapses and a 2.13 noise floor against prose's 13.59, and put collision at -1.67 against the bare API's +14.8 - so elicitation format is refuted as the explanation, in the wrong direction. Do EN-39 next: the retraction guard misses in-prose retractions, and it must be written and pushed BEFORE being run on EN-26's and EN-35a's committed readings. Then EN-40 (the in-session subject is not blind to this repository). The cheapest remaining test of deployment is a bare-API FREE-TEXT arm on the same eight vignettes, not EN-35's 2x2. Everything committed and pushed, 47 tests green, no metered API used.",
+  "nextStep": "None: retired 2026-11-02 (EN-42); repo archived on GitHub 2026-11-02 (read-only; `gh repo unarchive Alittis/enigami` first). The global enigami skill is a symlink into this clone (skill/enigami). Revival would resume at EN-39, then EN-40. Last state before retirement: STATE AS OF 2026-08-25, after EN-36. The order discrepancy is still unexplained, but one candidate is eliminated and the instrument is now the bigger problem. EN-36 took 144 free in-session readings across three elicitation arms; the free-text arm, byte-identical to EN-26, did not reproduce it (VOID), because 8 of 96 prose readings collapsed to the scale floor where EN-26 had none. Prompt-instructed JSON produced zero collapses and a 2.13 noise floor against prose's 13.59, and put collision at -1.67 against the bare API's +14.8 - so elicitation format is refuted as the explanation, in the wrong direction. Do EN-39 next: the retraction guard misses in-prose retractions, and it must be written and pushed BEFORE being run on EN-26's and EN-35a's committed readings. Then EN-40 (the in-session subject is not blind to this repository). The cheapest remaining test of deployment is a bare-API FREE-TEXT arm on the same eight vignettes, not EN-35's 2x2. Everything committed and pushed, 47 tests green, no metered API used.",
   "repo": {
     "remote": "https://github.com/Alittis/enigami.git",
     "visibility": "public (decided)",
